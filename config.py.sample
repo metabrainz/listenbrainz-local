@@ -1,0 +1,8 @@
+DATABASE_FILE = "navidrome.db"
+#DATABASE_FILE = "test.db"
+
+# To connect to a subsonic API
+SUBSONIC_HOST = "http://10.1.1.109"   # include http:// or https://
+SUBSONIC_USER = "mayhem"
+SUBSONIC_PASSWORD = "m!D7XHmVGy@4"
+SUBSONIC_PORT = 4533
