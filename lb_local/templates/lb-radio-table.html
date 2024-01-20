@@ -1,20 +1,30 @@
-<table id="lb-radio-playlist">
-    <thead>
-        <th>title</th>
-        <th>release</th>
-        <th>artist</th>
-    </thead>
-    {% for rec in recordings %}
-      <tr">
-        <td class="tracklistcol">
-          <a href="https://musicbrainz.org/recording/{{ rec.recording_mbid }}">{{ rec.recording_name }}</a>
-        </td>
-        <td class="tracklistcol">
-          <a href="https://listenbrainz.org/release/{{ rec.release_mbid }}">{{ rec.release_name }}</a>
-        </td>
-        <td class="tracklistcol">
-          <a href="https://listenbrainz.org/artist/{{ rec.artist_mbid }}">{{ rec.artist_name }}</a>
-        </td>
-      </tr>
-    {% endfor %}
-</table>
+<form hx-ext="json-enc"
+      hx-post="/lb-radio/create"
+      id="lb-radio-playlist">
+    <input class="button-primary" type="submit" value="Save">
+    <table>
+        <thead>
+            <th></th>
+            <th>title</th>
+            <th>release</th>
+            <th>artist</th>
+        </thead>
+        {% for rec in recordings %}
+          <tr>
+            <td class="tracklistcol">
+              <img src="http://coverartarchive.org/release/{{ rec.release_mbid }}/front-250" class="cover-art">
+            </td>
+            <td class="tracklistcol">
+              <a href="https://musicbrainz.org/recording/{{ rec.recording_mbid }}">{{ rec.recording_name }}</a>
+            </td>
+            <td class="tracklistcol">
+              <a href="https://listenbrainz.org/release/{{ rec.release_mbid }}">{{ rec.release_name }}</a>
+            </td>
+            <td class="tracklistcol">
+              <a href="https://listenbrainz.org/artist/{{ rec.artist_mbid }}">{{ rec.artist_name }}</a>
+            </td>
+          </tr>
+        {% endfor %}
+    </table>
+    <input type="hidden" name="jspf" value="{{ jspf }}"</input>
+</form>

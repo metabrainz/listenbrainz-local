@@ -1,3 +1,5 @@
+import json
+
 from flask import Flask, render_template, request, current_app
 from werkzeug.exceptions import BadRequest
 
@@ -26,12 +28,12 @@ def lb_radio():
     try:
         prompt = request.form["prompt"]
     except KeyError:
-        raise BadRequest("arguments 'prompt' is required.")
+        raise BadRequest("argument 'prompt' is required.")
 
     try:
         mode = request.form["mode"]
     except KeyError:
-        raise BadRequest("arguments 'mode' is required.")
+        raise BadRequest("argument 'mode' is required.")
 
     db = SubsonicDatabase(current_app.config["DATABASE_FILE"], current_app.config)
     db.open()
@@ -45,11 +47,29 @@ def lb_radio():
     for recording in jspf["playlist"]["track"]:
         recordings.append({"recording_name": recording["title"],
                            "recording_mbid": recording["identifier"][34:],
-                           "release_mbid": "",
+                           "release_mbid": recording["extension"]["https://musicbrainz.org/doc/jspf#track"] \
+                                   ["release_identifier"][32:],
                            "release_name": recording["album"],
                            "artist_mbid": recording["extension"]["https://musicbrainz.org/doc/jspf#track"] \
                                                    ["artist_identifiers"][0],
                            "artist_name": recording["creator"]
                           })
 
-    return render_template('lb-radio-table.html', recordings=recordings)
+    return render_template('lb-radio-table.html', recordings=recordings, jspf=json.dumps(jspf))
+
+@app.route("/lb-radio/create", methods=["POST"])
+def lb_radio_create():
+
+    jspf = request.get_json()
+    jspf = json.loads(jspf["jspf"])
+
+    db = SubsonicDatabase(current_app.config["DATABASE_FILE"],
+            { "SUBSONIC_HOST": current_app.config["SUBSONIC_HOST"], 
+              "SUBSONIC_USER": current_app.config["SUBSONIC_USER"],
+              "SUBSONIC_PASSWORD": current_app.config["SUBSONIC_PASSWORD"],
+              "SUBSONIC_PORT": current_app.config["SUBSONIC_PORT"] 
+            })
+    db.open()
+    db.upload_playlist(jspf)
+
+    return ('', 204)
