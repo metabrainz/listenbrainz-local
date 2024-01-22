@@ -6,3 +6,7 @@
 .cover-art {
     width: 50px;
 }
+
+.save-playlist {
+    float: right;
+}
