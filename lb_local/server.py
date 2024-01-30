@@ -7,6 +7,7 @@ from troi.playlist import _deserialize_from_jspf, PlaylistElement
 from lb_content_resolver.content_resolver import ContentResolver
 from lb_content_resolver.subsonic import SubsonicDatabase
 from lb_content_resolver.lb_radio import ListenBrainzRadioLocal
+from lb_content_resolver.troi.periodic_jams import LocalPeriodicJams
 import config
 
 STATIC_PATH = "/static"
@@ -23,8 +24,12 @@ app.config.from_object('config')
 def index():
     return render_template('index.html')
 
+@app.route("/lb-radio", methods=["GET"])
+def lb_radio_get():
+    return render_template('lb-radio.html')
+
 @app.route("/lb-radio", methods=["POST"])
-def lb_radio():
+def lb_radio_post():
 
     try:
         prompt = request.form["prompt"]
@@ -47,14 +52,14 @@ def lb_radio():
         db.metadata_sanity_check(include_subsonic=upload_to_subsonic)
         return
 
-    return render_template('lb-radio-table.html', recordings=recordings, jspf=json.dumps(playlist.get_jspf()))
+    return render_template('playlist-table.html', recordings=recordings, jspf=json.dumps(playlist.get_jspf()))
 
 class Config:
     def __init__(self, **entries):
         self.__dict__.update(entries)
 
-@app.route("/lb-radio/create", methods=["POST"])
-def lb_radio_create():
+@app.route("/playlist/create", methods=["POST"])
+def playlist_create():
     jspf = request.get_json()
 
     playlist = _deserialize_from_jspf(json.loads(jspf["jspf"]))
@@ -66,3 +71,26 @@ def lb_radio_create():
     db.upload_playlist(playlist_element)
 
     return ('', 204)
+
+@app.route("/periodic-jams", methods=["GET"])
+def periodic_jams_get():
+    return render_template('periodic-jams.html')
+
+@app.route("/periodic-jams", methods=["POST"])
+def periodic_jams_post():
+
+    try:
+        user_name = request.form["user_name"]
+    except KeyError:
+        raise BadRequest("argument 'user_name' is required.")
+
+    db = SubsonicDatabase(current_app.config["DATABASE_FILE"], current_app.config)
+    db.open()
+    r = LocalPeriodicJams(user_name, .8)
+    playlist = r.generate()
+    try:
+        recordings = playlist.playlists[0].recordings
+    except (IndexError, KeyError, AttributeError):
+        return
+
+    return render_template('playlist-table.html', recordings=recordings, jspf=json.dumps(playlist.get_jspf()))

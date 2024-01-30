@@ -1,0 +1,29 @@
+{%- extends 'base.html' -%}
+{%- block title -%}home{% endblock %}
+{%- block content -%}
+
+<h2>ListenBrainz Local</h2>
+
+<p id="fuss">
+    Generate Periodic Jams
+</p>
+
+<form hx-post="/periodic-jams"
+      hx-target="#lb-local-playlist"
+      hx-swap="outerHTML"
+  <fieldset>
+    <label for="prompt">User</label>
+    <div>
+      <input type="text" name="user_name" placeholder="joe_user" style="width: 40%" value="rob">
+      <input class="button-primary" type="submit" value="Create">
+    </div>
+  </fieldset>
+</form>
+
+<form id="lb-local-playlist">
+</form>
+
+{% endblock%}
+
+{% block scripts %}
+{% endblock %}

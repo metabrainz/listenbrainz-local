@@ -4,29 +4,12 @@
 
 <h2>ListenBrainz Local</h2>
 
-<p id="fuss">
-    Enter a ListenBrainz Local Radio query:
-</p>
-
-<form hx-post="/lb-radio"
-      hx-target="#lb-radio-playlist"
-      hx-swap="outerHTML"
-  <fieldset>
-    <label for="prompt">Prompt</label>
-    <div>
-      <input type="text" name="prompt" placeholder="artist:(portishead)" style="width: 60%" value="artist:(portishead)">
-      <select name="mode" style="width: 15%">
-          <option value="easy">easy</option>
-          <option value="medium">medium</option>
-          <option value="hard">hard</option>
-      </select>
-      <input class="button-primary" type="submit" value="Create">
-    </div>
-  </fieldset>
-</form>
-
-<form id="lb-radio-playlist">
-</form>
+<div>
+    <a href="/lb-radio">LB Radio Local</a>
+</div>
+<div>
+    <a href="/periodic-jams">Periodic Jams</a>
+</div>
 
 {% endblock%}
 
