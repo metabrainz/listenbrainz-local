@@ -47,9 +47,6 @@ def lb_radio():
         db.metadata_sanity_check(include_subsonic=upload_to_subsonic)
         return
 
-    with open("test.jspf", "w") as f:
-        f.write(json.dumps(playlist.get_jspf(), indent=2))
-
     return render_template('lb-radio-table.html', recordings=recordings, jspf=json.dumps(playlist.get_jspf()))
 
 class Config:
@@ -59,6 +56,7 @@ class Config:
 @app.route("/lb-radio/create", methods=["POST"])
 def lb_radio_create():
     jspf = request.get_json()
+
     playlist = _deserialize_from_jspf(json.loads(jspf["jspf"]))
     playlist_element = PlaylistElement()
     playlist_element.playlists = [ playlist ]
