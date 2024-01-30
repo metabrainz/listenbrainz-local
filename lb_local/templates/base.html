@@ -9,7 +9,7 @@
     <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Roboto:300,300italic,700,700italic">
     <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/normalize/5.0.0/normalize.css">
     <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/milligram/1.4.1/milligram.css">
-    <link rel="stylesheet" href="{{ url_for('static', filename='lb-local.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/lb-local.css') }}">
     <script src="https://unpkg.com/htmx.org@1.9.10"></script>
     <script src="https://unpkg.com/htmx.org/dist/ext/json-enc.js"></script>
     {% endblock %}
@@ -21,7 +21,7 @@
   <body>
       <div style="width: 90%; margin-left: 5%">
         <div style="float: right">
-          <img style="padding-top: 10px" src="https://listenbrainz.org/static/img/navbar_logo.svg">
+          <img style="padding-top: 10px" src="{{ url_for('static', filename='img/lb-local-logo.svg') }}" class="lb-logo">
         </div>
         {% block content %}
         {% endblock %}

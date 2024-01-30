@@ -1,2 +1,2 @@
 flask
-lb_content_resolver@git+https://github.com/metabrainz/listenbrainz-content-resolver.git@config-update
+lb_content_resolver@git+https://github.com/metabrainz/listenbrainz-content-resolver.git@update-troi

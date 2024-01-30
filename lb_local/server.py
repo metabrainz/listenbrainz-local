@@ -3,6 +3,7 @@ import json
 from flask import Flask, render_template, request, current_app
 from werkzeug.exceptions import BadRequest
 
+from troi.playlist import _deserialize_from_jspf, PlaylistElement
 from lb_content_resolver.content_resolver import ContentResolver
 from lb_content_resolver.subsonic import SubsonicDatabase
 from lb_content_resolver.lb_radio import ListenBrainzRadioLocal
@@ -38,38 +39,32 @@ def lb_radio():
     db = SubsonicDatabase(current_app.config["DATABASE_FILE"], current_app.config)
     db.open()
     r = ListenBrainzRadioLocal()
-    jspf = r.generate(mode, prompt, .8)
-    if len(jspf["playlist"]["track"]) == 0:
+    playlist = r.generate(mode, prompt, .8)
+    try:
+        recordings = playlist.playlists[0].recordings
+    except (IndexError, KeyError, AttributeError):
+        # TODO: Display this on the web page
         db.metadata_sanity_check(include_subsonic=upload_to_subsonic)
         return
 
-    recordings = []
-    for recording in jspf["playlist"]["track"]:
-        recordings.append({"recording_name": recording["title"],
-                           "recording_mbid": recording["identifier"][34:],
-                           "release_mbid": recording["extension"]["https://musicbrainz.org/doc/jspf#track"] \
-                                   ["release_identifier"][32:],
-                           "release_name": recording["album"],
-                           "artist_mbid": recording["extension"]["https://musicbrainz.org/doc/jspf#track"] \
-                                                   ["artist_identifiers"][0],
-                           "artist_name": recording["creator"]
-                          })
+    with open("test.jspf", "w") as f:
+        f.write(json.dumps(playlist.get_jspf(), indent=2))
 
-    return render_template('lb-radio-table.html', recordings=recordings, jspf=json.dumps(jspf))
+    return render_template('lb-radio-table.html', recordings=recordings, jspf=json.dumps(playlist.get_jspf()))
+
+class Config:
+    def __init__(self, **entries):
+        self.__dict__.update(entries)
 
 @app.route("/lb-radio/create", methods=["POST"])
 def lb_radio_create():
-
     jspf = request.get_json()
-    jspf = json.loads(jspf["jspf"])
+    playlist = _deserialize_from_jspf(json.loads(jspf["jspf"]))
+    playlist_element = PlaylistElement()
+    playlist_element.playlists = [ playlist ]
 
-    db = SubsonicDatabase(current_app.config["DATABASE_FILE"],
-            { "SUBSONIC_HOST": current_app.config["SUBSONIC_HOST"], 
-              "SUBSONIC_USER": current_app.config["SUBSONIC_USER"],
-              "SUBSONIC_PASSWORD": current_app.config["SUBSONIC_PASSWORD"],
-              "SUBSONIC_PORT": current_app.config["SUBSONIC_PORT"] 
-            })
+    db = SubsonicDatabase(current_app.config["DATABASE_FILE"], Config(**current_app.config))
     db.open()
-    db.upload_playlist(jspf)
+    db.upload_playlist(playlist_element)
 
     return ('', 204)

@@ -12,16 +12,18 @@
         {% for rec in recordings %}
           <tr>
             <td class="tracklistcol">
-              <img src="http://coverartarchive.org/release/{{ rec.release_mbid }}/front-250" class="cover-art">
+              <img src="http://coverartarchive.org/release/{{ rec.release.mbid }}/front-250"
+                   class="cover-art"
+                   onerror="this.onerror=null;this.style='opacity: 40%';this.src='http://coverartarchive.org/img/big_logo.svg'">
             </td>
             <td class="tracklistcol">
-              <a href="https://musicbrainz.org/recording/{{ rec.recording_mbid }}">{{ rec.recording_name }}</a>
+              <a href="https://musicbrainz.org/recording/{{ rec.mbid}}">{{ rec.name }}</a>
             </td>
             <td class="tracklistcol">
-              <a href="https://listenbrainz.org/release/{{ rec.release_mbid }}">{{ rec.release_name }}</a>
+              <a href="https://listenbrainz.org/release/{{ rec.release.mbid }}">{{ rec.release.name }}</a>
             </td>
             <td class="tracklistcol">
-              <a href="https://listenbrainz.org/artist/{{ rec.artist_mbid }}">{{ rec.artist_name }}</a>
+              <a href="https://listenbrainz.org/artist/{{ rec.artist.mbid }}">{{ rec.artist.name }}</a>
             </td>
           </tr>
         {% endfor %}
