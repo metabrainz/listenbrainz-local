@@ -1,3 +1,10 @@
+.prompt-examples {
+    margin-top: -.6em;
+    font-size: 10pt;
+}
+.prompt-example {
+    margin-left: 2em;
+}
 .tracklistcol {
     padding: 0.1rem 0.1rem;
     border-bottom: none;

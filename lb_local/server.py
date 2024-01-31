@@ -20,6 +20,11 @@ app = Flask(__name__, static_url_path=STATIC_PATH, static_folder=STATIC_FOLDER, 
 app.config.from_object('config')
 
 
+# TODO:
+# - Fix parsing of artist mbids from jspf in troi
+# - Pass hints and error messages from content resolver
+
+
 @app.route("/")
 def index():
     return render_template('index.html')

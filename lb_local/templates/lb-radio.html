@@ -15,7 +15,6 @@ reference</a>)</p>
     <label for="prompt">Prompt</label>
     <input type="text"
            name="prompt"
-           placeholder="artist:(portishead)"
            style="width: 65%"
            value="{{ prompt }}">
     <select name="mode" style="width: 15%">
@@ -29,6 +28,14 @@ reference</a>)</p>
            value="Create"
            hx-indicator="#spinner"
            hx-on:click="document.getElementById('lb-local-playlist').innerHTML = ''">
+    <p class="prompt-examples">
+      Examples:
+      <a class="prompt-example" href="/lb-radio?prompt=Amy Winehouse">Amy Winehouse</a>
+      <a class="prompt-example" href="/lb-radio?prompt=artist:(U2)">artist:(U2)</a>
+      <a class="prompt-example" href="/lb-radio?prompt=%23punk">#punk</a>
+      <a class="prompt-example" href="/lb-radio?prompt=stats:rob">stats:rob</a>
+      <a class="prompt-example" href="/lb-radio?prompt=tag:(trip hop, downtempo)::or">tag:(trip hop, downtempo)::or</a>
+    </p>
 
   </fieldset>
   <div style="text-align: center; width: 100%">
