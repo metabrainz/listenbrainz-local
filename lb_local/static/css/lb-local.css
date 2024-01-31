@@ -22,7 +22,7 @@
 
 .htmx-indicator{
     display: none;
-    transition: opacity 500ms ease-in;
+    transition: display 500ms ease-in;
 }
 .htmx-request .htmx-indicator{
     display: inline;
@@ -33,4 +33,14 @@
 .headphones {
     width: 15px;
     filter: invert(86%) sepia(25%) saturate(544%) hue-rotate(207deg) brightness(91%) contrast(88%);
+}
+.purple {
+    filter: invert(86%) sepia(25%) saturate(544%) hue-rotate(207deg) brightness(91%) contrast(88%);
+}
+.index-row {
+    width: 100%;
+}
+.index-item {
+    height: 125px;
+    display: inline;
 }

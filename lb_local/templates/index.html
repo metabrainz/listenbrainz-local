@@ -2,13 +2,45 @@
 {%- block title -%}home{% endblock %}
 {%- block content -%}
 
-<h2>ListenBrainz Local</h2>
+<h2>ListenBrainz Local Home</h2>
 
-<div>
-    <a href="/lb-radio">LB Radio Local</a>
-</div>
-<div>
-    <a href="/periodic-jams">Periodic Jams</a>
+<h5>
+ListenBrainz local brings the recommendation, playlist and discovery tools of ListenBrainz
+to your local music collection.
+</h5>
+<p>
+Available features:
+</p>
+
+<div class="container">
+  <div class="row">
+    <div class="column" style="text-align: center">
+      <a href="/lb-radio" class="index-item">
+        <img src="{{ url_for('static', filename='img/headphones.svg') }}"
+             class="index-item">
+      </a>
+      </br>
+      <a href="/lb-radio">LB Radio Local</a>
+    </div>
+
+    <div class="column" style="text-align: center">
+      <a href="/weekly-jams" class="index-item">
+        <img src="{{ url_for('static', filename='img/calendar.svg') }}"
+             class="index-item">
+      </a>
+      </br>
+      <a href="/weekly-jams">Weekly Jams</a>
+    </div>
+
+    <div class="column" style="text-align: center">
+      <a href="/top-tags" class="index-item">
+         <img src="{{ url_for('static', filename='img/hash.svg') }}"
+              class="index-item">
+      </a>
+      </br>
+      <a href="/tags">Tags</a>
+    </div>
+  </div>
 </div>
 
 {% endblock%}

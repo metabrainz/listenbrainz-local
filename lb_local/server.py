@@ -5,30 +5,31 @@ from werkzeug.exceptions import BadRequest
 
 from troi.playlist import _deserialize_from_jspf, PlaylistElement
 from lb_content_resolver.content_resolver import ContentResolver
-from lb_content_resolver.subsonic import SubsonicDatabase
+from lb_content_resolver.subsonic import SubsonicDatabase, Database
 from lb_content_resolver.lb_radio import ListenBrainzRadioLocal
 from lb_content_resolver.troi.periodic_jams import LocalPeriodicJams
+from lb_content_resolver.top_tags import TopTags
 import config
 
 STATIC_PATH = "/static"
 STATIC_FOLDER = "static"
 TEMPLATE_FOLDER = "templates"
 
-app = Flask(__name__,
-            static_url_path = STATIC_PATH,
-            static_folder = STATIC_FOLDER,
-            template_folder = TEMPLATE_FOLDER)
+app = Flask(__name__, static_url_path=STATIC_PATH, static_folder=STATIC_FOLDER, template_folder=TEMPLATE_FOLDER)
 app.config.from_object('config')
+
 
 @app.route("/")
 def index():
     return render_template('index.html')
 
+
 @app.route("/lb-radio", methods=["GET"])
 def lb_radio_get():
 
-    prompt = request.args.get("prompt")
+    prompt = request.args.get("prompt", "")
     return render_template('lb-radio.html', prompt=prompt)
+
 
 @app.route("/lb-radio", methods=["POST"])
 def lb_radio_post():
@@ -56,9 +57,12 @@ def lb_radio_post():
 
     return render_template('playlist-table.html', recordings=recordings, jspf=json.dumps(playlist.get_jspf()))
 
+
 class Config:
+
     def __init__(self, **entries):
         self.__dict__.update(entries)
+
 
 @app.route("/playlist/create", methods=["POST"])
 def playlist_create():
@@ -66,7 +70,7 @@ def playlist_create():
 
     playlist = _deserialize_from_jspf(json.loads(jspf["jspf"]))
     playlist_element = PlaylistElement()
-    playlist_element.playlists = [ playlist ]
+    playlist_element.playlists = [playlist]
 
     db = SubsonicDatabase(current_app.config["DATABASE_FILE"], Config(**current_app.config))
     db.open()
@@ -74,12 +78,14 @@ def playlist_create():
 
     return ('', 204)
 
-@app.route("/periodic-jams", methods=["GET"])
-def periodic_jams_get():
-    return render_template('periodic-jams.html')
 
-@app.route("/periodic-jams", methods=["POST"])
-def periodic_jams_post():
+@app.route("/weekly-jams", methods=["GET"])
+def weekly_jams_get():
+    return render_template('weekly-jams.html')
+
+
+@app.route("/weekly-jams", methods=["POST"])
+def weekly_jams_post():
 
     try:
         user_name = request.form["user_name"]
@@ -96,3 +102,12 @@ def periodic_jams_post():
         return
 
     return render_template('playlist-table.html', recordings=recordings, jspf=json.dumps(playlist.get_jspf()))
+
+
+@app.route("/tags", methods=["GET"])
+def tags():
+    db = Database(current_app.config["DATABASE_FILE"])
+    db.open()
+    tt = TopTags()
+    tags = tt.get_top_tags(250)
+    return render_template("top-tags.html", tags=tags)

@@ -6,10 +6,10 @@
 
 <p>
     Generate a playlist from a users weekly recommendations. You can generate a playlist as
-    many times as you'd like in a week, but the underying recommendations are updated each monday.
+    many times as you'd like in a week, but the underying recommendations only update each monday.
 </p>
 
-<form hx-post="/periodic-jams"
+<form hx-post="/weekly-jams"
       hx-target="#lb-local-playlist"
       hx-swap="outerHTML"
   <fieldset>

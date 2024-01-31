@@ -1,0 +1,20 @@
+{%- extends 'base.html' -%}
+{%- block title -%}home{% endblock %}
+{%- block content -%}
+
+<h2>ListenBrainz Local Top Tags</h2>
+
+<p>
+Below are the top {{ tags | length }} tags that MusicBrainz users have applied to the recordings in your collection:
+</p>
+
+<div id="canvas" class="canvas"></div>
+
+{% for tag in tags %}
+<a href="/lb-radio?prompt={{ "tag:(" + tag.tag + ")" | safe }}">{{ tag.tag }}</a>, {{ tag.count }};
+{% endfor %}
+
+{% endblock%}
+
+{% block scripts %}
+{% endblock %}
