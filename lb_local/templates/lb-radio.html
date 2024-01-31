@@ -13,16 +13,20 @@
       hx-swap="outerHTML"
   <fieldset>
     <label for="prompt">Prompt</label>
-    <div>
-      <input type="text" name="prompt" placeholder="artist:(portishead)" style="width: 60%" value="">
-      <select name="mode" style="width: 15%">
-          <option value="easy">easy</option>
-          <option value="medium">medium</option>
-          <option value="hard">hard</option>
-      </select>
-      <input class="button-primary" type="submit" value="Create">
-    </div>
+    <input type="text" name="prompt" placeholder="artist:(portishead)" style="width: 60%" value="">
+    <select name="mode" style="width: 15%">
+        <option value="easy">easy</option>
+        <option value="medium">medium</option>
+        <option value="hard">hard</option>
+    </select>
+    <input class="button-primary" type="submit" value="Create" hx-indicator="#spinner">
   </fieldset>
+    <div style="text-align: center; width: 100%">
+      <img id="spinner"
+           class="htmx-indicator"
+           src="{{ url_for('static', filename='img/spinner.svg') }}">
+      </img>
+    </div>
 </form>
 
 <form id="lb-local-playlist">
