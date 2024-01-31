@@ -30,3 +30,7 @@
 .htmx-request.htmx-indicator{
     display: inline;
 }
+.headphones {
+    width: 15px;
+    filter: invert(86%) sepia(25%) saturate(544%) hue-rotate(207deg) brightness(91%) contrast(88%);
+}

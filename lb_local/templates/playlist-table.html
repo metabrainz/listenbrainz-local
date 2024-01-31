@@ -1,7 +1,7 @@
 <form hx-ext="json-enc"
       hx-post="/playlist/create"
       id="lb-local-playlist">
-    <input class="button-primary save-playlist" type="submit" value="Save">
+    <input class="button-primary" type="submit" value="Save playlist">
     <table>
         <thead>
             <th></th>
@@ -23,7 +23,10 @@
               <a href="https://listenbrainz.org/release/{{ rec.release.mbid }}">{{ rec.release.name }}</a>
             </td>
             <td class="tracklistcol">
-              <a href="https://listenbrainz.org/artist/{{ rec.artist.mbid }}">{{ rec.artist.name }}</a>
+              <a  href="/lb-radio?prompt={{ rec.artist.name | safe }}">
+                  <img class="headphones" src="{{ url_for('static', filename='img/headphones.svg') }}">
+              </a>
+              <a class="artist" href="https://listenbrainz.org/artist/{{ rec.artist.mbid }}">{{ rec.artist.name }}</a>
             </td>
           </tr>
         {% endfor %}

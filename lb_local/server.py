@@ -26,7 +26,9 @@ def index():
 
 @app.route("/lb-radio", methods=["GET"])
 def lb_radio_get():
-    return render_template('lb-radio.html')
+
+    prompt = request.args.get("prompt")
+    return render_template('lb-radio.html', prompt=prompt)
 
 @app.route("/lb-radio", methods=["POST"])
 def lb_radio_post():

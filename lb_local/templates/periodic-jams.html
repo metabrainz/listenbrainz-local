@@ -2,10 +2,11 @@
 {%- block title -%}home{% endblock %}
 {%- block content -%}
 
-<h2>ListenBrainz Local</h2>
+<h2>ListenBrainz Local Weekly Jams</h2>
 
-<p id="fuss">
-    Generate Periodic Jams
+<p>
+    Generate a playlist from a users weekly recommendations. You can generate a playlist as
+    many times as you'd like in a week, but the underying recommendations are updated each monday.
 </p>
 
 <form hx-post="/periodic-jams"
@@ -13,11 +14,23 @@
       hx-swap="outerHTML"
   <fieldset>
     <label for="prompt">User</label>
-    <div>
-      <input type="text" name="user_name" placeholder="joe_user" style="width: 40%" value="rob">
-      <input class="button-primary" type="submit" value="Create">
-    </div>
+    <input type="text"
+           name="user_name"
+           placeholder="joe_user"
+           style="width: 40%"
+           value="rob">
+    <input class="button-primary"
+           type="submit"
+           value="Generate"
+           hx-indicator="#spinner"
+           hx-on:click="document.getElementById('lb-local-playlist').innerHTML = ''">
   </fieldset>
+  <div style="text-align: center; width: 100%">
+    <img id="spinner"
+         class="htmx-indicator"
+         src="{{ url_for('static', filename='img/spinner.svg') }}">
+    </img>
+  </div>
 </form>
 
 <form id="lb-local-playlist">

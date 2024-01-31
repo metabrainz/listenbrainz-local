@@ -2,31 +2,41 @@
 {%- block title -%}home{% endblock %}
 {%- block content -%}
 
-<h2>ListenBrainz Local</h2>
+<h2>ListenBrainz Local Radio</h2>
 
 <p id="fuss">
-    Enter a ListenBrainz Local Radio query:
-</p>
+Enter a ListenBrainz Local Radio prompt:  (<a href="https://troi.readthedocs.io/en/latest/lb_radio.html">prompt
+reference</a>)</p>
 
 <form hx-post="/lb-radio"
       hx-target="#lb-local-playlist"
       hx-swap="outerHTML"
   <fieldset>
     <label for="prompt">Prompt</label>
-    <input type="text" name="prompt" placeholder="artist:(portishead)" style="width: 60%" value="">
+    <input type="text"
+           name="prompt"
+           placeholder="artist:(portishead)"
+           style="width: 65%"
+           value="{{ prompt }}">
     <select name="mode" style="width: 15%">
         <option value="easy">easy</option>
         <option value="medium">medium</option>
         <option value="hard">hard</option>
     </select>
-    <input class="button-primary" type="submit" value="Create" hx-indicator="#spinner">
+    <input class="button-primary"
+           style="width: 15%"
+           type="submit"
+           value="Create"
+           hx-indicator="#spinner"
+           hx-on:click="document.getElementById('lb-local-playlist').innerHTML = ''">
+
   </fieldset>
-    <div style="text-align: center; width: 100%">
-      <img id="spinner"
-           class="htmx-indicator"
-           src="{{ url_for('static', filename='img/spinner.svg') }}">
-      </img>
-    </div>
+  <div style="text-align: center; width: 100%">
+    <img id="spinner"
+         class="htmx-indicator"
+         src="{{ url_for('static', filename='img/spinner.svg') }}">
+    </img>
+  </div>
 </form>
 
 <form id="lb-local-playlist">
