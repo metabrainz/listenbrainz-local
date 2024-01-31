@@ -9,6 +9,7 @@ from lb_content_resolver.subsonic import SubsonicDatabase, Database
 from lb_content_resolver.lb_radio import ListenBrainzRadioLocal
 from lb_content_resolver.troi.periodic_jams import LocalPeriodicJams
 from lb_content_resolver.top_tags import TopTags
+from lb_content_resolver.unresolved_recording import UnresolvedRecordingTracker
 import config
 
 STATIC_PATH = "/static"
@@ -104,10 +105,18 @@ def weekly_jams_post():
     return render_template('playlist-table.html', recordings=recordings, jspf=json.dumps(playlist.get_jspf()))
 
 
-@app.route("/tags", methods=["GET"])
+@app.route("/top-tags", methods=["GET"])
 def tags():
     db = Database(current_app.config["DATABASE_FILE"])
     db.open()
     tt = TopTags()
     tags = tt.get_top_tags(250)
     return render_template("top-tags.html", tags=tags)
+
+
+@app.route("/unresolved", methods=["GET"])
+def unresolved():
+    db = Database(current_app.config["DATABASE_FILE"])
+    db.open()
+    urt = UnresolvedRecordingTracker()
+    return render_template("unresolved.html", unresolved=urt.get_releases())

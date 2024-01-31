@@ -8,6 +8,11 @@
     height: 50px;
 }
 
+.cover-art-unresolved {
+    width: 150px;
+    height: 150px;
+}
+
 .save-playlist {
     float: right;
 }

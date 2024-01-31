@@ -1,0 +1,34 @@
+{%- extends 'base.html' -%}
+{%- block title -%}home{% endblock %}
+{%- block content -%}
+
+<h2>ListenBrainz Local Unresolved Albums</h2>
+
+<p>
+Below are the top albums and recordings that have not been able to be resolved against your collection:
+</p>
+
+{% for release in unresolved %}
+  <div>
+      <div>
+          <img src="http://coverartarchive.org/release/{{ release.mbid }}/front-250"
+               class="cover-art-unresolved"
+               onerror="this.onerror=null;this.style='opacity: 40%';this.src='http://coverartarchive.org/img/big_logo.svg'">
+      </div>
+      <div>
+          <p>
+             <a href="http://listenbrainz.org/release/{{ release.mbid }}">{{ release.release_name }}</a>
+              by  {{ release.artist_name }} 
+             <a href="/lb-radio?prompt={{ release.artist_name | safe }}">
+                 <img class="headphones" src="{{ url_for('static', filename='img/headphones.svg') }}">
+             </a>
+          </p>
+      </div>
+
+  </div>
+{% endfor %}
+
+{% endblock%}
+
+{% block scripts %}
+{% endblock %}
