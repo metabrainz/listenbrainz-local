@@ -8,11 +8,6 @@
     height: 50px;
 }
 
-.cover-art-unresolved {
-    width: 150px;
-    height: 150px;
-}
-
 .save-playlist {
     float: right;
 }
@@ -48,4 +43,19 @@
 .index-item {
     height: 125px;
     display: inline;
+}
+
+.cover-art-unresolved {
+    width: 150px;
+    height: 150px;
+}
+
+.flex-wrap-container {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+}
+.unresolved-release {
+  width: 180px;
+
 }

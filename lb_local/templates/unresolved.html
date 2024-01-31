@@ -8,8 +8,9 @@
 Below are the top albums and recordings that have not been able to be resolved against your collection:
 </p>
 
+<div class="flex-wrap-container" style="margin-top: 3em">
 {% for release in unresolved %}
-  <div>
+  <div class="unresolved-release" style="padding: 10px">
       <div>
           <img src="http://coverartarchive.org/release/{{ release.mbid }}/front-250"
                class="cover-art-unresolved"
@@ -17,16 +18,22 @@ Below are the top albums and recordings that have not been able to be resolved a
       </div>
       <div>
           <p>
-             <a href="http://listenbrainz.org/release/{{ release.mbid }}">{{ release.release_name }}</a>
-              by  {{ release.artist_name }} 
-             <a href="/lb-radio?prompt={{ release.artist_name | safe }}">
-                 <img class="headphones" src="{{ url_for('static', filename='img/headphones.svg') }}">
-             </a>
+             <a href="https://listenbrainz.org/release/{{ release.mbid }}">{{ release.release_name }}</a>
+             <br/>
+             {% for artist in release.recordings[0].artists %}
+               <a href="/lb-radio?prompt={{ artist.name | safe }}">
+                   <img class="headphones" src="{{ url_for('static', filename='img/headphones.svg') }}">
+               </a>
+               <b><a href="https://listenbrainz.org/artist/{{ artist.artist_mbid }}">{{ artist.name }}</a></b> 
+               {{ artist.join_phrase }}
+               <br/>
+             {% endfor %}
           </p>
       </div>
 
   </div>
 {% endfor %}
+</div>
 
 {% endblock%}
 
