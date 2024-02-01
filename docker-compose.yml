@@ -8,13 +8,13 @@ services:
     expose:
       - "3031"
     volumes:
-      - .:/code/lb-local:z
+      - .:/code/lblocal:z
     environment:
       - VIRTUAL_HOST=local.listenbrainz.org
       - LETSENCRYPT_HOST=local.listenbrainz.org
       - LETSENCRYPT_EMAIL=rob@listenbrainz.org
 
-#networks:
-#  default:
-#    name: nginx-proxy
-#    external: true
+networks:
+  default:
+    name: production
+    external: true
