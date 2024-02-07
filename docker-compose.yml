@@ -1,0 +1,20 @@
+version: "3.3"
+
+services:
+
+  web:
+    build: .
+    image: listenbrainz-local 
+    expose:
+      - "3031"
+    volumes:
+      - .:/code/lblocal:z
+    environment:
+      - VIRTUAL_HOST=local.listenbrainz.org
+      - LETSENCRYPT_HOST=local.listenbrainz.org
+      - LETSENCRYPT_EMAIL=rob@listenbrainz.org
+
+networks:
+  default:
+    name: production
+    external: true
