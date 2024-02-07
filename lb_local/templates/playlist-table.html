@@ -26,7 +26,7 @@
               <a  href="/lb-radio?prompt={{ rec.artist.name | safe }}">
                   <img class="headphones" src="{{ url_for('static', filename='img/headphones.svg') }}">
               </a>
-              <a class="artist" href="https://listenbrainz.org/artist/{{ rec.artist.mbid }}">{{ rec.artist.name }}</a>
+              <a class="artist" href="https://listenbrainz.org/artist/{{ rec.artist.mbids[0] }}">{{ rec.artist.name }}</a>
             </td>
           </tr>
         {% endfor %}

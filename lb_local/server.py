@@ -4,12 +4,12 @@ from flask import Flask, render_template, request, current_app
 from werkzeug.exceptions import BadRequest
 
 from troi.playlist import _deserialize_from_jspf, PlaylistElement
-from lb_content_resolver.content_resolver import ContentResolver
-from lb_content_resolver.subsonic import SubsonicDatabase, Database
-from lb_content_resolver.lb_radio import ListenBrainzRadioLocal
-from lb_content_resolver.troi.periodic_jams import LocalPeriodicJams
-from lb_content_resolver.top_tags import TopTags
-from lb_content_resolver.unresolved_recording import UnresolvedRecordingTracker
+from troi.content_resolver.content_resolver import ContentResolver
+from troi.content_resolver.subsonic import SubsonicDatabase, Database
+from troi.content_resolver.lb_radio import ListenBrainzRadioLocal
+from troi.local.periodic_jams_local import PeriodicJamsLocal
+from troi.content_resolver.top_tags import TopTags
+from troi.content_resolver.unresolved_recording import UnresolvedRecordingTracker
 import config
 
 STATIC_PATH = "/static"
@@ -23,6 +23,7 @@ app.config.from_object('config')
 # TODO:
 # - Fix parsing of artist mbids from jspf in troi
 # - Pass hints and error messages from content resolver
+# - Resolve playlists
 
 
 @app.route("/")
@@ -100,7 +101,7 @@ def weekly_jams_post():
 
     db = SubsonicDatabase(current_app.config["DATABASE_FILE"], current_app.config)
     db.open()
-    r = LocalPeriodicJams(user_name, .8)
+    r = PeriodicJamsLocal(user_name, .8)
     playlist = r.generate()
     try:
         recordings = playlist.playlists[0].recordings
