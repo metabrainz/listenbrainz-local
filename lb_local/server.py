@@ -59,7 +59,7 @@ def lb_radio_post():
         recordings = playlist.playlists[0].recordings
     except (IndexError, KeyError, AttributeError):
         # TODO: Display this on the web page
-        db.metadata_sanity_check(include_subsonic=upload_to_subsonic)
+        db.metadata_sanity_check(include_subsonic=True)
         return
 
     return render_template('playlist-table.html', recordings=recordings, jspf=json.dumps(playlist.get_jspf()))

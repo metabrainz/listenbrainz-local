@@ -8,11 +8,13 @@
 Below are the top {{ tags | length }} tags that MusicBrainz users have applied to the recordings in your collection:
 </p>
 
-<div id="canvas" class="canvas"></div>
-
-{% for tag in tags %}
-<a href="/lb-radio?prompt={{ "tag:(" + tag.tag + ")" | safe }}">{{ tag.tag }}</a>, {{ tag.count }};
-{% endfor %}
+<div class="flex-wrap-container" style="margin-top: 3em">
+  {% for tag in tags %}
+    <div class="tag-div">
+        <a href="/lb-radio?prompt={{ "tag:(" + tag.tag + ")" | safe }}">{{ tag.tag }}</a><br/>{{ tag.count }};
+    </div>
+  {% endfor %}
+</div>
 
 {% endblock%}
 

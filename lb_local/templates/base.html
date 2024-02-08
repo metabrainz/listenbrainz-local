@@ -19,9 +19,11 @@
     {% endblock %}
   </head>
   <body>
-      <div style="width: 90%; margin-left: 5%">
-        <div style="float: right">
+      <div class="container">
+        <div style="width: 90%; margin-left: 5%">
+          <div style="float: right">
             <a href="/"><img style="padding-top: 10px" src="{{ url_for('static', filename='img/lb-local-logo.svg') }}" class="lb-logo"></a>
+          </div>
         </div>
         {% block content %}
         {% endblock %}

@@ -2,34 +2,33 @@
       hx-post="/playlist/create"
       id="lb-local-playlist">
     <input class="button-primary" type="submit" value="Save playlist">
-    <table>
-        <thead>
-            <th></th>
-            <th>title</th>
-            <th>release</th>
-            <th>artist</th>
-        </thead>
-        {% for rec in recordings %}
-          <tr>
-            <td class="tracklistcol">
-              <img src="http://coverartarchive.org/release/{{ rec.release.mbid }}/front-250"
-                   class="cover-art"
-                   onerror="this.onerror=null;this.style='opacity: 40%';this.src='http://coverartarchive.org/img/big_logo.svg'">
-            </td>
-            <td class="tracklistcol">
-              <a href="https://musicbrainz.org/recording/{{ rec.mbid}}">{{ rec.name }}</a>
-            </td>
-            <td class="tracklistcol">
-              <a href="https://listenbrainz.org/release/{{ rec.release.mbid }}">{{ rec.release.name }}</a>
-            </td>
-            <td class="tracklistcol">
-              <a  href="/lb-radio?prompt={{ rec.artist.name | safe }}">
-                  <img class="headphones" src="{{ url_for('static', filename='img/headphones.svg') }}">
-              </a>
-              <a class="artist" href="https://listenbrainz.org/artist/{{ rec.artist.mbids[0] }}">{{ rec.artist.name }}</a>
-            </td>
-          </tr>
-        {% endfor %}
+    <div class="row tl-header-row">
+        <div class="col tl-cover-col cover-art"></div>
+        <div class="col tl-recording-col">title</div>
+        <div class="col tl-release-col">release</div>
+        <div class="col tl-artist-col">artist</div>
+     </div>
+     {% for rec in recordings %}
+       <div class="row tl-row">
+         <div class="col tl-cover-col">
+           <img src="http://coverartarchive.org/release/{{ rec.release.mbid }}/front-250"
+                class="cover-art"
+                onerror="this.onerror=null;this.style='opacity: 40%';this.src='http://coverartarchive.org/img/big_logo.svg'">
+         </div>
+         <div class="col tl-recording-col">
+           <a href="https://musicbrainz.org/recording/{{ rec.mbid}}">{{ rec.name }}</a>
+         </div>
+         <div class="col tl-release-col">
+           <a href="https://listenbrainz.org/release/{{ rec.release.mbid }}">{{ rec.release.name }}</a>
+         </div>
+         <div class="col tl-artist-col">
+           <a  href="/lb-radio?prompt={{ rec.artist.name | safe }}">
+               <img class="headphones" src="{{ url_for('static', filename='img/headphones.svg') }}">
+           </a>
+           <a class="artist" href="https://listenbrainz.org/artist/{{ rec.artist.mbids[0] }}">{{ rec.artist.name }}</a>
+         </div>
+       </div>
+     {% endfor %}
     </table>
     <input type="hidden" name="jspf" value="{{ jspf }}"</input>
 </form>

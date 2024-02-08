@@ -5,9 +5,27 @@
 .prompt-example {
     margin-left: 2em;
 }
-.tracklistcol {
-    padding: 0.1rem 0.1rem;
-    border-bottom: none;
+.tl-header-row {
+    font-weight: bold;
+}
+
+.tl-row {
+}
+
+.tl-cover-col {
+    margin-right: 5px;
+}
+.tl-recording-col {
+    width: 40%;
+    margin-right: 5px;
+}
+.tl-release-col {
+    width: 25%;
+    margin-right: 5px;
+}
+.tl-artist-col {
+    width: 25%;
+    margin-right: 5px;
 }
 
 .cover-art {
@@ -64,5 +82,8 @@
 }
 .unresolved-release {
   width: 180px;
-
+}
+.tag-div {
+  width: 125px;
+  margin-right: 5px;
 }
