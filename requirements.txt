@@ -1,2 +1,2 @@
 flask
-troi[nmslib]@git+https://github.com/metabrainz/troi-recommendation-playground.git@merge-content-resolver
+troi[nmslib]@git+https://github.com/metabrainz/troi-recommendation-playground.git@main
