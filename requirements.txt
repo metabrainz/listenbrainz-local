@@ -1,2 +1,3 @@
 flask
-troi[nmslib]@git+https://github.com/metabrainz/troi-recommendation-playground.git@main
+icecream
+troi[nmslib]@git+https://github.com/metabrainz/troi-recommendation-playground.git@more-troi-fixes

@@ -51,9 +51,9 @@ def lb_radio_post():
     except KeyError:
         raise BadRequest("argument 'mode' is required.")
 
-    db = SubsonicDatabase(current_app.config["DATABASE_FILE"], current_app.config)
+    db = SubsonicDatabase(current_app.config["DATABASE_FILE"], current_app.config, quiet=False)
     db.open()
-    r = ListenBrainzRadioLocal()
+    r = ListenBrainzRadioLocal(quiet=False)
     playlist = r.generate(mode, prompt, .8)
     try:
         recordings = playlist.playlists[0].recordings
@@ -61,6 +61,9 @@ def lb_radio_post():
         # TODO: Display this on the web page
         db.metadata_sanity_check(include_subsonic=True)
         return
+
+    from icecream import ic
+    ic(recordings[0].musicbrainz["subsonic_id"])
 
     return render_template('playlist-table.html', recordings=recordings, jspf=json.dumps(playlist.get_jspf()))
 

@@ -1,5 +1,5 @@
 .prompt-examples {
-    margin-top: -.6em;
+    margin-top: -0.6em;
     font-size: 10pt;
 }
 .prompt-example {
@@ -46,22 +46,24 @@
     height: 100px;
 }
 
-.htmx-indicator{
+.htmx-indicator {
     display: none;
     transition: display 500ms ease-in;
 }
-.htmx-request .htmx-indicator{
+.htmx-request .htmx-indicator {
     display: inline;
 }
-.htmx-request.htmx-indicator{
+.htmx-request.htmx-indicator {
     display: inline;
 }
 .headphones {
     width: 15px;
-    filter: invert(86%) sepia(25%) saturate(544%) hue-rotate(207deg) brightness(91%) contrast(88%);
+    filter: invert(86%) sepia(25%) saturate(544%) hue-rotate(207deg)
+        brightness(91%) contrast(88%);
 }
 .purple {
-    filter: invert(86%) sepia(25%) saturate(544%) hue-rotate(207deg) brightness(91%) contrast(88%);
+    filter: invert(86%) sepia(25%) saturate(544%) hue-rotate(207deg)
+        brightness(91%) contrast(88%);
 }
 .index-row {
     width: 100%;
@@ -77,14 +79,28 @@
 }
 
 .flex-wrap-container {
-  display: flex;
-  flex-direction: row;
-  flex-wrap: wrap;
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
 }
 .unresolved-release {
-  width: 180px;
+    width: 180px;
 }
 .tag-div {
-  width: 125px;
-  margin-right: 5px;
+    width: 125px;
+    margin-right: 5px;
+}
+
+.player {
+    width: 90%;
+    justify-content: space-between;
+    border: 1px solid #ccc;
+    background: #fafafa;
+    text-align: center;
+    margin-bottom: 1em;
+}
+
+.player-button {
+    margin: 0.5em;
+    font-size: 20px !important;
 }

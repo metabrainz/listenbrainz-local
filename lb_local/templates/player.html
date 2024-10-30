@@ -1,0 +1,42 @@
+<div class="flex-wrap-container player">
+    <input
+        class="button player-button"
+        type="button"
+        id="prev-button"
+        value="&#x23EE;"
+    />
+    <input
+        class="button player-button"
+        type="button"
+        id="play-button"
+        onclick="play();"
+        value="&#x23F5;"
+    />
+    <input
+        class="button player-button"
+        type="button"
+        id="next-button"
+        value="&#x23ED;"
+    />
+    <input
+        class="button player-button"
+        type="submit"
+        id="save-playlist"
+        value="&#x2913;"
+    />
+</div>
+<script type="text/javascript">
+    var current_playing_index = null;
+
+    function play() {
+        console.log("foo");
+        if (current_playing_index == null) {
+            current_playing_index = 0;
+            file_id = document.getElementById(
+                "recording" + current_playing_index,
+            ).value;
+            console.log(file_id);
+        }
+        return true;
+    }
+</script>

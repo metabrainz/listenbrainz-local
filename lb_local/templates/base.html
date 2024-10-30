@@ -1,35 +1,63 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    {% block head %}
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <head>
+        {% block head %}
+        <meta charset="utf-8" />
+        <meta
+            name="viewport"
+            content="width=device-width, initial-scale=1, shrink-to-fit=no"
+        />
 
-    {% block styles %}
-    <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Roboto:300,300italic,700,700italic">
-    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/normalize/5.0.0/normalize.css">
-    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/milligram/1.4.1/milligram.css">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/lb-local.css') }}">
-    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
-    <script src="https://unpkg.com/htmx.org/dist/ext/json-enc.js"></script>
-    {% endblock %}
-
-    <title>ListenBrainz Local: {% block title %}{% endblock %}</title>
-
-    {% endblock %}
-  </head>
-  <body>
-      <div class="container">
-        <div style="width: 90%; margin-left: 5%">
-          <div style="float: right">
-            <a href="/"><img style="padding-top: 10px" src="{{ url_for('static', filename='img/lb-local-logo.svg') }}" class="lb-logo"></a>
-          </div>
-        </div>
-        {% block content %}
+        {% block styles %}
+        <link
+            rel="stylesheet"
+            href="//fonts.googleapis.com/css?family=Roboto:300,300italic,700,700italic"
+        />
+        <link
+            rel="stylesheet"
+            href="//cdnjs.cloudflare.com/ajax/libs/normalize/5.0.0/normalize.css"
+        />
+        <link
+            rel="stylesheet"
+            href="//cdnjs.cloudflare.com/ajax/libs/milligram/1.4.1/milligram.css"
+        />
+        <link
+            rel="stylesheet"
+            href="{{ url_for('static', filename='css/lb-local.css') }}"
+        />
+        <script
+            src="https://unpkg.com/htmx.org@2.0.3"
+            integrity="sha384-0895/pl2MU10Hqc6jd4RvrthNlDiE9U1tWmX7WRESftEDRosgxNsQG/Ze9YMRzHq"
+            crossorigin="anonymous"
+        ></script>
+        <script src="https://unpkg.com/htmx.org/dist/ext/json-enc.js"></script>
+        <script
+            src="https://cdnjs.cloudflare.com/ajax/libs/howler/2.2.4/howler.min.js"
+            integrity="sha512-xi/RZRIF/S0hJ+yJJYuZ5yk6/8pCiRlEXZzoguSMl+vk2i3m6UjUO/WcZ11blRL/O+rnj94JRGwt/CHbc9+6EA=="
+            crossorigin="anonymous"
+            referrerpolicy="no-referrer"
+        ></script>
         {% endblock %}
-      </div>
-  
-    {% block scripts %}
-    {% endblock %}
-  </body>
+
+        <title>ListenBrainz Local: {% block title %}{% endblock %}</title>
+
+        {% endblock %}
+    </head>
+    <body>
+        <div class="container">
+            <div style="width: 90%; margin-left: 5%">
+                <div style="float: right">
+                    <a href="/"
+                        ><img
+                            style="padding-top: 10px"
+                            src="{{ url_for('static', filename='img/lb-local-logo.svg') }}"
+                            class="lb-logo"
+                    /></a>
+                </div>
+            </div>
+            {% block content %} {% endblock %}
+        </div>
+
+        {% block scripts %} {% endblock %}
+    </body>
 </html>
