@@ -28,6 +28,10 @@
 <script type="text/javascript">
     var current_playing_index = null;
 
+    var sound = null;
+
+    sound.play();
+
     function play() {
         console.log("foo");
         if (current_playing_index == null) {
@@ -35,7 +39,13 @@
             file_id = document.getElementById(
                 "recording" + current_playing_index,
             ).value;
-            console.log(file_id);
+
+            url =
+            sound = new Howl({
+                src: [url],
+                html5: true,
+            });
+            sound.play();
         }
         return true;
     }
