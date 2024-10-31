@@ -9,7 +9,7 @@
         class="button player-button"
         type="button"
         id="play-button"
-        onclick="play();"
+        onclick="play({{ subsonic }});"
         value="&#x23F5;"
     />
     <input
@@ -25,28 +25,3 @@
         value="&#x2913;"
     />
 </div>
-<script type="text/javascript">
-    var current_playing_index = null;
-
-    var sound = null;
-
-    sound.play();
-
-    function play() {
-        console.log("foo");
-        if (current_playing_index == null) {
-            current_playing_index = 0;
-            file_id = document.getElementById(
-                "recording" + current_playing_index,
-            ).value;
-
-            url =
-            sound = new Howl({
-                src: [url],
-                html5: true,
-            });
-            sound.play();
-        }
-        return true;
-    }
-</script>

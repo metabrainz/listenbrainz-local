@@ -1,6 +1,9 @@
+import hashlib
 import json
+import uuid
 
 from flask import Flask, render_template, request, current_app
+from flask_cors import CORS
 from werkzeug.exceptions import BadRequest
 
 from troi.playlist import _deserialize_from_jspf, PlaylistElement
@@ -17,14 +20,23 @@ STATIC_FOLDER = "static"
 TEMPLATE_FOLDER = "templates"
 
 app = Flask(__name__, static_url_path=STATIC_PATH, static_folder=STATIC_FOLDER, template_folder=TEMPLATE_FOLDER)
+CORS(app, origins=[f"{config.SUBSONIC_HOST}:{config.SUBSONIC_PORT}"])
 app.config.from_object('config')
 
 
 # TODO:
-# - Fix parsing of artist mbids from jspf in troi
 # - Pass hints and error messages from content resolver
 # - Resolve playlists
 
+def subsonic_credentials_url_args():
+    """Return the subsonic API request arguments that must be appended to a subsonic call."""
+
+    salt = str(uuid.uuid4())
+    h = hashlib.new('md5')
+    h.update(bytes(config.SUBSONIC_PASSWORD, "utf-8"))
+    h.update(bytes(salt, "utf-8"))
+    token = h.hexdigest()
+    return { "args":f"u={config.SUBSONIC_USER}&s={salt}&t={token}&v=1.14.0&c=lb-local", "host":config.SUBSONIC_HOST, "port":config.SUBSONIC_PORT }
 
 @app.route("/")
 def index():
@@ -35,7 +47,7 @@ def index():
 def lb_radio_get():
 
     prompt = request.args.get("prompt", "")
-    return render_template('lb-radio.html', prompt=prompt)
+    return render_template('lb-radio.html', prompt=prompt, subsonic=subsonic_credentials_url_args())
 
 
 @app.route("/lb-radio", methods=["POST"])
@@ -65,7 +77,9 @@ def lb_radio_post():
     from icecream import ic
     ic(recordings[0].musicbrainz["subsonic_id"])
 
-    return render_template('playlist-table.html', recordings=recordings, jspf=json.dumps(playlist.get_jspf()))
+    return render_template("playlist-table.html", recordings=recordings, jspf=json.dumps(playlist.get_jspf()),
+                           subsonic=subsonic_credentials_url_args())
+
 
 
 class Config:
@@ -125,6 +139,14 @@ def tags():
 
 @app.route("/unresolved", methods=["GET"])
 def unresolved():
+    db = Database(current_app.config["DATABASE_FILE"])
+    db.open()
+    urt = UnresolvedRecordingTracker()
+    return render_template("unresolved.html", unresolved=urt.get_releases())
+
+
+@app.route("/stream/<file_id>", methods=["GET"])
+def stream(file_id):
     db = Database(current_app.config["DATABASE_FILE"])
     db.open()
     urt = UnresolvedRecordingTracker()

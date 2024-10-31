@@ -4,13 +4,13 @@
 
 <h2>ListenBrainz Local Radio</h2>
 
-<p id="fuss">
+<p>
 Enter a ListenBrainz Local Radio prompt:  (<a href="https://troi.readthedocs.io/en/latest/lb_radio.html">prompt
 reference</a>)</p>
 
 <form hx-post="/lb-radio"
       hx-target="#lb-local-playlist"
-      hx-swap="outerHTML"
+      hx-swap="outerHTML">
   <fieldset>
     <label for="prompt">Prompt</label>
     <input type="text"

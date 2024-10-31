@@ -1,3 +1,4 @@
 flask
 icecream
 troi[nmslib]@git+https://github.com/metabrainz/troi-recommendation-playground.git@more-troi-fixes
+flask-cors
