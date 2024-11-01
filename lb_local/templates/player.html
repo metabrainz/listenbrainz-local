@@ -3,19 +3,28 @@
         class="button player-button"
         type="button"
         id="prev-button"
+        onclick="enter_event(EVENT_PREV, {{ subsonic }});"
         value="&#x23EE;"
     />
     <input
         class="button player-button"
         type="button"
+        id="stop-button"
+        onclick="enter_event(EVENT_STOP, {{ subsonic }});"
+        value="&#x23F9;"
+    />
+    <input
+        class="button player-button"
+        type="button"
         id="play-button"
-        onclick="play({{ subsonic }});"
+        onclick="enter_event(EVENT_PLAY, {{ subsonic }});"
         value="&#x23F5;"
     />
     <input
         class="button player-button"
         type="button"
         id="next-button"
+        onclick="enter_event(EVENT_NEXT, {{ subsonic }});"
         value="&#x23ED;"
     />
     <input
