@@ -10,7 +10,7 @@
         <div class="col tl-artist-col">artist</div>
     </div>
     {% for rec in recordings %}
-        <div class="row tl-row">
+        <div class="row tl-row" id="row{{ loop.index0 }}">
             <input type="hidden" value="{{ rec.musicbrainz["subsonic_id"]}}" id="recording{{ loop.index0 }}"/>
             <div class="col tl-cover-col">
             <img src="http://coverartarchive.org/release/{{ rec.release.mbid }}/front-250"

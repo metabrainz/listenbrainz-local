@@ -104,3 +104,7 @@
     margin: 0.5em;
     font-size: 20px !important;
 }
+
+.playing-now-row {
+    background: #fff0ff;
+}

@@ -22,6 +22,8 @@ var transition_table = [
     [STATE_PREV, EVENT_STOP, STATE_STOPPED],
     [STATE_PAUSED, EVENT_PLAY, STATE_PLAYING],
     [STATE_PAUSED, EVENT_STOP, STATE_STOPPED],
+    [STATE_PAUSED, EVENT_PREV, STATE_PREV],
+    [STATE_PAUSED, EVENT_NEXT, STATE_NEXT],
 ];
 
 var sound = null;
@@ -37,6 +39,7 @@ function enter_event(event, subsonic = null) {
     for (let trans of transition_table) {
         //console.log(trans[0], trans[1], trans[2]);
         if (current_state == trans[0] && event == trans[1]) {
+            console.log(trans[0], trans[1], trans[2]);
             current_state = trans[2];
             if (trans[2] == STATE_PLAYING) {
                 play();
@@ -67,6 +70,11 @@ function enter_event(event, subsonic = null) {
 
 function play(subsonic) {
     console.log("play");
+    if (sound != null) {
+        console.log("play/resume");
+        sound.play();
+        return;
+    }
     if (current_playing_index == null) {
         current_playing_index = 0;
     }
@@ -87,6 +95,7 @@ function pause(subsonic) {
 }
 function stop(subsonic) {
     console.log("stop");
+    toggle_playing_now_row(current_playing_index);
     current_playing_index = null;
     if (sound != null) {
         sound.unload();
@@ -99,6 +108,7 @@ function prev(subsonic) {
     if (current_playing_index == null) {
         return;
     }
+    toggle_playing_now_row(current_playing_index);
     if (current_playing_index == 0) {
         enter_event(EVENT_STOP);
         return;
@@ -110,6 +120,10 @@ function prev(subsonic) {
     ).value;
     console.log("file id" + file_id);
     if (file_id != null) {
+        if (sound != null) {
+            sound.unload();
+            sound = null;
+        }
         enter_event(EVENT_PLAY);
     } else {
         enter_event(EVENT_STOP);
@@ -121,6 +135,7 @@ function next(subsonic) {
     if (current_playing_index == null) {
         return;
     }
+    toggle_playing_now_row(current_playing_index);
 
     current_playing_index += 1;
     file_id = document.getElementById(
@@ -128,6 +143,10 @@ function next(subsonic) {
     ).value;
 
     if (file_id != null) {
+        if (sound != null) {
+            sound.unload();
+            sound = null;
+        }
         enter_event(EVENT_PLAY);
     } else {
         enter_event(EVENT_STOP);
@@ -135,6 +154,8 @@ function next(subsonic) {
 }
 function play_track(file_id) {
     console.log("play_track");
+    //For testing with only short tracks...
+    //file_id = "cf22184021802f7ebbf0e461d11fc42d";
     url =
         subsonic_info.host +
         ":" +
@@ -150,6 +171,17 @@ function play_track(file_id) {
     sound = new Howl({
         src: [url],
         html5: true,
+        onend: on_end,
     });
     sound.play();
+    toggle_playing_now_row(current_playing_index);
+}
+
+function on_end() {
+    enter_event(EVENT_NEXT);
+}
+
+function toggle_playing_now_row(index) {
+    var element = document.getElementById("row" + index);
+    element.classList.toggle("playing-now-row");
 }
