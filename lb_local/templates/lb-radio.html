@@ -3,6 +3,14 @@ content -%}
 
 <h2 style="margin-bottom: 0.5em">ListenBrainz Local Radio</h2>
 
+<script type="text/javascript">
+    function leave_page() {
+        console.log("leave page");
+        document.getElementById("lb-local-playlist").innerHTML = "";
+        stop();
+    }
+</script>
+
 <form hx-post="/lb-radio" hx-target="#lb-local-playlist" hx-swap="outerHTML">
     <fieldset>
         <div class="col-auto">
@@ -35,7 +43,7 @@ content -%}
                     class="btn btn-lg btn-primary"
                     type="submit"
                     hx-indicator="#spinner"
-                    hx-on:click="document.getElementById('lb-local-playlist').innerHTML = ''"
+                    hx-on:click="leave_page();"
                 >
                     Create
                 </button>
