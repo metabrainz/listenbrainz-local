@@ -216,5 +216,5 @@ function on_end() {
 
 function toggle_playing_now_row(index) {
     var element = document.getElementById("row" + index);
-    element.classList.toggle("playing-now-row");
+    element.classList.toggle("table-active");
 }

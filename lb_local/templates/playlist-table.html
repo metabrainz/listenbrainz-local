@@ -3,40 +3,42 @@
       hx-post="/playlist/create"
       id="lb-local-playlist">
     {% include 'player.html' %}
-    <div class="row tl-header-row">
-        <div class="col tl-cover-col cover-art"></div>
-        <div class="col tl-recording-col">title</div>
-        <div class="col tl-release-col">release</div>
-        <div class="col tl-artist-col">artist</div>
-    </div>
-    {% for rec in recordings %}
-        <div class="row tl-row" id="row{{ loop.index0 }}">
-            <input type="hidden" value="{{ rec.musicbrainz["subsonic_id"]}}" id="recording{{ loop.index0 }}"/>
-            <div class="col tl-cover-col">
-                <a onclick="enter_event(EVENT_JUMP, {{ loop.index0 }})">
-                    <img src="http://coverartarchive.org/release/{{ rec.release.mbid }}/front-250"
-                        class="cover-art"
-                        onerror="this.onerror=null;this.style='opacity: 40%';this.src='http://coverartarchive.org/img/big_logo.svg'"/>
-                </a>
-            </div>
-            <div class="col tl-recording-col">
-                <a href="https://musicbrainz.org/recording/{{ rec.mbid}}">{{ rec.name }}</a>
-            </div>
-            <div class="col tl-release-col">
-                <a href="https://listenbrainz.org/release/{{ rec.release.mbid }}">{{ rec.release.name }}</a>
-            </div>
-            <div class="col tl-artist-col">
-                <img class="headphones" src="{{ url_for('static', filename='img/headphones.svg') }}">
-                {% for artist in rec.artist_credit.artists %}
-                <a  href="/lb-radio?prompt={{ artist.name | safe }}">
-                    <a class="artist" href="https://listenbrainz.org/artist/{{ artist.mbid }}">{{ artist.name }}</a>
-                </a>
-                {{ artist.join_phrase }}
-            {% endfor %}
-
-            </div>
-        </div>
-    {% endfor %}
+    <table class="table">
+        <thead>
+            <th>cover</th>
+            <th>title</th>
+            <th>release</th>
+            <th>artist</th>
+        </thead>
+        <tbody>
+        {% for rec in recordings %}
+            <tr id="row{{ loop.index0 }}">
+                <input type="hidden" value="{{ rec.musicbrainz["subsonic_id"]}}" id="recording{{ loop.index0 }}"/>
+                <td>
+                    <a onclick="enter_event(EVENT_JUMP, {{ loop.index0 }})">
+                        <img src="http://coverartarchive.org/release/{{ rec.release.mbid }}/front-250"
+                            class="cover-art"
+                            onerror="this.onerror=null;this.style='opacity: 40%';this.src='http://coverartarchive.org/img/big_logo.svg'"/>
+                    </a>
+                </td>
+                <td>
+                    <a href="https://musicbrainz.org/recording/{{ rec.mbid}}">{{ rec.name }}</a>
+                </td>
+                <td class="col tl-release-col">
+                    <a href="https://listenbrainz.org/release/{{ rec.release.mbid }}">{{ rec.release.name }}</a>
+                </td>
+                <td class="col tl-artist-col">
+                    <img class="headphones" src="{{ url_for('static', filename='img/headphones.svg') }}">
+                    {% for artist in rec.artist_credit.artists %}
+                        <a  href="/lb-radio?prompt={{ artist.name | safe }}">
+                            <a class="artist" href="https://listenbrainz.org/artist/{{ artist.mbid }}">{{ artist.name }}</a>
+                        </a>
+                        {{ artist.join_phrase }}
+                    {% endfor %}
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
     </table>
     <input type="hidden" name="jspf" value="{{ jspf }}"</input>
 <form>

@@ -1,5 +1,4 @@
 .prompt-examples {
-    margin-top: -0.6em;
     font-size: 10pt;
 }
 .prompt-example {
@@ -103,8 +102,4 @@
 .player-button {
     margin: 0.5em;
     font-size: 20px !important;
-}
-
-.playing-now-row {
-    background: #fff0ff;
 }

@@ -1,55 +1,74 @@
-{%- extends 'base.html' -%}
-{%- block title -%}home{% endblock %}
-{%- block content -%}
+{%- extends 'base.html' -%} {%- block title -%}home{% endblock %} {%- block
+content -%}
 
-<h2>ListenBrainz Local Radio</h2>
+<h2 style="margin-bottom: 0.5em">ListenBrainz Local Radio</h2>
 
-<p>
-Enter a ListenBrainz Local Radio prompt:  (<a href="https://troi.readthedocs.io/en/latest/lb_radio.html">prompt
-reference</a>)</p>
-
-<form hx-post="/lb-radio"
-      hx-target="#lb-local-playlist"
-      hx-swap="outerHTML">
-  <fieldset>
-    <label for="prompt">Prompt</label>
-    <input type="text"
-           name="prompt"
-           style="width: 65%"
-           value="{{ prompt }}">
-    <select name="mode" style="width: 15%">
-        <option value="easy">easy</option>
-        <option value="medium">medium</option>
-        <option value="hard">hard</option>
-    </select>
-    <input class="button-primary"
-           style="width: 15%"
-           type="submit"
-           value="Create"
-           hx-indicator="#spinner"
-           hx-on:click="document.getElementById('lb-local-playlist').innerHTML = ''">
-    <p class="prompt-examples">
-      Examples:
-      <a class="prompt-example" href="/lb-radio?prompt=Amy Winehouse">Amy Winehouse</a>
-      <a class="prompt-example" href="/lb-radio?prompt=artist:(U2)">artist:(U2)</a>
-      <a class="prompt-example" href="/lb-radio?prompt=%23punk">#punk</a>
-      <a class="prompt-example" href="/lb-radio?prompt=stats:rob">stats:rob</a>
-      <a class="prompt-example" href="/lb-radio?prompt=tag:(trip hop, downtempo)::or">tag:(trip hop, downtempo)::or</a>
-    </p>
-
-  </fieldset>
-  <div style="text-align: center; width: 100%">
-    <img id="spinner"
-         class="htmx-indicator"
-         src="{{ url_for('static', filename='img/spinner.svg') }}">
-    </img>
-  </div>
+<form hx-post="/lb-radio" hx-target="#lb-local-playlist" hx-swap="outerHTML">
+    <fieldset>
+        <div class="col-auto">
+            <label for="prompt" class="form-label">
+                Enter a ListenBrainz Local Radio prompt: (<a
+                    href="https://troi.readthedocs.io/en/latest/lb_radio.html"
+                    >prompt reference</a
+                >)
+            </label>
+        </div>
+        <div class="row align-items-center">
+            <div class="col-7">
+                <input
+                    id="prompt"
+                    class="form-control-lg w-100"
+                    type="text"
+                    name="prompt"
+                    value="{{ prompt }}"
+                />
+            </div>
+            <div class="col">
+                <select name="mode" class="form-select form-select-lg">
+                    <option value="easy">easy</option>
+                    <option value="medium">medium</option>
+                    <option value="hard">hard</option>
+                </select>
+            </div>
+            <div class="col">
+                <button
+                    class="btn btn-lg btn-primary"
+                    type="submit"
+                    hx-indicator="#spinner"
+                    hx-on:click="document.getElementById('lb-local-playlist').innerHTML = ''"
+                >
+                    Create
+                </button>
+            </div>
+        </div>
+        <p class="prompt-examples">
+            Examples:
+            <a class="prompt-example" href="/lb-radio?prompt=Amy Winehouse"
+                >Amy Winehouse</a
+            >
+            <a class="prompt-example" href="/lb-radio?prompt=artist:(U2)"
+                >artist:(U2)</a
+            >
+            <a class="prompt-example" href="/lb-radio?prompt=%23punk">#punk</a>
+            <a class="prompt-example" href="/lb-radio?prompt=stats:rob"
+                >stats:rob</a
+            >
+            <a
+                class="prompt-example"
+                href="/lb-radio?prompt=tag:(trip hop, downtempo)::or"
+                >tag:(trip hop, downtempo)::or</a
+            >
+        </p>
+    </fieldset>
+    <div style="text-align: center; width: 100%">
+        <img
+            id="spinner"
+            class="htmx-indicator"
+            src="{{ url_for('static', filename='img/spinner.svg') }}"
+        />
+    </div>
 </form>
 
-<form id="lb-local-playlist">
-</form>
+<form id="lb-local-playlist"></form>
 
-{% endblock%}
-
-{% block scripts %}
-{% endblock %}
+{% endblock%} {% block scripts %} {% endblock %}
