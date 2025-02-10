@@ -41,7 +41,7 @@
 {% block scripts %}
 <script type="text/javascript">
     document.addEventListener("DOMContentLoaded", () => {
-          init_player("{{ subsonic.host }}", {{ subsonic.port }}, "{{ subsonic.args }}");
+          init_player("{{ subsonic.host }}", {{ subsonic.port }}, "{{ subsonic.args |safe}}");
     });
 
     function leave_page() {

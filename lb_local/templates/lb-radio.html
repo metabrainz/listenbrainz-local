@@ -3,18 +3,6 @@ content -%}
 
 <h2 style="margin-bottom: 0.5em">ListenBrainz Local Radio</h2>
 
-<script type="text/javascript">
-    document.addEventListener("DOMContentLoaded", () => {
-          init_player("{{ subsonic.host }}", {{ subsonic.port }}, "{{ subsonic.args }}");
-    });
-
-    function leave_page() {
-        console.log("leave page");
-        document.getElementById("lb-local-playlist").innerHTML = "";
-        stop();
-    }
-</script>
-
 <form hx-post="/lb-radio" hx-target="#lb-local-playlist" hx-swap="outerHTML">
     <fieldset>
         <div class="col-auto">
@@ -83,4 +71,16 @@ content -%}
 
 <form id="lb-local-playlist"></form>
 
-{% endblock%} {% block scripts %} {% endblock %}
+{% endblock%} {% block scripts %}
+<script type="text/javascript">
+    document.addEventListener("DOMContentLoaded", () => {
+          init_player("{{ subsonic.host }}", {{ subsonic.port }}, "{{ subsonic.args |safe}}");
+    });
+
+    function leave_page() {
+        console.log("leave page");
+        document.getElementById("lb-local-playlist").innerHTML = "";
+        stop();
+    }
+</script>
+{% endblock %}

@@ -1,8 +1,5 @@
-<form hx-ext="json-enc"
-      hx-trigger="submit"
-      hx-post="/playlist/create"
-      id="lb-local-playlist">
-    {% include 'player.html' %}
+
+{% include 'player.html' %}
     <table class="table">
         <thead>
             <th>cover</th>
@@ -41,4 +38,3 @@
         </tbody>
     </table>
     <input type="hidden" name="jspf" value="{{ jspf }}"</input>
-<form>

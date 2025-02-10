@@ -38,7 +38,7 @@ var current_playing_index = null;
 var subsonic_info = null;
 
 function init_player(host, port, args) {
-    console.log("init player");
+    console.log(args);
     subsonic_info = { host: host, port: port, args: args };
 }
 function enter_event(event, arg = null) {
@@ -50,6 +50,7 @@ function enter_event(event, arg = null) {
             current_state = trans[2];
             if (trans[2] == STATE_PLAYING) {
                 play();
+                console.log("play event done");
                 return;
             }
             if (trans[2] == STATE_PAUSED) {
@@ -95,6 +96,7 @@ function play() {
     ).value;
 
     play_track(file_id);
+    console.log("play done");
 }
 
 function pause() {
@@ -198,6 +200,7 @@ function play_track(file_id) {
         file_id +
         "&" +
         subsonic_info.args;
+    console.log(url);
     if (sound != null) {
         sound.unload();
         sound = null;
@@ -209,6 +212,7 @@ function play_track(file_id) {
     });
     sound.play();
     toggle_playing_now_row(current_playing_index);
+    console.log("play_track done");
 }
 
 function on_end() {

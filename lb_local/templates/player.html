@@ -27,11 +27,19 @@
     >
         <i class="fa-solid fa-forward"></i>
     </button>
-    <button
-        class="btn btn-secondary player-button"
-        type="submit"
-        id="save-playlist"
+
+    <form
+        hx-ext="json-enc"
+        hx-trigger="submit"
+        hx-post="/playlist/create"
+        id="lb-local-playlist"
     >
-        <i class="fa-solid fa-download"></i>
-    </button>
+        <button
+            class="btn btn-secondary player-button"
+            type="submit"
+            id="save-playlist"
+        >
+            <i class="fa-solid fa-download"></i>
+        </button>
+    </form>
 </div>
