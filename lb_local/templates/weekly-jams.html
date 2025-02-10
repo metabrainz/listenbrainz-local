@@ -39,4 +39,15 @@
 {% endblock%}
 
 {% block scripts %}
+<script type="text/javascript">
+    document.addEventListener("DOMContentLoaded", () => {
+          init_player("{{ subsonic.host }}", {{ subsonic.port }}, "{{ subsonic.args }}");
+    });
+
+    function leave_page() {
+        console.log("leave page");
+        document.getElementById("lb-local-playlist").innerHTML = "";
+        stop();
+    }
+</script>
 {% endblock %}

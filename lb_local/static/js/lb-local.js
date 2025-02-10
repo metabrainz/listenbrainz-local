@@ -37,8 +37,9 @@ var current_state = STATE_STOPPED;
 var current_playing_index = null;
 var subsonic_info = null;
 
-function init_player(subsonic) {
-    subsonic_info = subsonic;
+function init_player(host, port, args) {
+    console.log("init player");
+    subsonic_info = { host: host, port: port, args: args };
 }
 function enter_event(event, arg = null) {
     console.log("enter event: " + event);

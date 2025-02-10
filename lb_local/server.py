@@ -1,10 +1,13 @@
+import hashlib
 import json
+import uuid
+
 
 from flask import Flask, render_template, request, current_app
+from flask_cors import CORS
 from werkzeug.exceptions import BadRequest
 
 from troi.playlist import _deserialize_from_jspf, PlaylistElement
-from troi.content_resolver.content_resolver import ContentResolver
 from troi.content_resolver.subsonic import SubsonicDatabase, Database
 from troi.content_resolver.lb_radio import ListenBrainzRadioLocal
 from troi.local.periodic_jams_local import PeriodicJamsLocal
@@ -17,6 +20,7 @@ STATIC_FOLDER = "static"
 TEMPLATE_FOLDER = "templates"
 
 app = Flask(__name__, static_url_path=STATIC_PATH, static_folder=STATIC_FOLDER, template_folder=TEMPLATE_FOLDER)
+CORS(app, origins=[f"{config.SUBSONIC_HOST}:{config.SUBSONIC_PORT}"])
 app.config.from_object('config')
 
 
@@ -25,6 +29,15 @@ app.config.from_object('config')
 # - Pass hints and error messages from content resolver
 # - Resolve playlists
 
+def subsonic_credentials_url_args():
+    """Return the subsonic API request arguments that must be appended to a subsonic call."""
+
+    salt = str(uuid.uuid4())
+    h = hashlib.new('md5')
+    h.update(bytes(config.SUBSONIC_PASSWORD, "utf-8"))
+    h.update(bytes(salt, "utf-8"))
+    token = h.hexdigest()
+    return { "args":f"u={config.SUBSONIC_USER}&s={salt}&t={token}&v=1.14.0&c=lb-local", "host":config.SUBSONIC_HOST, "port":config.SUBSONIC_PORT }
 
 @app.route("/")
 def index():
@@ -35,7 +48,7 @@ def index():
 def lb_radio_get():
 
     prompt = request.args.get("prompt", "")
-    return render_template('lb-radio.html', prompt=prompt, page="lb-radio")
+    return render_template('lb-radio.html', prompt=prompt, page="lb-radio", subsonic=subsonic_credentials_url_args())
 
 
 @app.route("/lb-radio", methods=["POST"])
@@ -89,7 +102,7 @@ def playlist_create():
 
 @app.route("/weekly-jams", methods=["GET"])
 def weekly_jams_get():
-    return render_template('weekly-jams.html', page="weekly-jams")
+    return render_template('weekly-jams.html', page="weekly-jams", subsonic=subsonic_credentials_url_args())
 
 
 @app.route("/weekly-jams", methods=["POST"])
@@ -102,7 +115,7 @@ def weekly_jams_post():
 
     db = SubsonicDatabase(current_app.config["DATABASE_FILE"], current_app.config, quiet=False)
     db.open()
-    r = PeriodicJamsLocal(user_name, .8)
+    r = PeriodicJamsLocal(user_name, .8, quiet=False)
     playlist = r.generate()
     try:
         recordings = playlist.playlists[0].recordings
