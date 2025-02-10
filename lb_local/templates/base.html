@@ -10,10 +10,8 @@
             href="//fonts.googleapis.com/css?family=Roboto:300,300italic,700,700italic"
         />
         <link
-            href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+            href="{{ url_for('static', filename='css/bootstrap.min.css') }}"
             rel="stylesheet"
-            integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
-            crossorigin="anonymous"
         />
         <link
             rel="stylesheet"
@@ -45,17 +43,61 @@
     </head>
     <body onload="init_player({{ subsonic }})">
         <div class="container-md">
-            <div class="row" style="float: right">
-                <div class="col-md-12">
-                    <a href="/"
+            <nav class="navbar navbar-expand-md navbar-color">
+                <div class="container-fluid">
+                    <a class="navbar-brand" href="/"
                         ><img
-                            style="padding-top: 10px"
-                            src="{{ url_for('static', filename='img/lb-local-logo.svg') }}"
                             class="lb-logo"
+                            src="/static/img/lb-local-logo.svg"
                     /></a>
+                    <button
+                        class="navbar-toggler"
+                        type="button"
+                        data-bs-toggle="collapse"
+                        data-bs-target="#navbarSupportedContent"
+                        aria-controls="navbarSupportedContent"
+                        aria-expanded="false"
+                        aria-label="Toggle navigation"
+                    >
+                        <span class="navbar-toggler-icon"></span>
+                    </button>
+                    <div
+                        class="collapse navbar-collapse"
+                        id="navbarSupportedContent"
+                    >
+                        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                            <li class="nav-item">
+                                <a
+                                    class="nav-link {{ 'active aria-current="page"' if page == "lb-radio" }}"
+                                    href="/lb-radio"
+                                    >LB Radio</a
+                                >
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link {{ 'active aria-current="page"' if page == "weekly-jams" }}"
+                                    href="/weekly-jams"
+                                    >Weeky Jams</a
+                                >
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link {{ 'active aria-current="page"' if page == "top-tags" }}"
+                                href="/top-tags"
+                                    >Top Tags</a
+                                >
+                            </li>
+                            <li class="nav-item">
+                                    <a class="nav-link {{ 'active aria-current="page"' if page == "unresolved" }}"
+                                        href="/unresolved"
+                                    >Unresolved Albums</a
+                                >
+                            </li>
+                        </ul>
+                    </div>
                 </div>
+            </nav>
+            <div class="row main-row">
+                <div class="col-md-12">{% block content %} {% endblock %}</div>
             </div>
-            {% block content %} {% endblock %}
         </div>
         <script
             src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"

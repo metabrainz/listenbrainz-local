@@ -1,4 +1,20 @@
-.prompt-examples {
+body {
+    font-size: 1.2em;
+}
+.navbar-color {
+    background-color: #e5e5e5;
+    border-radius: 0px 0px 10px 10px;
+}
+
+.nav-link.active {
+    font-weight: 500;
+}
+
+.main-row {
+    margin: 2em 1em 1em 1em;
+}
+
+}.prompt-examples {
     font-size: 10pt;
 }
 .prompt-example {
@@ -38,7 +54,7 @@
 }
 
 .lb-logo {
-    height: 84px;
+    max-height: 50px;
 }
 
 #spinner {
