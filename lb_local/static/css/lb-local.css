@@ -1,6 +1,11 @@
 body {
     font-size: 1.2em;
 }
+
+.hidden {
+    display: none;
+}
+
 .navbar-color {
     background-color: #e5e5e5;
     border-radius: 0px 0px 10px 10px;
@@ -14,7 +19,7 @@ body {
     margin: 2em 1em 1em 1em;
 }
 
-}.prompt-examples {
+.prompt-examples {
     font-size: 10pt;
 }
 .prompt-example {
@@ -107,12 +112,11 @@ body {
 }
 
 .player {
-    width: 90%;
-    justify-content: space-between;
     border: 1px solid #ccc;
-    background: #fafafa;
-    text-align: center;
-    margin-bottom: 1em;
+    background: #593196;
+    margin: 1.5em 1em 1.5em 1em;
+    width: 70%;
+    justify-content: center;
 }
 
 .player-button {

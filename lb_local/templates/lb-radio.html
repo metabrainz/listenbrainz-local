@@ -32,16 +32,17 @@ content -%}
             </div>
             <div class="col">
                 <button
+                    id="submit-button"
                     class="btn btn-lg btn-primary"
                     type="submit"
                     hx-indicator="#spinner"
-                    hx-on:click="leave_page();"
+                    hx-on:click="clear_page();"
                 >
                     Create
                 </button>
             </div>
         </div>
-        <p class="prompt-examples">
+        <p class="prompt-examples" id="prompt-examples">
             Examples:
             <a class="prompt-example" href="/lb-radio?prompt=Amy Winehouse"
                 >Amy Winehouse</a
@@ -75,10 +76,12 @@ content -%}
 <script type="text/javascript">
     document.addEventListener("DOMContentLoaded", () => {
           init_player("{{ subsonic.host }}", {{ subsonic.port }}, "{{ subsonic.args |safe}}");
+          htmx.logAll();
     });
 
-    function leave_page() {
-        console.log("leave page");
+    function clear_page() {
+        console.log("clear page");
+        htmx.addClass(htmx.find('#prompt-examples'), 'hidden');
         document.getElementById("lb-local-playlist").innerHTML = "";
         stop();
     }

@@ -1,46 +1,47 @@
-<div class="flex-wrap-container player">
-    <button
-        class="btn btn-secondary player-button"
-        id="prev-button"
-        onclick="enter_event(EVENT_PREV);"
-    >
-        <i class="fa-solid fa-backward"></i>
-    </button>
-    <button
-        class="btn btn-secondary player-button"
-        id="stop-button"
-        onclick="enter_event(EVENT_STOP);"
-    >
-        <i class="fa-solid fa-stop"></i>
-    </button>
-    <button
-        class="btn btn-secondary player-button"
-        id="play-button"
-        onclick="enter_event(EVENT_PLAY);"
-    >
-        <i class="fa-solid fa-play"></i>
-    </button>
-    <button
-        class="btn btn-secondary player-button"
-        id="next-button"
-        onclick="enter_event(EVENT_NEXT);"
-    >
-        <i class="fa-solid fa-forward"></i>
-    </button>
-
-    <form
-        hx-ext="json-enc"
-        hx-trigger="submit"
-        hx-post="/playlist/create"
-        id="lb-local-playlist"
-    >
-        <input type="hidden" name="jspf" value="{{ jspf }}"</input>
+<div style="display: flex; justify-content: center;">
+    <div class="flex-wrap-container player">
         <button
             class="btn btn-secondary player-button"
-            type="submit"
-            id="save-playlist"
+            id="prev-button"
+            onclick="enter_event(EVENT_PREV);"
         >
-            <i class="fa-solid fa-download"></i>
+            <i class="fa-solid fa-backward"></i>
         </button>
-    </form>
+        <button
+            class="btn btn-secondary player-button"
+            id="stop-button"
+            onclick="enter_event(EVENT_STOP);"
+        >
+            <i class="fa-solid fa-stop"></i>
+        </button>
+        <button
+            class="btn btn-secondary player-button"
+            id="play-button"
+            onclick="enter_event(EVENT_PLAY);"
+        >
+            <i class="fa-solid fa-play"></i>
+        </button>
+        <button
+            class="btn btn-secondary player-button"
+            id="next-button"
+            onclick="enter_event(EVENT_NEXT);"
+        >
+            <i class="fa-solid fa-forward"></i>
+        </button>
+        <form
+            hx-ext="json-enc"
+            hx-trigger="submit"
+            hx-post="/playlist/create"
+            id="lb-local-playlist"
+        >
+        <input type="hidden" name="jspf" value="{{ jspf }}"</input>
+            <button
+                class="btn btn-secondary player-button"
+                type="submit"
+                id="save-playlist"
+            >
+                <i class="fa-solid fa-download"></i>
+            </button>
+        </form>
+    </div>
 </div>
