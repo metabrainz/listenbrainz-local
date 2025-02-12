@@ -36,6 +36,7 @@ var sound = null;
 var current_state = STATE_STOPPED;
 var current_playing_index = null;
 var subsonic_info = null;
+var interval_id = null;
 
 function init_player(host, port, args) {
     console.log(args);
@@ -95,6 +96,7 @@ function play() {
         "recording" + current_playing_index,
     ).value;
 
+    set_playing_now_row(current_playing_index);
     play_track(file_id);
     console.log("play done");
 }
@@ -110,10 +112,7 @@ function stop() {
     console.log("stop");
     clear_playing_now_row(current_playing_index);
     current_playing_index = null;
-    if (sound != null) {
-        sound.unload();
-        sound = null;
-    }
+    stop_playing();
 }
 
 function prev() {
@@ -133,10 +132,7 @@ function prev() {
     ).value;
     console.log("file id" + file_id);
     if (file_id != null) {
-        if (sound != null) {
-            sound.unload();
-            sound = null;
-        }
+        stop_playing();
         enter_event(EVENT_PLAY);
     } else {
         enter_event(EVENT_STOP);
@@ -156,10 +152,7 @@ function next() {
     ).value;
 
     if (file_id != null) {
-        if (sound != null) {
-            sound.unload();
-            sound = null;
-        }
+        stop_playing();
         enter_event(EVENT_PLAY);
     } else {
         enter_event(EVENT_STOP);
@@ -178,10 +171,7 @@ function jump(index) {
     ).value;
     console.log("file id" + file_id);
     if (file_id != null) {
-        if (sound != null) {
-            sound.unload();
-            sound = null;
-        }
+        stop_playing();
         enter_event(EVENT_PLAY);
     } else {
         enter_event(EVENT_STOP);
@@ -201,18 +191,33 @@ function play_track(file_id) {
         "&" +
         subsonic_info.args;
     console.log(url);
-    if (sound != null) {
-        sound.unload();
-        sound = null;
-    }
+    stop_playing();
     sound = new Howl({
         src: [url],
         html5: true,
         onend: on_end,
     });
     sound.play();
-    set_playing_now_row(current_playing_index);
     console.log("play_track done");
+    interval_id = setInterval(timer_update, 100);
+}
+
+function timer_update() {
+    if (sound != null) {
+        pos = (sound.seek() * 100) / sound.duration();
+        console.log(pos);
+        pbar = document.getElementById("progress-bar");
+        pbar.setAttribute("aria-valuenow", pos.toString());
+        pbar.setAttribute("style", "width: " + pos + "%");
+    }
+}
+function stop_playing() {
+    if (sound != null) {
+        sound.unload();
+        sound = null;
+    }
+    clearInterval(interval_id);
+    interval_id = null;
 }
 
 function on_end() {

@@ -1,4 +1,4 @@
-<div style="display: flex; justify-content: center;">
+<div style="display: flex; justify-content: center">
     <div class="flex-wrap-container player">
         <button
             class="btn btn-secondary player-button"
@@ -34,7 +34,7 @@
             hx-post="/playlist/create"
             id="lb-local-playlist"
         >
-        <input type="hidden" name="jspf" value="{{ jspf }}"</input>
+            <input type="hidden" name="jspf" value="{{ jspf }}" />
             <button
                 class="btn btn-secondary player-button"
                 type="submit"
@@ -43,5 +43,15 @@
                 <i class="fa-solid fa-download"></i>
             </button>
         </form>
+        <div class="progress" id="progress-bar-div">
+            <div
+                id="progress-bar"
+                class="progress-bar"
+                role="progressbar"
+                aria-valuenow="50"
+                aria-valuemin="0"
+                aria-valuemax="100"
+            ></div>
+        </div>
     </div>
 </div>

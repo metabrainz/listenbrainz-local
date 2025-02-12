@@ -123,3 +123,9 @@ body {
     margin: 0.5em;
     font-size: 20px !important;
 }
+
+#progress-bar-div {
+    width: 100%;
+    margin: 10px;
+    border: 2px dotted #ccc;
+}
