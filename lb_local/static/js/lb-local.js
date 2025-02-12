@@ -108,7 +108,7 @@ function pause() {
 }
 function stop() {
     console.log("stop");
-    toggle_playing_now_row(current_playing_index);
+    clear_playing_now_row(current_playing_index);
     current_playing_index = null;
     if (sound != null) {
         sound.unload();
@@ -121,7 +121,7 @@ function prev() {
     if (current_playing_index == null) {
         return;
     }
-    toggle_playing_now_row(current_playing_index);
+    clear_playing_now_row(current_playing_index);
     if (current_playing_index == 0) {
         enter_event(EVENT_STOP);
         return;
@@ -148,7 +148,7 @@ function next() {
     if (current_playing_index == null) {
         return;
     }
-    toggle_playing_now_row(current_playing_index);
+    clear_playing_now_row(current_playing_index);
 
     current_playing_index += 1;
     file_id = document.getElementById(
@@ -169,7 +169,7 @@ function next() {
 function jump(index) {
     console.log("jump");
     if (current_playing_index) {
-        toggle_playing_now_row(current_playing_index);
+        clear_playing_now_row(current_playing_index);
     }
 
     current_playing_index = index;
@@ -211,7 +211,7 @@ function play_track(file_id) {
         onend: on_end,
     });
     sound.play();
-    toggle_playing_now_row(current_playing_index);
+    set_playing_now_row(current_playing_index);
     console.log("play_track done");
 }
 
@@ -219,9 +219,16 @@ function on_end() {
     enter_event(EVENT_NEXT);
 }
 
-function toggle_playing_now_row(index) {
+function set_playing_now_row(index) {
     var element = document.getElementById("row" + index);
     if (element != null) {
-        element.classList.toggle("table-active");
+        element.classList.add("table-active");
+    }
+}
+
+function clear_playing_now_row(index) {
+    var element = document.getElementById("row" + index);
+    if (element != null) {
+        element.classList.remove("table-active");
     }
 }

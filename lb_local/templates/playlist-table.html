@@ -8,7 +8,8 @@
     </thead>
     <tbody>
     {% for rec in recordings %}
-        <tr id="row{{ loop.index0 }}">
+        <tr id="row{{ loop.index0 }}"
+            hx-on:click="enter_event(EVENT_JUMP, {{ loop.index0 }})">
             <input type="hidden" value="{{ rec.musicbrainz["subsonic_id"]}}" id="recording{{ loop.index0 }}"/>
             <td>
                 <a onclick="enter_event(EVENT_JUMP, {{ loop.index0 }})">
