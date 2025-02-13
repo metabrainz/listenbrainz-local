@@ -4,7 +4,7 @@ import uuid
 
 
 from flask import Flask, render_template, request, current_app, redirect, session, url_for
-from flask_cors import CORS, cross_origin
+from flask_cors import CORS
 from werkzeug.exceptions import BadRequest
 from authlib.integrations.flask_client import OAuth
 
@@ -65,8 +65,12 @@ def login_redirect():
 @app.route('/auth')
 def auth():
     token = oauth.musicbrainz.authorize_access_token()
+    r = oauth.musicbrainz.get('https://musicbrainz.org/oauth2/userinfo')
+    userinfo = r.json()
     ## Save the token in the DB, not the user session
-    session['user'] = token['access_token']
+    session['user'] = { "user_name": userinfo["sub"],
+                        "user_id": userinfo["metabrainz_user_id"],
+                        "token": token['access_token'] }
     return redirect('/')
 
 @app.route('/logout')
