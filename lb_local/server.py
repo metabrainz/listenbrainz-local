@@ -2,7 +2,6 @@ import hashlib
 import json
 import uuid
 
-
 from flask import Flask, render_template, request, current_app, redirect, session, url_for
 from flask_cors import CORS
 from werkzeug.exceptions import BadRequest
@@ -24,20 +23,17 @@ app = Flask(__name__, static_url_path=STATIC_PATH, static_folder=STATIC_FOLDER, 
 app.config.from_object('config')
 CORS(app, origins=[f"{config.SUBSONIC_HOST}:{config.SUBSONIC_PORT}"])
 oauth = OAuth(app)
-oauth.register(
-    name='musicbrainz',
-    authorize_url="https://musicbrainz.org/oauth2/authorize",
-    redirect_uri="http://127.0.0.1:5000/auth",
-    access_token_url="https://musicbrainz.org/oauth2/token",
-    client_kwargs={
-        'scope': 'profile'
-    }
-)
+oauth.register(name='musicbrainz',
+               authorize_url="https://musicbrainz.org/oauth2/authorize",
+               redirect_uri="http://127.0.0.1:5000/auth",
+               access_token_url="https://musicbrainz.org/oauth2/token",
+               client_kwargs={'scope': 'profile'})
 
 # TODO:
 # - Fix parsing of artist mbids from jspf in troi
 # - Pass hints and error messages from content resolver
 # - Resolve playlists
+
 
 def subsonic_credentials_url_args():
     """Return the subsonic API request arguments that must be appended to a subsonic call."""
@@ -47,7 +43,12 @@ def subsonic_credentials_url_args():
     h.update(bytes(config.SUBSONIC_PASSWORD, "utf-8"))
     h.update(bytes(salt, "utf-8"))
     token = h.hexdigest()
-    return { "args":f"u={config.SUBSONIC_USER}&s={salt}&t={token}&v=1.14.0&c=lb-local", "host":config.SUBSONIC_HOST, "port":config.SUBSONIC_PORT }
+    return {
+        "args": f"u={config.SUBSONIC_USER}&s={salt}&t={token}&v=1.14.0&c=lb-local",
+        "host": config.SUBSONIC_HOST,
+        "port": config.SUBSONIC_PORT
+    }
+
 
 @app.route("/")
 def index():
@@ -57,10 +58,12 @@ def index():
     else:
         return render_template('index.html')
 
+
 @app.route("/login")
 def login_redirect():
     redirect_uri = url_for('auth', _external=True)
     return oauth.musicbrainz.authorize_redirect(redirect_uri)
+
 
 @app.route('/auth')
 def auth():
@@ -68,15 +71,15 @@ def auth():
     r = oauth.musicbrainz.get('https://musicbrainz.org/oauth2/userinfo')
     userinfo = r.json()
     ## Save the token in the DB, not the user session
-    session['user'] = { "user_name": userinfo["sub"],
-                        "user_id": userinfo["metabrainz_user_id"],
-                        "token": token['access_token'] }
+    session['user'] = {"user_name": userinfo["sub"], "user_id": userinfo["metabrainz_user_id"], "token": token['access_token']}
     return redirect('/')
+
 
 @app.route('/logout')
 def logout():
     session.pop('user', None)
     return redirect('/')
+
 
 @app.route("/lb-radio", methods=["GET"])
 def lb_radio_get():
@@ -109,8 +112,7 @@ def lb_radio_post():
         db.metadata_sanity_check(include_subsonic=True)
         return
 
-    return render_template('playlist-table.html', recordings=recordings,
-                           jspf=json.dumps(playlist.get_jspf()))
+    return render_template('components/playlist-table.html', recordings=recordings, jspf=json.dumps(playlist.get_jspf()))
 
 
 class Config:
@@ -156,7 +158,7 @@ def weekly_jams_post():
     except (IndexError, KeyError, AttributeError):
         return
 
-    return render_template('playlist-table.html', recordings=recordings, jspf=json.dumps(playlist.get_jspf()))
+    return render_template('components/playlist-table.html', recordings=recordings, jspf=json.dumps(playlist.get_jspf()))
 
 
 @app.route("/top-tags", methods=["GET"])
@@ -173,6 +175,4 @@ def unresolved():
     db = Database(current_app.config["DATABASE_FILE"], quiet=False)
     db.open()
     urt = UnresolvedRecordingTracker()
-    return render_template("unresolved.html",
-                           unresolved=urt.get_releases(),
-                           page="unresolved")
+    return render_template("unresolved.html", unresolved=urt.get_releases(), page="unresolved")
