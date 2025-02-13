@@ -112,7 +112,7 @@ def lb_radio_post():
         db.metadata_sanity_check(include_subsonic=True)
         return
 
-    return render_template('components/playlist-table.html', recordings=recordings, jspf=json.dumps(playlist.get_jspf()))
+    return render_template('component/playlist-table.html', recordings=recordings, jspf=json.dumps(playlist.get_jspf()))
 
 
 class Config:
@@ -158,7 +158,7 @@ def weekly_jams_post():
     except (IndexError, KeyError, AttributeError):
         return
 
-    return render_template('components/playlist-table.html', recordings=recordings, jspf=json.dumps(playlist.get_jspf()))
+    return render_template('component/playlist-table.html', recordings=recordings, jspf=json.dumps(playlist.get_jspf()))
 
 
 @app.route("/top-tags", methods=["GET"])
