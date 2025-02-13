@@ -21,7 +21,11 @@
             src="https://kit.fontawesome.com/20616c5125.js"
             crossorigin="anonymous"
         ></script>
-        <script src="https://unpkg.com/htmx.org@2.0.4" integrity="sha384-HGfztofotfshcF7+8n44JQL2oJmowVChPTg48S+jvZoztPfvwD79OC/LTtG6dMp+" crossorigin="anonymous"></script>
+        <script
+            src="https://unpkg.com/htmx.org@2.0.4"
+            integrity="sha384-HGfztofotfshcF7+8n44JQL2oJmowVChPTg48S+jvZoztPfvwD79OC/LTtG6dMp+"
+            crossorigin="anonymous"
+        ></script>
         <script src="https://unpkg.com/htmx.org/dist/ext/json-enc.js"></script>
         <script
             src="https://cdnjs.cloudflare.com/ajax/libs/howler/2.2.4/howler.min.js"
@@ -38,62 +42,15 @@
         {% endblock %}
     </head>
     <body>
-        <div class="container-md">
-            <nav class="navbar navbar-expand-md navbar-color">
-                <div class="container-fluid">
-                    <a class="navbar-brand" href="/"
-                        ><img
-                            class="lb-logo"
-                            src="/static/img/lb-local-logo.svg"
-                    /></a>
-                    <button
-                        class="navbar-toggler"
-                        type="button"
-                        data-bs-toggle="collapse"
-                        data-bs-target="#navbarSupportedContent"
-                        aria-controls="navbarSupportedContent"
-                        aria-expanded="false"
-                        aria-label="Toggle navigation"
-                    >
-                        <span class="navbar-toggler-icon"></span>
-                    </button>
-                    <div
-                        class="collapse navbar-collapse"
-                        id="navbarSupportedContent"
-                    >
-                        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                            <li class="nav-item">
-                                <a
-                                    class="nav-link {{ 'active aria-current="page"' if page == "lb-radio" }}"
-                                    href="/lb-radio"
-                                    >LB Radio</a
-                                >
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link {{ 'active aria-current="page"' if page == "weekly-jams" }}"
-                                    href="/weekly-jams"
-                                    >Weeky Jams</a
-                                >
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link {{ 'active aria-current="page"' if page == "top-tags" }}"
-                                href="/top-tags"
-                                    >Top Tags</a
-                                >
-                            </li>
-                            <li class="nav-item">
-                                    <a class="nav-link {{ 'active aria-current="page"' if page == "unresolved" }}"
-                                        href="/unresolved"
-                                    >Unresolved Albums</a
-                                >
-                            </li>
-                        </ul>
-                    </div>
-                </div>
-            </nav>
+        <div class="container-md vh-100">
+            {% if no_navbar %} {% else %} {% include 'navbar.html' %}
             <div class="row main-row">
-                <div class="col-md-12">{% block content %} {% endblock %}</div>
+                <div class="col-md-12">
+                    {% endif %} {% block content %} {% endblock %} {% if
+                    no_navbar %} {% else %}
+                </div>
             </div>
+            {% endif %}
         </div>
         <script
             src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"

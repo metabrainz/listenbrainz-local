@@ -133,3 +133,10 @@ body {
     height: 20px;
     border-radius: 5px;
 }
+
+.login-div {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+}

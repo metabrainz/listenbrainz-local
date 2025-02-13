@@ -3,9 +3,10 @@ import json
 import uuid
 
 
-from flask import Flask, render_template, request, current_app
-from flask_cors import CORS
+from flask import Flask, render_template, request, current_app, redirect, session, url_for
+from flask_cors import CORS, cross_origin
 from werkzeug.exceptions import BadRequest
+from authlib.integrations.flask_client import OAuth
 
 from troi.playlist import _deserialize_from_jspf, PlaylistElement
 from troi.content_resolver.subsonic import SubsonicDatabase, Database
@@ -20,9 +21,18 @@ STATIC_FOLDER = "static"
 TEMPLATE_FOLDER = "templates"
 
 app = Flask(__name__, static_url_path=STATIC_PATH, static_folder=STATIC_FOLDER, template_folder=TEMPLATE_FOLDER)
-CORS(app, origins=[f"{config.SUBSONIC_HOST}:{config.SUBSONIC_PORT}"])
 app.config.from_object('config')
-
+CORS(app, origins=[f"{config.SUBSONIC_HOST}:{config.SUBSONIC_PORT}"])
+oauth = OAuth(app)
+oauth.register(
+    name='musicbrainz',
+    authorize_url="https://musicbrainz.org/oauth2/authorize",
+    redirect_uri="http://127.0.0.1:5000/auth",
+    access_token_url="https://musicbrainz.org/oauth2/token",
+    client_kwargs={
+        'scope': 'profile'
+    }
+)
 
 # TODO:
 # - Fix parsing of artist mbids from jspf in troi
@@ -41,8 +51,28 @@ def subsonic_credentials_url_args():
 
 @app.route("/")
 def index():
-    return render_template('index.html')
+    user = session.get('user')
+    if user is None:
+        return render_template('login.html', no_navbar=True)
+    else:
+        return render_template('index.html')
 
+@app.route("/login")
+def login_redirect():
+    redirect_uri = url_for('auth', _external=True)
+    return oauth.musicbrainz.authorize_redirect(redirect_uri)
+
+@app.route('/auth')
+def auth():
+    token = oauth.musicbrainz.authorize_access_token()
+    ## Save the token in the DB, not the user session
+    session['user'] = token['access_token']
+    return redirect('/')
+
+@app.route('/logout')
+def logout():
+    session.pop('user', None)
+    return redirect('/')
 
 @app.route("/lb-radio", methods=["GET"])
 def lb_radio_get():

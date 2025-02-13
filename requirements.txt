@@ -1,4 +1,5 @@
 flask
 icecream
-troi[nmslib]@git+https://github.com/metabrainz/troi-recommendation-playground.git@main
+troi[nmslib]@git+https://github.com/metabrainz/troi-recommendation-playground.git@fix-unresolved-releases
 flask-cors
+authlib
