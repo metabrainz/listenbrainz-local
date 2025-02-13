@@ -38,15 +38,24 @@ var current_playing_index = null;
 var subsonic_info = null;
 var interval_id = null;
 
+function on_end() {
+    enter_event(EVENT_NEXT);
+}
+
+function on_play() {
+    update_button_states();
+}
+
 function init_player(host, port, args) {
     subsonic_info = { host: host, port: port, args: args };
 }
+
 function enter_event(event, arg = null) {
     for (let trans of transition_table) {
         if (current_state == trans[0] && event == trans[1]) {
             current_state = trans[2];
             if (trans[2] == STATE_PLAYING) {
-                play();
+                play_pause();
                 return;
             }
             if (trans[2] == STATE_PAUSED) {
@@ -85,17 +94,31 @@ function update_button_states() {
 
     if (!document.getElementById("prev-button"))
         return;
-    console.log("num rows: " + num_tracks_loaded);
+
     document.getElementById("prev-button").disabled = !(current_playing_index != null && current_playing_index > 0);
     document.getElementById("stop-button").disabled = !(sound != null && current_playing_index != null);
-    document.getElementById("play-button").disabled = !(sound == null && num_tracks_loaded > 0);
+    document.getElementById("play-button").disabled = num_tracks_loaded == 0;
     document.getElementById("next-button").disabled = !(current_playing_index != null && current_playing_index < num_tracks_loaded - 1);
     document.getElementById("save-playlist").disabled = num_tracks_loaded == 0;
+
+    play_pause_button = document.getElementById("play-pause-icon");
+    if (current_playing_index != null && sound != null && sound.playing()) {
+        play_pause_button.classList.add("fa-pause");
+        play_pause_button.classList.remove("fa-play");
+    }
+    else {
+        play_pause_button.classList.remove("fa-pause");
+        play_pause_button.classList.add("fa-play");
+    }
 }
 
-function play() {
+function play_pause() {
     if (sound != null) {
-        sound.play();
+        if (sound.playing())
+            pause();
+        else
+            sound.play();
+        update_button_states();
         return;
     }
     if (current_playing_index == null) {
@@ -122,6 +145,7 @@ function stop() {
     current_playing_index = null;
     stop_playing();
     update_button_states();
+    update_progress_bar();
 }
 
 function prev() {
@@ -198,15 +222,24 @@ function play_track(file_id) {
         src: [url],
         html5: true,
         onend: on_end,
+        onplay: on_play,
     });
     sound.play();
     interval_id = setInterval(timer_update, 100);
 }
 
 function timer_update() {
+    update_progress_bar();
+}
+
+function update_progress_bar() {
     if (sound != null) {
         pos = (sound.seek() * 100) / sound.duration();
-        pbar = document.getElementById("progress-bar");
+    } else {
+        pos = 0;
+    }
+    pbar = document.getElementById("progress-bar");
+    if (pbar) {
         pbar.setAttribute("aria-valuenow", pos.toString());
         pbar.setAttribute("style", "width: " + pos + "%");
     }
@@ -231,10 +264,6 @@ function stop_playing() {
     }
     clearInterval(interval_id);
     interval_id = null;
-}
-
-function on_end() {
-    enter_event(EVENT_NEXT);
 }
 
 function set_playing_now_row(index) {
