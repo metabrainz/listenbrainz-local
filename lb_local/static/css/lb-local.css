@@ -117,11 +117,13 @@ body {
     margin: 1.5em 1em 1.5em 1em;
     width: 70%;
     justify-content: center;
+    border-radius: 20px;
 }
 
 .player-button {
     margin: 0.5em;
     font-size: 20px !important;
+    border-radius: 10px;
 }
 
 #progress-bar-div {
@@ -129,4 +131,5 @@ body {
     margin: 12px;
     border: 2px solid #ccc;
     height: 20px;
+    border-radius: 5px;
 }

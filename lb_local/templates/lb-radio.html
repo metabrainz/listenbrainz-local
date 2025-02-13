@@ -70,17 +70,18 @@ content -%}
     </div>
 </form>
 
-<div id="lb-local-playlist"></div>
+<div id="lb-local-playlist"
+     hx-on::after-swap="update_button_states();"
+    ></div>
 
 {% endblock%} {% block scripts %}
 <script type="text/javascript">
     document.addEventListener("DOMContentLoaded", () => {
           init_player("{{ subsonic.host }}", {{ subsonic.port }}, "{{ subsonic.args |safe}}");
-          htmx.logAll();
+          //htmx.logAll();
     });
 
     function clear_page() {
-        console.log("clear page");
         htmx.addClass(htmx.find('#prompt-examples'), 'hidden');
         document.getElementById("lb-local-playlist").innerHTML = "";
         stop();

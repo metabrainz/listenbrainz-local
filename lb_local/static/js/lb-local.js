@@ -76,6 +76,23 @@ function enter_event(event, arg = null) {
     );
 }
 
+function update_button_states() {
+    playlist = document.getElementById("playlist-table");
+    if (playlist) 
+        num_tracks_loaded = playlist.rows.length - 1; // skip header row
+    else
+        num_tracks_loaded = 0;
+
+    if (!document.getElementById("prev-button"))
+        return;
+    console.log("num rows: " + num_tracks_loaded);
+    document.getElementById("prev-button").disabled = !(current_playing_index != null && current_playing_index > 0);
+    document.getElementById("stop-button").disabled = !(sound != null && current_playing_index != null);
+    document.getElementById("play-button").disabled = !(sound == null && num_tracks_loaded > 0);
+    document.getElementById("next-button").disabled = !(current_playing_index != null && current_playing_index < num_tracks_loaded - 1);
+    document.getElementById("save-playlist").disabled = num_tracks_loaded == 0;
+}
+
 function play() {
     if (sound != null) {
         sound.play();
@@ -90,11 +107,13 @@ function play() {
 
     set_playing_now_row(current_playing_index);
     play_track(file_id);
+    update_button_states();
 }
 
 function pause() {
     if (sound != null) {
         sound.pause();
+        update_button_states();
         return;
     }
 }
@@ -102,6 +121,7 @@ function stop() {
     clear_playing_now_row(current_playing_index);
     current_playing_index = null;
     stop_playing();
+    update_button_states();
 }
 
 function prev() {
