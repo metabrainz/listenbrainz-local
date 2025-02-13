@@ -21,6 +21,7 @@ content -%}
                     type="text"
                     name="prompt"
                     value="{{ prompt }}"
+                    hx-on:input="update_buttons();"
                 />
             </div>
             <div class="col">
@@ -33,7 +34,7 @@ content -%}
             <div class="col">
                 <button
                     id="submit-button"
-                    class="btn btn-lg btn-primary"
+                    class="btn btn-lg btn-primary disabled"
                     type="submit"
                     hx-indicator="#spinner"
                     hx-on:click="clear_page();"
@@ -70,21 +71,29 @@ content -%}
     </div>
 </form>
 
-<div id="lb-local-playlist"
-     hx-on::after-swap="update_button_states();"
-    ></div>
+<div id="lb-local-playlist" hx-on::after-swap="update_button_states();"></div>
 
 {% endblock%} {% block scripts %}
 <script type="text/javascript">
     document.addEventListener("DOMContentLoaded", () => {
           init_player("{{ subsonic.host }}", {{ subsonic.port }}, "{{ subsonic.args |safe}}");
           //htmx.logAll();
+          update_buttons();
     });
 
     function clear_page() {
         htmx.addClass(htmx.find('#prompt-examples'), 'hidden');
         document.getElementById("lb-local-playlist").innerHTML = "";
         stop();
+    }
+
+    function update_buttons() {
+        input =  document.getElementById("prompt");
+        submit =  document.getElementById("submit-button");
+        if (input.value.length > 0)
+            submit.classList.remove("disabled");
+        else
+            submit.classList.add("disabled");
     }
 </script>
 {% endblock %}
