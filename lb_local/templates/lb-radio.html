@@ -3,7 +3,7 @@ content -%}
 
 <h2 style="margin-bottom: 0.5em">ListenBrainz Local Radio</h2>
 
-<form hx-post="/lb-radio" hx-target="#lb-local-playlist" hx-swap="outerHTML">
+<form hx-post="/lb-radio" hx-target="#lb-local-playlist" hx-swap="innerHTML">
     <fieldset>
         <div class="col-auto">
             <label for="prompt" class="form-label">
@@ -70,7 +70,7 @@ content -%}
     </div>
 </form>
 
-<form id="lb-local-playlist"></form>
+<div id="lb-local-playlist"></div>
 
 {% endblock%} {% block scripts %}
 <script type="text/javascript">

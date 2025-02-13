@@ -83,8 +83,7 @@ function play() {
     }
     if (current_playing_index == null) {
         current_playing_index = 0;
-    }
-
+    } else clear_playing_now_row(current_playing_index);
     file_id = document.getElementById(
         "recording" + current_playing_index,
     ).value;
