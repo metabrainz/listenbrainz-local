@@ -2,7 +2,7 @@
 {%- block title -%}home{% endblock %}
 {%- block content -%}
 
-<h2>ListenBrainz Local Weekly Jams</h2>
+<h2>Weekly Jams</h2>
 
 <p>
     Generate a playlist from a users weekly recommendations. You can generate a playlist as
@@ -11,19 +11,20 @@
 
 <form hx-post="/weekly-jams"
       hx-target="#lb-local-playlist"
-      hx-swap="outerHTML"
+      hx-swap="innerHTML"
   <fieldset>
     <label for="prompt">User</label>
     <input type="text"
            name="user_name"
+           class="form-control-lg"
            placeholder="joe_user"
            style="width: 40%"
-           value="rob">
-    <input class="button-primary"
+           value="rob"/>
+    <button class="btn btn-lg btn-primary"
            type="submit"
-           value="Generate"
            hx-indicator="#spinner"
-           hx-on:click="document.getElementById('lb-local-playlist').innerHTML = ''">
+           hx-on:click="clear_page();">
+        Generate</button>
   </fieldset>
   <div style="text-align: center; width: 100%">
     <img id="spinner"
@@ -33,8 +34,9 @@
   </div>
 </form>
 
-<form id="lb-local-playlist">
-</form>
+<div id="lb-local-playlist"
+     hx-on::after-swap="update_button_states();"
+    ></div>
 
 {% endblock%}
 
@@ -42,10 +44,11 @@
 <script type="text/javascript">
     document.addEventListener("DOMContentLoaded", () => {
           init_player("{{ subsonic.host }}", {{ subsonic.port }}, "{{ subsonic.args |safe}}");
+          //htmx.logAll();
     });
 
-    function leave_page() {
-        console.log("leave page");
+    function clear_page() {
+        htmx.addClass(htmx.find('#prompt-examples'), 'hidden');
         document.getElementById("lb-local-playlist").innerHTML = "";
         stop();
     }
