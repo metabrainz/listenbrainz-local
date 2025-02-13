@@ -126,6 +126,7 @@ body {
 
 #progress-bar-div {
     width: 100%;
-    margin: 10px;
-    border: 2px dotted #ccc;
+    margin: 12px;
+    border: 2px solid #ccc;
+    height: 20px;
 }

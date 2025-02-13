@@ -39,19 +39,14 @@ var subsonic_info = null;
 var interval_id = null;
 
 function init_player(host, port, args) {
-    console.log(args);
     subsonic_info = { host: host, port: port, args: args };
 }
 function enter_event(event, arg = null) {
-    console.log("enter event: " + event);
     for (let trans of transition_table) {
-        //console.log(trans[0], trans[1], trans[2]);
         if (current_state == trans[0] && event == trans[1]) {
-            console.log(trans[0], trans[1], trans[2]);
             current_state = trans[2];
             if (trans[2] == STATE_PLAYING) {
                 play();
-                console.log("play event done");
                 return;
             }
             if (trans[2] == STATE_PAUSED) {
@@ -82,9 +77,7 @@ function enter_event(event, arg = null) {
 }
 
 function play() {
-    console.log("play");
     if (sound != null) {
-        console.log("play/resume");
         sound.play();
         return;
     }
@@ -98,25 +91,21 @@ function play() {
 
     set_playing_now_row(current_playing_index);
     play_track(file_id);
-    console.log("play done");
 }
 
 function pause() {
-    console.log("pause");
     if (sound != null) {
         sound.pause();
         return;
     }
 }
 function stop() {
-    console.log("stop");
     clear_playing_now_row(current_playing_index);
     current_playing_index = null;
     stop_playing();
 }
 
 function prev() {
-    console.log("prev");
     if (current_playing_index == null) {
         return;
     }
@@ -130,7 +119,6 @@ function prev() {
     file_id = document.getElementById(
         "recording" + current_playing_index,
     ).value;
-    console.log("file id" + file_id);
     if (file_id != null) {
         stop_playing();
         enter_event(EVENT_PLAY);
@@ -140,7 +128,6 @@ function prev() {
 }
 
 function next() {
-    console.log("next");
     if (current_playing_index == null) {
         return;
     }
@@ -160,7 +147,6 @@ function next() {
 }
 
 function jump(index) {
-    console.log("jump");
     if (current_playing_index) {
         clear_playing_now_row(current_playing_index);
     }
@@ -169,7 +155,6 @@ function jump(index) {
     file_id = document.getElementById(
         "recording" + current_playing_index,
     ).value;
-    console.log("file id" + file_id);
     if (file_id != null) {
         stop_playing();
         enter_event(EVENT_PLAY);
@@ -179,7 +164,6 @@ function jump(index) {
 }
 
 function play_track(file_id) {
-    console.log("play_track");
     //For testing with only short tracks...
     //file_id = "cf22184021802f7ebbf0e461d11fc42d";
     url =
@@ -190,7 +174,6 @@ function play_track(file_id) {
         file_id +
         "&" +
         subsonic_info.args;
-    console.log(url);
     stop_playing();
     sound = new Howl({
         src: [url],
@@ -198,19 +181,30 @@ function play_track(file_id) {
         onend: on_end,
     });
     sound.play();
-    console.log("play_track done");
     interval_id = setInterval(timer_update, 100);
 }
 
 function timer_update() {
     if (sound != null) {
         pos = (sound.seek() * 100) / sound.duration();
-        console.log(pos);
         pbar = document.getElementById("progress-bar");
         pbar.setAttribute("aria-valuenow", pos.toString());
         pbar.setAttribute("style", "width: " + pos + "%");
     }
 }
+
+function seek(ev) {
+    if (sound == null) return;
+
+    pbar = document.getElementById("progress-bar-div");
+    brect = pbar.getBoundingClientRect();
+    width = brect.right - brect.left;
+    x = ev.x - brect.left;
+    percent = x / width;
+    pos = percent * sound.duration();
+    sound.seek(pos);
+}
+
 function stop_playing() {
     if (sound != null) {
         sound.unload();

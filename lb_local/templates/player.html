@@ -43,7 +43,7 @@
                 <i class="fa-solid fa-download"></i>
             </button>
         </form>
-        <div class="progress" id="progress-bar-div">
+        <div class="progress" hx-on:click="seek(event);" id="progress-bar-div">
             <div
                 id="progress-bar"
                 class="progress-bar"
