@@ -1,39 +1,53 @@
 import hashlib
 import json
+import os
 import uuid
 
 from flask import Flask, render_template, request, current_app, redirect, session, url_for
 from flask_cors import CORS
 from werkzeug.exceptions import BadRequest
 from authlib.integrations.flask_client import OAuth
-
+from authlib.integrations.flask_oauth2 import ResourceProtector
 from troi.playlist import _deserialize_from_jspf, PlaylistElement
 from troi.content_resolver.subsonic import SubsonicDatabase, Database
 from troi.content_resolver.lb_radio import ListenBrainzRadioLocal
 from troi.local.periodic_jams_local import PeriodicJamsLocal
 from troi.content_resolver.top_tags import TopTags
 from troi.content_resolver.unresolved_recording import UnresolvedRecordingTracker
+
+from lb_local.database import Database
 import config
 
 STATIC_PATH = "/static"
 STATIC_FOLDER = "static"
 TEMPLATE_FOLDER = "templates"
 
-app = Flask(__name__, static_url_path=STATIC_PATH, static_folder=STATIC_FOLDER, template_folder=TEMPLATE_FOLDER)
-app.config.from_object('config')
-CORS(app, origins=[f"{config.SUBSONIC_HOST}:{config.SUBSONIC_PORT}"])
-oauth = OAuth(app)
-oauth.register(name='musicbrainz',
-               authorize_url="https://musicbrainz.org/oauth2/authorize",
-               redirect_uri="http://127.0.0.1:5000/auth",
-               access_token_url="https://musicbrainz.org/oauth2/token",
-               client_kwargs={'scope': 'profile'})
+#require_oauth = ResourceProtector()
 
 # TODO:
-# - Fix parsing of artist mbids from jspf in troi
 # - Pass hints and error messages from content resolver
 # - Resolve playlists
 
+def open_db():
+    exists = os.path.exists(config.USER_DATABASE_FILE)
+    db = Database(config.USER_DATABASE_FILE, False)
+    if not exists:
+        db.create()
+
+def create_app():
+    app = Flask(__name__, static_url_path=STATIC_PATH, static_folder=STATIC_FOLDER, template_folder=TEMPLATE_FOLDER)
+    app.config.from_object('config')
+    CORS(app, origins=[f"{config.SUBSONIC_HOST}:{config.SUBSONIC_PORT}"])
+    oauth = OAuth(app)
+    oauth.register(name='musicbrainz',
+                   authorize_url="https://musicbrainz.org/oauth2/authorize",
+                   redirect_uri=config.DOMAIN + "/auth",
+                   access_token_url="https://musicbrainz.org/oauth2/token",
+                   client_kwargs={'scope': 'profile'})
+    open_db()
+    return app
+    
+app = create_app()
 
 def subsonic_credentials_url_args():
     """Return the subsonic API request arguments that must be appended to a subsonic call."""
@@ -48,7 +62,6 @@ def subsonic_credentials_url_args():
         "host": config.SUBSONIC_HOST,
         "port": config.SUBSONIC_PORT
     }
-
 
 @app.route("/")
 def index():
@@ -68,10 +81,16 @@ def login_redirect():
 @app.route('/auth')
 def auth():
     token = oauth.musicbrainz.authorize_access_token()
+    from icecream import ic
+    ic(token)
+    
     r = oauth.musicbrainz.get('https://musicbrainz.org/oauth2/userinfo')
     userinfo = r.json()
     ## Save the token in the DB, not the user session
     session['user'] = {"user_name": userinfo["sub"], "user_id": userinfo["metabrainz_user_id"], "token": token['access_token']}
+
+
+
     return redirect('/')
 
 
@@ -82,6 +101,7 @@ def logout():
 
 
 @app.route("/lb-radio", methods=["GET"])
+#@require_oauth()
 def lb_radio_get():
 
     prompt = request.args.get("prompt", "")
