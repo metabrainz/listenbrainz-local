@@ -1,6 +1,6 @@
 import datetime
 from peewee import *
-from lb_local.model.database import db
+from lb_local.model.database import user_db
 
 
 class User(Model):
@@ -9,7 +9,7 @@ class User(Model):
     """
 
     class Meta:
-        database = db
+        database = user_db
         table_name = "user"
 
     id = IntegerField(null=False, unique=True)

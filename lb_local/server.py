@@ -1,4 +1,5 @@
 import hashlib
+from functools import wraps
 import json
 import os
 import uuid
@@ -14,8 +15,10 @@ from troi.content_resolver.lb_radio import ListenBrainzRadioLocal
 from troi.local.periodic_jams_local import PeriodicJamsLocal
 from troi.content_resolver.top_tags import TopTags
 from troi.content_resolver.unresolved_recording import UnresolvedRecordingTracker
+import peewee
 
-from lb_local.database import Database
+from lb_local.database import UserDatabase
+from lb_local.model.user import User
 import config
 
 STATIC_PATH = "/static"
@@ -28,26 +31,44 @@ TEMPLATE_FOLDER = "templates"
 # - Pass hints and error messages from content resolver
 # - Resolve playlists
 
-def open_db():
-    exists = os.path.exists(config.USER_DATABASE_FILE)
-    db = Database(config.USER_DATABASE_FILE, False)
-    if not exists:
-        db.create()
+def fetch_token(name):
+    print("fetch token called for %s" % name)
+    try:
+        user = User.select().where(User.name == name).get()
+        print("found existing user")
+    except peewee.DoesNotExist:
+        return None
 
-def create_app():
-    app = Flask(__name__, static_url_path=STATIC_PATH, static_folder=STATIC_FOLDER, template_folder=TEMPLATE_FOLDER)
-    app.config.from_object('config')
-    CORS(app, origins=[f"{config.SUBSONIC_HOST}:{config.SUBSONIC_PORT}"])
-    oauth = OAuth(app)
-    oauth.register(name='musicbrainz',
-                   authorize_url="https://musicbrainz.org/oauth2/authorize",
-                   redirect_uri=config.DOMAIN + "/auth",
-                   access_token_url="https://musicbrainz.org/oauth2/token",
-                   client_kwargs={'scope': 'profile'})
-    open_db()
-    return app
-    
-app = create_app()
+    return user['token'].to_token()
+
+app = Flask(__name__, static_url_path=STATIC_PATH, static_folder=STATIC_FOLDER, template_folder=TEMPLATE_FOLDER)
+app.config.from_object('config')
+CORS(app, origins=[f"{config.SUBSONIC_HOST}:{config.SUBSONIC_PORT}"])
+oauth = OAuth(app, fetch_token=fetch_token)
+oauth.register(name='musicbrainz',
+               authorize_url="https://musicbrainz.org/oauth2/authorize",
+               redirect_uri=config.DOMAIN + "/auth",
+               access_token_url="https://musicbrainz.org/oauth2/token",
+               client_kwargs={'scope': 'profile'})
+exists = os.path.exists(config.USER_DATABASE_FILE)
+user_db = UserDatabase(config.USER_DATABASE_FILE, False)
+if not exists:
+    user_db.create()
+else:
+    user_db.open()
+
+def login_required(func):
+    @wraps(func)
+    def wrapper():
+        user = session.get('user')
+        if user is None:
+            print("Found no session, redirect to login")
+            return redirect("/welcome")
+
+        print("Found session")
+        return func()
+
+    return wrapper
 
 def subsonic_credentials_url_args():
     """Return the subsonic API request arguments that must be appended to a subsonic call."""
@@ -64,13 +85,13 @@ def subsonic_credentials_url_args():
     }
 
 @app.route("/")
+@login_required
 def index():
-    user = session.get('user')
-    if user is None:
-        return render_template('login.html', no_navbar=True)
-    else:
-        return render_template('index.html')
+    return render_template('index.html')
 
+@app.route("/welcome")
+def welcome():
+    return render_template('login.html', no_navbar=True)
 
 @app.route("/login")
 def login_redirect():
@@ -81,16 +102,20 @@ def login_redirect():
 @app.route('/auth')
 def auth():
     token = oauth.musicbrainz.authorize_access_token()
-    from icecream import ic
-    ic(token)
     
     r = oauth.musicbrainz.get('https://musicbrainz.org/oauth2/userinfo')
     userinfo = r.json()
-    ## Save the token in the DB, not the user session
-    session['user'] = {"user_name": userinfo["sub"], "user_id": userinfo["metabrainz_user_id"], "token": token['access_token']}
 
+    try:
+        user = User.select().where(User.id == userinfo["metabrainz_user_id"]).get()
+        user.token = token['access_token']
+        print("Fetched exisiting user")
+    except peewee.DoesNotExist:
+        print("create new user")
+        user = User.create(id=userinfo["metabrainz_user_id"], name=userinfo["sub"], token=token['access_token'])
+    user.save()
 
-
+    session['user'] = {"user_name": userinfo["sub"], "user_id": userinfo["metabrainz_user_id"] }
     return redirect('/')
 
 
@@ -101,7 +126,7 @@ def logout():
 
 
 @app.route("/lb-radio", methods=["GET"])
-#@require_oauth()
+@login_required
 def lb_radio_get():
 
     prompt = request.args.get("prompt", "")
@@ -109,6 +134,7 @@ def lb_radio_get():
 
 
 @app.route("/lb-radio", methods=["POST"])
+@login_required
 def lb_radio_post():
 
     try:
@@ -142,6 +168,7 @@ class Config:
 
 
 @app.route("/playlist/create", methods=["POST"])
+@login_required
 def playlist_create():
     jspf = request.get_json()
 
@@ -157,11 +184,13 @@ def playlist_create():
 
 
 @app.route("/weekly-jams", methods=["GET"])
+@login_required
 def weekly_jams_get():
     return render_template('weekly-jams.html', page="weekly-jams", subsonic=subsonic_credentials_url_args())
 
 
 @app.route("/weekly-jams", methods=["POST"])
+@login_required
 def weekly_jams_post():
 
     try:
@@ -182,6 +211,7 @@ def weekly_jams_post():
 
 
 @app.route("/top-tags", methods=["GET"])
+@login_required
 def tags():
     db = Database(current_app.config["DATABASE_FILE"], quiet=False)
     db.open()
@@ -191,6 +221,7 @@ def tags():
 
 
 @app.route("/unresolved", methods=["GET"])
+@login_required
 def unresolved():
     db = Database(current_app.config["DATABASE_FILE"], quiet=False)
     db.open()

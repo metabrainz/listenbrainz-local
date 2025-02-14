@@ -5,8 +5,8 @@ PRAGMAS = (
     ('journal_mode', 'WAL'),
 )
 
-db = SqliteDatabase(None, pragmas=PRAGMAS)
+user_db = SqliteDatabase(None, pragmas=PRAGMAS)
 
 def setup_db(db_file):
-    global db
-    db.init(db_file)
+    global user_db
+    user_db.init(db_file)

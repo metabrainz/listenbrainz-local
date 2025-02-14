@@ -3,13 +3,13 @@ import os
 
 import peewee
 
-from lb_local.model.database import db, setup_db
+from lb_local.model.database import user_db, setup_db
 from lb_local.model.user import User
 
 logger = logging.getLogger(__name__)
 
 
-class Database:
+class UserDatabase:
     '''
     Keep a database with metadata for a collection of local music files.
     '''
@@ -27,8 +27,8 @@ class Database:
             db_dir = os.path.dirname(os.path.realpath(self.db_file))
             os.makedirs(db_dir, exist_ok=True)
             setup_db(self.db_file)
-            db.connect()
-            db.create_tables((
+            user_db.connect()
+            user_db.create_tables((
                 User,
             ))
         except Exception as e:
@@ -36,15 +36,15 @@ class Database:
 
     def open(self):
         """
-            Open the database file and connect to the db.
+            Open the database file and connect to the user_db.
         """
         try:
             setup_db(self.db_file)
-            db.connect()
+            user_db.connect()
         except peewee.OperationalError:
             logger.error("Cannot open database index file: '%s'" % self.db_file)
             sys.exit(-1)
 
     def close(self):
         """ Close the db."""
-        db.close()
+        user_db.close()
