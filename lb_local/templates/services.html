@@ -3,6 +3,11 @@
 
 <h2>Services</h2>
 
+{% with messages = get_flashed_messages() %} {% if messages %} {% for message in
+messages %}
+<div class="alert alert-warning" role="alert">{{ message }}</div>
+{% endfor %} {% endif %} {% endwith %}
+
 <div
     class="form-body"
     id="service-list"

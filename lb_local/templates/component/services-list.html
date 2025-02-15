@@ -4,6 +4,7 @@
         <th>URL</th>
         <th>name</th>
         <th>UUID</th>
+        <th></th>
     </thead>
     <tbody>
         {% for service in services %}
@@ -11,10 +12,16 @@
             <td>{{ service.name }}</td>
             <td>{{ service.url }}</td>
             <td>{{ service.uuid }}</td>
+            <td>
+                <a href="/services/{{ service.uuid }}/edit">Edit</a> |
+                <a href="/services/{{ service.uuid }}/delete">Delete</a>
+            </td>
         </tr>
         {% endfor %}
     </tbody>
 </table>
 {% else %}
 <p>No services defined.</p>
-{% endif %}
+{% endif %} {% block scripts %}
+<script type="text/javascript"></script>
+{% endblock %}

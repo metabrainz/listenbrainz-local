@@ -1,7 +1,7 @@
 {%- extends 'include/base.html' -%} {%- block title -%}services{% endblock %}
 {%- block content -%}
 
-<h2>Add service</h2>
+<h2>{{mode}} service</h2>
 
 {% with messages = get_flashed_messages() %} {% if messages %} {% for message in
 messages %}
@@ -17,7 +17,7 @@ messages %}
             <input
                 type="text"
                 name="name"
-                value="{{name}}"
+                value="{{ (service and service.name) or name or ''}}"
                 class="form-control form-control-lg"
                 id="exampleInputName"
             />
@@ -27,7 +27,7 @@ messages %}
             <input
                 type="text"
                 name="url"
-                value="{{url}}"
+                value="{{ (service and service.url) or url or ''}}"
                 class="form-control form-control-lg"
                 id="exampleInputURL"
                 aria-describedby="urlHelp"
@@ -37,15 +37,15 @@ messages %}
             </div>
         </div>
     </div>
-
+    <input
+        type="hidden"
+        name="uuid"
+        value="{{ (service and service.uuid) or ''}}"
+    />
     <div class="form-buttons text-end">
         <a class="btn btn-lg btn-secondary" href="/services">Cancel</a>
         <button type="submit" class="btn btn-lg btn-primary">Save</button>
     </div>
 </form>
 
-{% endblock%} {% block scripts %}
-<script type="text/javascript">
-    function enable_buttons() {}
-</script>
-{% endblock %}
+{% endblock%}

@@ -49,11 +49,11 @@
             </ul>
             <span class="nav-item dropdown">
                       <a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                        {{ session.user.user_name }}
+                        {{ current_user.name }}
                       </a>
                       <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
                         <li><a class="dropdown-item" href="/settings">Settings</a></lio>
-                        {% if session.user.is_admin %}
+                        {% if current_user.is_admin %}
                             <li><a class="dropdown-item" href="/admin">Admin</a></lio>
                             <li><a class="dropdown-item" href="/services">Services</a></lio>
                         {% endif %}

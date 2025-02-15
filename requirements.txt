@@ -1,9 +1,11 @@
-flask
-flask-admin
+flask~=3.1.0
+flask-admin~=1.6.1
 icecream
 troi[nmslib]@git+https://github.com/metabrainz/troi-recommendation-playground.git@fix-unresolved-releases
-flask-cors
-authlib
-peewee
+flask-cors~=5.0.0
+authlib~=1.4.1
+peewee~=3.17.9
 wtf-peewee
 validators
+Flask-Login~=0.6.3
+Werkzeug~=3.1.3
