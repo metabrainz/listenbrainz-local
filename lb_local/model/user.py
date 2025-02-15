@@ -12,9 +12,9 @@ class User(Model):
         database = user_db
         table_name = "user"
 
-    id = IntegerField(null=False, unique=True)
+    user_id = IntegerField()
     name = TextField(null=False, unique=True)
-    token = TextField(null=False)
+    token = TextField()
 
     def __repr__(self):
         return "<User('%d %s')>" % (self.id, self.name or "")

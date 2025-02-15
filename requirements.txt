@@ -1,6 +1,8 @@
 flask
+flask-admin
 icecream
 troi[nmslib]@git+https://github.com/metabrainz/troi-recommendation-playground.git@fix-unresolved-releases
 flask-cors
 authlib
 peewee
+wtf-peewee

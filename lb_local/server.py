@@ -4,8 +4,10 @@ import json
 import os
 import uuid
 
-from flask import Flask, render_template, request, current_app, redirect, session, url_for
+from flask import Flask, render_template, request, current_app, redirect, session, url_for, flash
 from flask_cors import CORS
+from flask_admin import Admin
+from flask_admin.contrib.peewee import ModelView
 from werkzeug.exceptions import BadRequest
 from authlib.integrations.flask_client import OAuth
 from authlib.integrations.flask_oauth2 import ResourceProtector
@@ -19,6 +21,7 @@ import peewee
 
 from lb_local.database import UserDatabase
 from lb_local.model.user import User
+from lb_local.model.database import user_db
 import config
 
 # TODO:
@@ -41,10 +44,27 @@ def fetch_token(name):
 
     return user['token'].to_token()
 
+class LBLocalModelView(ModelView):
+
+    def is_accessible(self):
+        user = session.get('user')
+        return user["is_admin"]
+
+    def inaccessible_callback(self, name, **kwargs):
+        return redirect(url_for('index', next=request.url))
+
+    def after_model_delete(self, model):
+        # TODO: Revoke session for user
+        pass
+
 
 def create_app():
+    exists = os.path.exists(config.USER_DATABASE_FILE)
+    udb = UserDatabase(config.USER_DATABASE_FILE, False)
+
     app = Flask(__name__, static_url_path=STATIC_PATH, static_folder=STATIC_FOLDER, template_folder=TEMPLATE_FOLDER)
     app.config.from_object('config')
+
     CORS(app, origins=[f"{config.SUBSONIC_HOST}:{config.SUBSONIC_PORT}"])
     oauth = OAuth(app, fetch_token=fetch_token)
     oauth.register(name='musicbrainz',
@@ -52,12 +72,13 @@ def create_app():
                    redirect_uri=config.DOMAIN + "/auth",
                    access_token_url="https://musicbrainz.org/oauth2/token",
                    client_kwargs={'scope': 'profile'})
-    exists = os.path.exists(config.USER_DATABASE_FILE)
-    user_db = UserDatabase(config.USER_DATABASE_FILE, False)
+    admin = Admin(app, name='ListenBrainz Local Admin')
+    admin.add_view(LBLocalModelView(User, user_db))
+
     if not exists:
-        user_db.create()
+        udb.create()
     else:
-        user_db.open()
+        udb.open()
 
     return (app, oauth)
 
@@ -125,15 +146,19 @@ def auth():
     userinfo = r.json()
 
     try:
-        user = User.select().where(User.id == userinfo["metabrainz_user_id"]).get()
+        user = User.select().where(User.name == userinfo["sub"]).get()
         user.token = token['access_token']
-        print("Fetched exisiting user")
     except peewee.DoesNotExist:
-        print("create new user")
-        user = User.create(id=userinfo["metabrainz_user_id"], name=userinfo["sub"], token=token['access_token'])
+        flash("Sorry, login denied.")
+        return redirect("/welcome")
+
     user.save()
 
-    session['user'] = {"user_name": userinfo["sub"], "user_id": userinfo["metabrainz_user_id"]}
+    session['user'] = {
+        "user_name": userinfo["sub"],
+        "user_id": userinfo["metabrainz_user_id"],
+        "is_admin": userinfo["sub"] in config.ADMIN_USERS
+    }
     return redirect('/')
 
 

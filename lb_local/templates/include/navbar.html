@@ -53,6 +53,9 @@
                       </a>
                       <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
                         <li><a class="dropdown-item" href="/settings">Settings</a></lio>
+                        {% if session.user.is_admin %}
+                            <li><a class="dropdown-item" href="/admin">Admin</a></lio>
+                        {% endif %}
                         <li><hr class="dropdown-divider"></li>
                         <li><a class="dropdown-item" href="/logout">Logout</a></li>
                       </ul>

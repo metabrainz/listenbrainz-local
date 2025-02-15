@@ -2,7 +2,14 @@
 content -%}
 
 <div class="login-div vh-100" id="login">
-    <img class="login-logo" src="/static/img/lb-local-logo.svg" />
+    <img class="login-logo" style="margin-bottom: 2em;" src="/static/img/lb-local-logo.svg" />
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        {% for message in messages %}
+          <p>{{ message }}</p>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
     <a href="/login" class="btn btn-lg btn-primary" style="margin-top: 3em">
         Login with MetaBrainz
     </a>
