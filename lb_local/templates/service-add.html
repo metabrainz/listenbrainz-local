@@ -8,7 +8,7 @@ messages %}
 <div class="alert alert-warning" role="alert">{{ message }}</div>
 {% endfor %} {% endif %} {% endwith %}
 
-<form method="post" action="/services/add">
+<form method="post" action="/service/add">
     <div class="form-body">
         <div class="mb-3">
             <label for="exampleInputName" class="form-label"
@@ -43,7 +43,7 @@ messages %}
         value="{{ (service and service.uuid) or ''}}"
     />
     <div class="form-buttons text-end">
-        <a class="btn btn-lg btn-secondary" href="/services">Cancel</a>
+        <a class="btn btn-lg btn-secondary" href="/service">Cancel</a>
         <button type="submit" class="btn btn-lg btn-primary">Save</button>
     </div>
 </form>

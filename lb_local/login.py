@@ -1,0 +1,64 @@
+from datetime import datetime, timezone
+from functools import wraps
+import uuid
+import hashlib
+
+from flask import Flask, render_template, request, current_app, redirect, url_for, flash
+from flask_login import login_user, logout_user, login_required, current_user, LoginManager
+import peewee
+from lb_local.model.user import User
+
+login_manager = LoginManager()
+login_manager.login_view = ".welcome"
+
+import config
+
+@login_manager.user_loader
+def load_user(login_id):
+    try:
+        return User.select().where(User.login_id == login_id).get()
+    except peewee.DoesNotExist:
+        return None
+
+
+def login_forbidden(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        if not current_user.is_anonymous:
+            return redirect(url_for(".index"))
+        return f(*args, **kwargs)
+
+    return decorated
+
+
+def fetch_token():
+    return current_user.get_token()
+
+
+def update_token(name, token, refresh_token=None, access_token=None):
+    if refresh_token:
+        item = User.select().where(User.name == name, User.refresh_token == refresh_token)
+    elif access_token:
+        item = User.select().where(User.name == name, User.access_token == access_token)
+    else:
+        return
+
+    item.access_token = token["access_token"]
+    if "refresh_token" in token:
+        item.refresh_token = token["refresh_token"]
+    item.access_token_expires_at = datetime.fromtimestamp(token["expires_at"], tz=timezone.utc)
+    item.save()
+
+def subsonic_credentials_url_args():
+    """Return the subsonic API request arguments that must be appended to a subsonic call."""
+
+    salt = str(uuid.uuid4())
+    h = hashlib.new('md5')
+    h.update(bytes(config.SUBSONIC_PASSWORD, "utf-8"))
+    h.update(bytes(salt, "utf-8"))
+    token = h.hexdigest()
+    return {
+        "args": f"u={config.SUBSONIC_USER}&s={salt}&t={token}&v=1.14.0&c=lb-local",
+        "host": config.SUBSONIC_HOST,
+        "port": config.SUBSONIC_PORT
+    }

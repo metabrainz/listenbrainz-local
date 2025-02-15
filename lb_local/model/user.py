@@ -15,11 +15,11 @@ class User(Model, UserMixin):
         table_name = "user"
 
     user_id = AutoField(primary_key=True)
-    login_id = TextField(null=False, unique=True)
+    login_id = TextField(null=True, unique=True)
     name = TextField(null=False, unique=True)
     access_token = TextField(null=True)
-    refresh_token = TextField()
-    access_token_expires_at = DateTimeField()
+    refresh_token = TextField(null=True)
+    access_token_expires_at = DateTimeField(null=True)
 
     def get_id(self):
         return self.login_id
