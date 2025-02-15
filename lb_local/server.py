@@ -21,16 +21,16 @@ from lb_local.database import UserDatabase
 from lb_local.model.user import User
 import config
 
-STATIC_PATH = "/static"
-STATIC_FOLDER = "static"
-TEMPLATE_FOLDER = "templates"
-
-#require_oauth = ResourceProtector()
-
 # TODO:
 # - Pass hints and error messages from content resolver
 # - Resolve playlists
 
+STATIC_PATH = "/static"
+STATIC_FOLDER = "static"
+TEMPLATE_FOLDER = "templates"
+
+
+# oauth2: The authlib docs state that I need to be providing a fetch_token function, but it never gets called.
 def fetch_token(name):
     print("fetch token called for %s" % name)
     try:
@@ -41,23 +41,37 @@ def fetch_token(name):
 
     return user['token'].to_token()
 
-app = Flask(__name__, static_url_path=STATIC_PATH, static_folder=STATIC_FOLDER, template_folder=TEMPLATE_FOLDER)
-app.config.from_object('config')
-CORS(app, origins=[f"{config.SUBSONIC_HOST}:{config.SUBSONIC_PORT}"])
-oauth = OAuth(app, fetch_token=fetch_token)
-oauth.register(name='musicbrainz',
-               authorize_url="https://musicbrainz.org/oauth2/authorize",
-               redirect_uri=config.DOMAIN + "/auth",
-               access_token_url="https://musicbrainz.org/oauth2/token",
-               client_kwargs={'scope': 'profile'})
-exists = os.path.exists(config.USER_DATABASE_FILE)
-user_db = UserDatabase(config.USER_DATABASE_FILE, False)
-if not exists:
-    user_db.create()
-else:
-    user_db.open()
 
+def create_app():
+    app = Flask(__name__, static_url_path=STATIC_PATH, static_folder=STATIC_FOLDER, template_folder=TEMPLATE_FOLDER)
+    app.config.from_object('config')
+    CORS(app, origins=[f"{config.SUBSONIC_HOST}:{config.SUBSONIC_PORT}"])
+    oauth = OAuth(app, fetch_token=fetch_token)
+    oauth.register(name='musicbrainz',
+                   authorize_url="https://musicbrainz.org/oauth2/authorize",
+                   redirect_uri=config.DOMAIN + "/auth",
+                   access_token_url="https://musicbrainz.org/oauth2/token",
+                   client_kwargs={'scope': 'profile'})
+    exists = os.path.exists(config.USER_DATABASE_FILE)
+    user_db = UserDatabase(config.USER_DATABASE_FILE, False)
+    if not exists:
+        user_db.create()
+    else:
+        user_db.open()
+
+    return (app, oauth)
+
+
+app, oauth = create_app()
+
+
+# oauth2: the docs are unclear if a resourceprotector should be used for clients as well as servers? But
+# the decorator as implemented is clearly incomplete. Do I even need this decorator?
+# https://docs.authlib.org/en/latest/client/flask.html#accessing-oauth-resources
+# is unclear and I am not sure what part is flask fantasy and what is reality
+#require_oauth = ResourceProtector()
 def login_required(func):
+
     @wraps(func)
     def wrapper():
         user = session.get('user')
@@ -69,6 +83,7 @@ def login_required(func):
         return func()
 
     return wrapper
+
 
 def subsonic_credentials_url_args():
     """Return the subsonic API request arguments that must be appended to a subsonic call."""
@@ -84,14 +99,17 @@ def subsonic_credentials_url_args():
         "port": config.SUBSONIC_PORT
     }
 
+
 @app.route("/")
 @login_required
 def index():
     return render_template('index.html')
 
+
 @app.route("/welcome")
 def welcome():
     return render_template('login.html', no_navbar=True)
+
 
 @app.route("/login")
 def login_redirect():
@@ -102,7 +120,7 @@ def login_redirect():
 @app.route('/auth')
 def auth():
     token = oauth.musicbrainz.authorize_access_token()
-    
+
     r = oauth.musicbrainz.get('https://musicbrainz.org/oauth2/userinfo')
     userinfo = r.json()
 
@@ -115,7 +133,7 @@ def auth():
         user = User.create(id=userinfo["metabrainz_user_id"], name=userinfo["sub"], token=token['access_token'])
     user.save()
 
-    session['user'] = {"user_name": userinfo["sub"], "user_id": userinfo["metabrainz_user_id"] }
+    session['user'] = {"user_name": userinfo["sub"], "user_id": userinfo["metabrainz_user_id"]}
     return redirect('/')
 
 
