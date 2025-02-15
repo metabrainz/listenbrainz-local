@@ -34,7 +34,11 @@ def welcome():
 def lb_radio_get():
 
     prompt = request.args.get("prompt", "")
-    return render_template('lb-radio.html', prompt=prompt, page="lb-radio", subsonic=subsonic_credentials_url_args())
+    return render_template('lb-radio.html', prompt=prompt,
+                           page="lb-radio",
+                           subsonic=subsonic_credentials_url_args(current_user.config["SUBSONIC_USER"],
+                                                                  current_user.config["SUBSONIC_PASSWORD"],
+                                                                  current_user.config["SUBSONIC_URL"]))
 
 
 @index_bp.route("/lb-radio", methods=["POST"])
@@ -96,7 +100,11 @@ def playlist_create():
 @index_bp.route("/weekly-jams", methods=["GET"])
 @login_required
 def weekly_jams_get():
-    return render_template('weekly-jams.html', page="weekly-jams", subsonic=subsonic_credentials_url_args())
+    return render_template('weekly-jams.html',
+                           page="weekly-jams",
+                           subsonic=subsonic_credentials_url_args(current_user.config["SUBSONIC_USER"],
+                                                                  current_user.config["SUBSONIC_PASSWORD"],
+                                                                  current_user.config["SUBSONIC_URL"]))
 
 
 @index_bp.route("/weekly-jams", methods=["POST"])

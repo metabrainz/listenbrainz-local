@@ -49,15 +49,16 @@ def update_token(name, token, refresh_token=None, access_token=None):
     item.access_token_expires_at = datetime.fromtimestamp(token["expires_at"], tz=timezone.utc)
     item.save()
 
-def subsonic_credentials_url_args():
+def subsonic_credentials_url_args(user, password, url):
     """Return the subsonic API request arguments that must be appended to a subsonic call."""
 
     salt = str(uuid.uuid4())
     h = hashlib.new('md5')
-    h.update(bytes(config.SUBSONIC_PASSWORD, "utf-8"))
+    h.update(bytes(password, "utf-8"))
     h.update(bytes(salt, "utf-8"))
     token = h.hexdigest()
     return {
-        "args": f"u={config.SUBSONIC_USER}&s={salt}&t={token}&v=1.14.0&c=lb-local",
-        "url": config.SUBSONIC_URL
+        "args": f"u={user}&s={salt}&t={token}&v=1.14.0&c=lb-local",
+        "token": token,
+        "salt": salt
     }

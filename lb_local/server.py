@@ -23,6 +23,7 @@ from lb_local.model.database import user_db
 from lb_local.view.admin import UserModelView, ServiceModelView
 from lb_local.view.service import service_bp
 from lb_local.view.index import index_bp
+from lb_local.view.credential import credential_bp
 from lb_local.login import load_user, login_forbidden, fetch_token, login_manager, update_token, subsonic_credentials_url_args
 import config
 
@@ -68,6 +69,7 @@ def create_app():
 app, oauth = create_app()
 app.register_blueprint(index_bp)
 app.register_blueprint(service_bp, url_prefix="/service")
+app.register_blueprint(credential_bp, url_prefix="/credential")
 
 
 @app.route("/login")
