@@ -46,6 +46,8 @@ def fetch_token(name):
 
 class LBLocalModelView(ModelView):
 
+    form_excluded_columns = ('user_id', 'token')
+
     def is_accessible(self):
         user = session.get('user')
         return user["is_admin"]
@@ -56,6 +58,7 @@ class LBLocalModelView(ModelView):
     def after_model_delete(self, model):
         # TODO: Revoke session for user
         pass
+
 
 
 def create_app():
@@ -149,8 +152,11 @@ def auth():
         user = User.select().where(User.name == userinfo["sub"]).get()
         user.token = token['access_token']
     except peewee.DoesNotExist:
-        flash("Sorry, login denied.")
-        return redirect("/welcome")
+        if userinfo["sub"] in config.ADMIN_USERS:
+            user = User.create(id=userinfo["metabrainz_user_id"], name=userinfo["sub"], token=token['access_token'])
+        else:
+            flash("Sorry, you do not have an account on this server.")
+            return redirect("/welcome")
 
     user.save()
 
