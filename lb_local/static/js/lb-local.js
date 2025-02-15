@@ -46,8 +46,9 @@ function on_play() {
     update_button_states();
 }
 
-function init_player(host, port, args) {
-    subsonic_info = { host: host, port: port, args: args };
+function init_player(url, args) {
+    subsonic_info = { url: url, args: args };
+    console.log(subsonic_info);
 }
 
 function enter_event(event, arg = null) {
@@ -87,26 +88,30 @@ function enter_event(event, arg = null) {
 
 function update_button_states() {
     playlist = document.getElementById("playlist-table");
-    if (playlist) 
+    if (playlist)
         num_tracks_loaded = playlist.rows.length - 1; // skip header row
-    else
-        num_tracks_loaded = 0;
+    else num_tracks_loaded = 0;
 
-    if (!document.getElementById("prev-button"))
-        return;
+    if (!document.getElementById("prev-button")) return;
 
-    document.getElementById("prev-button").disabled = !(current_playing_index != null && current_playing_index > 0);
-    document.getElementById("stop-button").disabled = !(sound != null && current_playing_index != null);
+    document.getElementById("prev-button").disabled = !(
+        current_playing_index != null && current_playing_index > 0
+    );
+    document.getElementById("stop-button").disabled = !(
+        sound != null && current_playing_index != null
+    );
     document.getElementById("play-button").disabled = num_tracks_loaded == 0;
-    document.getElementById("next-button").disabled = !(current_playing_index != null && current_playing_index < num_tracks_loaded - 1);
+    document.getElementById("next-button").disabled = !(
+        current_playing_index != null &&
+        current_playing_index < num_tracks_loaded - 1
+    );
     document.getElementById("save-playlist").disabled = num_tracks_loaded == 0;
 
     play_pause_button = document.getElementById("play-pause-icon");
     if (current_playing_index != null && sound != null && sound.playing()) {
         play_pause_button.classList.add("fa-pause");
         play_pause_button.classList.remove("fa-play");
-    }
-    else {
+    } else {
         play_pause_button.classList.remove("fa-pause");
         play_pause_button.classList.add("fa-play");
     }
@@ -114,10 +119,8 @@ function update_button_states() {
 
 function play_pause() {
     if (sound != null) {
-        if (sound.playing())
-            pause();
-        else
-            sound.play();
+        if (sound.playing()) pause();
+        else sound.play();
         update_button_states();
         return;
     }
@@ -210,9 +213,7 @@ function play_track(file_id) {
     //For testing with only short tracks...
     //file_id = "cf22184021802f7ebbf0e461d11fc42d";
     url =
-        subsonic_info.host +
-        ":" +
-        subsonic_info.port +
+        subsonic_info.url +
         "/rest/stream?id=" +
         file_id +
         "&" +

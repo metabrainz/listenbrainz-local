@@ -59,6 +59,5 @@ def subsonic_credentials_url_args():
     token = h.hexdigest()
     return {
         "args": f"u={config.SUBSONIC_USER}&s={salt}&t={token}&v=1.14.0&c=lb-local",
-        "host": config.SUBSONIC_HOST,
-        "port": config.SUBSONIC_PORT
+        "url": config.SUBSONIC_URL
     }

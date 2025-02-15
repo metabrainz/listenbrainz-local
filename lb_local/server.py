@@ -40,7 +40,7 @@ def create_app():
     app = Flask(__name__, static_url_path=STATIC_PATH, static_folder=STATIC_FOLDER, template_folder=TEMPLATE_FOLDER)
     app.config.from_object('config')
 
-    CORS(app, origins=[f"{config.SUBSONIC_HOST}:{config.SUBSONIC_PORT}"])
+    CORS(app, origins=[f"{config.SUBSONIC_URL}"])
     oauth = OAuth(app, fetch_token=fetch_token)
     oauth.register(name='musicbrainz',
                    authorize_url="https://musicbrainz.org/oauth2/authorize",

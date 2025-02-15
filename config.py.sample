@@ -5,10 +5,9 @@ DOMAIN = "127.0.0.1:5000"
 SECRET_KEY = ""
 
 # To connect to a subsonic API
-SUBSONIC_HOST = "http://127.0.0.1"   # include http:// or https://
+SUBSONIC_URL = "http://127.0.0.1:4533"   # include http:// or https://
 SUBSONIC_USER = ""
 SUBSONIC_PASSWORD = ""
-SUBSONIC_PORT = 4533
 
 # MusicBrainz OAuth2 Details
 MUSICBRAINZ_CLIENT_ID=""
