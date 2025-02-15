@@ -4,17 +4,17 @@ from lb_local.model.database import user_db
 from lb_local.model.service import Service
 
 
-class Credentials(Model):
+class Credential(Model):
     """
        Store user information
     """
 
     class Meta:
         database = user_db
-        table_name = "credentials"
+        table_name = "credential"
 
     service = ForeignKeyField(Service)
-    user = TextField(null=False)
+    user_name = TextField(null=False)
     salt = TextField(null=False)
     token = TextField(null=False)
 

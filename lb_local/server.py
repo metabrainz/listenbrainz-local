@@ -18,6 +18,7 @@ import peewee
 from lb_local.database import UserDatabase
 from lb_local.model.user import User
 from lb_local.model.service import Service
+from lb_local.model.credential import Credential
 from lb_local.model.database import user_db
 from lb_local.view.admin import UserModelView, ServiceModelView
 from lb_local.view.service import service_bp
@@ -52,6 +53,7 @@ def create_app():
     admin = Admin(app, name='ListenBrainz Local Admin')
     admin.add_view(UserModelView(User, "User"))
     admin.add_view(ServiceModelView(Service, "Service"))
+    admin.add_view(ModelView(Credential, "Credential"))
 
     login_manager.init_app(app)
 

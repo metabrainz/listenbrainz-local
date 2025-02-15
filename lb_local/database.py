@@ -6,6 +6,7 @@ import peewee
 from lb_local.model.database import user_db, setup_db
 from lb_local.model.user import User
 from lb_local.model.service import Service
+from lb_local.model.credential import Credential
 
 logger = logging.getLogger(__name__)
 
@@ -30,7 +31,7 @@ class UserDatabase:
             setup_db(self.db_file)
             user_db.connect()
             user_db.create_tables((
-                User, Service
+                User, Service, Credential
             ))
         except Exception as e:
             logger.error("Failed to create db file %r: %s" % (self.db_file, e))
