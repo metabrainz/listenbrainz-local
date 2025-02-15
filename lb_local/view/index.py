@@ -1,4 +1,6 @@
 import json
+from copy import copy
+from urllib.parse import urlparse
 
 from flask import Blueprint, render_template, request, current_app, redirect, url_for, flash
 from werkzeug.exceptions import BadRequest
@@ -78,7 +80,13 @@ def playlist_create():
     playlist_element = PlaylistElement()
     playlist_element.playlists = [playlist]
 
-    db = SubsonicDatabase(current_app.config["DATABASE_FILE"], Config(**current_app.config), quiet=False)
+    url = urlparse(current_app.config["SUBSONIC_URL"])
+    conf = copy(current_app.config)
+    conf["SUBSONIC_HOST"] = "%s://%s" % (url.scheme, url.hostname)
+    conf["SUBSONIC_PORT"] = int(url.port)
+    print(conf)
+
+    db = SubsonicDatabase(current_app.config["DATABASE_FILE"], Config(**conf), quiet=False)
     db.open()
     db.upload_playlist(playlist_element)
 
