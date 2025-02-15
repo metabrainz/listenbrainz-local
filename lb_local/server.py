@@ -21,6 +21,7 @@ import peewee
 
 from lb_local.database import UserDatabase
 from lb_local.model.user import User
+from lb_local.model.service import Service
 from lb_local.model.database import user_db
 import config
 
@@ -44,7 +45,7 @@ def fetch_token(name):
 
     return user['token'].to_token()
 
-class LBLocalModelView(ModelView):
+class UserModelView(ModelView):
 
     form_excluded_columns = ('user_id', 'token')
 
@@ -59,6 +60,16 @@ class LBLocalModelView(ModelView):
         # TODO: Revoke session for user
         pass
 
+class ServiceModelView(ModelView):
+
+    form_excluded_columns = ('uuid')
+
+    def is_accessible(self):
+        user = session.get('user')
+        return user["is_admin"]
+
+    def inaccessible_callback(self, name, **kwargs):
+        return redirect(url_for('index', next=request.url))
 
 
 def create_app():
@@ -76,7 +87,8 @@ def create_app():
                    access_token_url="https://musicbrainz.org/oauth2/token",
                    client_kwargs={'scope': 'profile'})
     admin = Admin(app, name='ListenBrainz Local Admin')
-    admin.add_view(LBLocalModelView(User, user_db))
+    admin.add_view(UserModelView(User, "User"))
+    admin.add_view(ServiceModelView(Service, "Service"))
 
     if not exists:
         udb.create()
@@ -276,3 +288,14 @@ def unresolved():
     db.open()
     urt = UnresolvedRecordingTracker()
     return render_template("unresolved.html", unresolved=urt.get_releases(), page="unresolved")
+
+@app.route("/services", methods=["GET"])
+@login_required
+def services():
+    return render_template("services.html", page="services")
+
+@app.route("/services/list", methods=["GET"])
+@login_required
+def services_list():
+    services = Service.select()
+    return render_template("component/services-list.html", services=services)
