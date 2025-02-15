@@ -1,16 +1,17 @@
 import hashlib
+from datetime import datetime, timezone
 from functools import wraps
 import json
 import os
 import uuid
 
-from flask import Flask, render_template, request, current_app, redirect, session, url_for, flash
+from flask import Flask, render_template, request, current_app, redirect, url_for
 from flask_cors import CORS
 from flask_admin import Admin
 from flask_admin.contrib.peewee import ModelView
+from flask_login import login_user, logout_user, login_required, current_user, LoginManager
 from werkzeug.exceptions import BadRequest
 from authlib.integrations.flask_client import OAuth
-from authlib.integrations.flask_oauth2 import ResourceProtector
 from troi.playlist import _deserialize_from_jspf, PlaylistElement
 from troi.content_resolver.subsonic import SubsonicDatabase, Database
 from troi.content_resolver.lb_radio import ListenBrainzRadioLocal
@@ -33,28 +34,55 @@ STATIC_PATH = "/static"
 STATIC_FOLDER = "static"
 TEMPLATE_FOLDER = "templates"
 
+login_manager = LoginManager()
+login_manager.login_view = ".welcome"
 
-# oauth2: The authlib docs state that I need to be providing a fetch_token function, but it never gets called.
-def fetch_token(name):
-    print("fetch token called for %s" % name)
+@login_manager.user_loader
+def load_user(login_id):
     try:
-        user = User.select().where(User.name == name).get()
-        print("found existing user")
+        return User.select().where(User.login_id == login_id).get()
     except peewee.DoesNotExist:
         return None
 
-    return user['token'].to_token()
+
+def login_forbidden(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        if not current_user.is_anonymous:
+            return redirect(url_for(".index"))
+        return f(*args, **kwargs)
+
+    return decorated
+
+
+def fetch_token():
+    return current_user.get_token()
+
+
+def update_token(name, token, refresh_token=None, access_token=None):
+    if refresh_token:
+        item = User.select().where(User.name == name, User.refresh_token == refresh_token)
+    elif access_token:
+        item = User.select().where(User.name == name, User.access_token == access_token)
+    else:
+        return
+
+    item.access_token = token["access_token"]
+    if "refresh_token" in token:
+        item.refresh_token = token["refresh_token"]
+    item.access_token_expires_at = datetime.fromtimestamp(token["expires_at"], tz=timezone.utc)
+    item.save()
+
 
 class UserModelView(ModelView):
 
     form_excluded_columns = ('user_id', 'token')
 
     def is_accessible(self):
-        user = session.get('user')
-        return user["is_admin"]
+        return current_user.is_admin
 
     def inaccessible_callback(self, name, **kwargs):
-        return redirect(url_for('index', next=request.url))
+        return redirect(url_for("index", next=request.url))
 
     def after_model_delete(self, model):
         # TODO: Revoke session for user
@@ -85,40 +113,24 @@ def create_app():
                    authorize_url="https://musicbrainz.org/oauth2/authorize",
                    redirect_uri=config.DOMAIN + "/auth",
                    access_token_url="https://musicbrainz.org/oauth2/token",
-                   client_kwargs={'scope': 'profile'})
+                   client_kwargs={"scope": "profile"},
+                   authorize_params={"access_type": "offline"},
+                   fetch_token=fetch_token)
     admin = Admin(app, name='ListenBrainz Local Admin')
     admin.add_view(UserModelView(User, "User"))
     admin.add_view(ServiceModelView(Service, "Service"))
+
+    login_manager.init_app(app)
 
     if not exists:
         udb.create()
     else:
         udb.open()
 
-    return (app, oauth)
+    return app, oauth
 
 
 app, oauth = create_app()
-
-
-# oauth2: the docs are unclear if a resourceprotector should be used for clients as well as servers? But
-# the decorator as implemented is clearly incomplete. Do I even need this decorator?
-# https://docs.authlib.org/en/latest/client/flask.html#accessing-oauth-resources
-# is unclear and I am not sure what part is flask fantasy and what is reality
-#require_oauth = ResourceProtector()
-def login_required(func):
-
-    @wraps(func)
-    def wrapper():
-        user = session.get('user')
-        if user is None:
-            print("Found no session, redirect to login")
-            return redirect("/welcome")
-
-        print("Found session")
-        return func()
-
-    return wrapper
 
 
 def subsonic_credentials_url_args():
@@ -143,6 +155,7 @@ def index():
 
 
 @app.route("/welcome")
+@login_forbidden
 def welcome():
     return render_template('login.html', no_navbar=True)
 
@@ -157,32 +170,33 @@ def login_redirect():
 def auth():
     token = oauth.musicbrainz.authorize_access_token()
 
-    r = oauth.musicbrainz.get('https://musicbrainz.org/oauth2/userinfo')
+    r = oauth.musicbrainz.get("https://musicbrainz.org/oauth2/userinfo")
     userinfo = r.json()
 
     try:
         user = User.select().where(User.name == userinfo["sub"]).get()
-        user.token = token['access_token']
+        user.access_token = token["access_token"]
+        user.access_token_expires_at = datetime.fromtimestamp(token["expires_at"], tz=timezone.utc)
+        if "refresh_token" in token:
+            user.refresh_token = token["refresh_token"]
     except peewee.DoesNotExist:
-        if userinfo["sub"] in config.ADMIN_USERS:
-            user = User.create(id=userinfo["metabrainz_user_id"], name=userinfo["sub"], token=token['access_token'])
-        else:
-            flash("Sorry, you do not have an account on this server.")
-            return redirect("/welcome")
-
+        user = User(
+            name=userinfo["sub"],
+            access_token=token["access_token"],
+            refresh_token=token.get("refresh_token"),
+            access_token_expires_at=datetime.fromtimestamp(token["expires_at"]),
+            login_id=str(uuid.uuid4())
+        )
     user.save()
 
-    session['user'] = {
-        "user_name": userinfo["sub"],
-        "user_id": userinfo["metabrainz_user_id"],
-        "is_admin": userinfo["sub"] in config.ADMIN_USERS
-    }
-    return redirect('/')
+    login_user(user)
+
+    return redirect("/")
 
 
 @app.route('/logout')
 def logout():
-    session.pop('user', None)
+    logout_user()
     return redirect('/')
 
 
