@@ -3,6 +3,7 @@ from functools import wraps
 import json
 import os
 import uuid
+import validators
 
 from flask import Flask, render_template, request, current_app, redirect, session, url_for, flash
 from flask_cors import CORS
@@ -63,6 +64,7 @@ class UserModelView(ModelView):
 class ServiceModelView(ModelView):
 
     form_excluded_columns = ('uuid')
+    can_create = False
 
     def is_accessible(self):
         user = session.get('user')
@@ -165,7 +167,7 @@ def auth():
         user.token = token['access_token']
     except peewee.DoesNotExist:
         if userinfo["sub"] in config.ADMIN_USERS:
-            user = User.create(id=userinfo["metabrainz_user_id"], name=userinfo["sub"], token=token['access_token'])
+            user = User.create(user_id=userinfo["metabrainz_user_id"], name=userinfo["sub"], token=token['access_token'])
         else:
             flash("Sorry, you do not have an account on this server.")
             return redirect("/welcome")
@@ -293,6 +295,37 @@ def unresolved():
 @login_required
 def services():
     return render_template("services.html", page="services")
+
+@app.route("/services/add", methods=["GET"])
+@login_required
+def service_add():
+    return render_template("service-add.html")
+
+@app.route("/services/add", methods=["POST"])
+@login_required
+def service_add_post():
+    name = request.form.get("name", "")
+    url = request.form.get("url", "")
+    if not url or not name:
+        flash("Both name and URL are required.")
+        return render_template("service-add.html", name=name, url=url)
+
+    if not url.startswith("https://") and not url.startswith("http://"):
+        flash("URL must start with http:// or https://")
+        return render_template("service-add.html", name=name, url=url)
+
+    if not validators.url(url):
+        flash("Invalid URL")
+        return render_template("service-add.html", name=name, url=url)
+
+    try:
+        service = Service.create(name=name, url=url, uuid=uuid.uuid4())
+        service.save()
+    except peewee.IntegrityError as err:
+        flash("Duplicate service name or service URL.")
+        return render_template("service-add.html", name=name, url=url)
+
+    return redirect(url_for("services"))
 
 @app.route("/services/list", methods=["GET"])
 @login_required

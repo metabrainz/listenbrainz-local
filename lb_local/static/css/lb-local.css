@@ -140,3 +140,13 @@ body {
     justify-content: center;
     flex-direction: column;
 }
+
+.form-body {
+    background-color: #e5e5e5;
+    border-radius: 10px;
+    padding: 1.8em;
+}
+
+.form-buttons {
+    margin-top: 1.2em;
+}

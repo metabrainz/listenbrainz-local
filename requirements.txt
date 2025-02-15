@@ -6,3 +6,4 @@ flask-cors
 authlib
 peewee
 wtf-peewee
+validators

@@ -1,3 +1,4 @@
+{% if services|length > 0 %}
 <table class="table table-striped table-border" id="services-list-table">
     <thead>
         <th>URL</th>
@@ -11,10 +12,9 @@
             <td>{{ service.url }}</td>
             <td>{{ service.uuid }}</td>
         </tr>
-        {% else %}
-        <tr>
-            <td>No services defined.</td>
-        </tr>
         {% endfor %}
     </tbody>
 </table>
+{% else %}
+<p>No services defined.</p>
+{% endif %}

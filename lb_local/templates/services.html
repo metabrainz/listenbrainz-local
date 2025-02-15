@@ -3,11 +3,18 @@
 
 <h2>Services</h2>
 
-<div id="service-list" hx-get="/services/list" hx-trigger="load"></div>
+<div
+    class="form-body"
+    id="service-list"
+    hx-get="/services/list"
+    hx-trigger="load"
+    style="margin-top: 2em"
+></div>
 
-<button class="btn btn-lg btn-primary">Add</button>
-<button class="btn btn-lg btn-primary">Edit</button>
-<button class="btn btn-lg btn-primary">Remove</button>
+<div class="form-buttons text-end">
+    <a href="/" class="btn btn-lg btn-secondary">Cancel</a>
+    <a href="/services/add" class="btn btn-lg btn-primary">Add</a>
+</div>
 
 {% endblock%} {% block scripts %}
 <script type="text/javascript"></script>
