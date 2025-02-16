@@ -19,6 +19,9 @@ class User(Model, UserMixin):
     name = TextField(null=False, unique=True)
     access_token = TextField(null=True)
     refresh_token = TextField(null=True)
+    # sqlite doesn't have a native datetime type and peewee doesn't automatically parse datetime strings to
+    # python datetime objects if they contain a timezone offset, easiest workaround is to always convert
+    # utc first and save as a timezone-naive datetime value
     access_token_expires_at = DateTimeField(null=True)
 
     def get_id(self):

@@ -1,31 +1,25 @@
-import hashlib
-from datetime import datetime, timezone
-from functools import wraps
-import json
 import os
 import uuid
-import validators
+from datetime import datetime
 
-from flask import Flask, render_template, request, current_app, redirect, url_for, flash
-from flask_cors import CORS
+import peewee
+from authlib.integrations.flask_client import OAuth
+from flask import Flask, redirect, url_for, flash
 from flask_admin import Admin
 from flask_admin.contrib.peewee import ModelView
-from flask_login import login_user, logout_user, login_required, current_user, LoginManager
-from werkzeug.exceptions import BadRequest
-from authlib.integrations.flask_client import OAuth
-import peewee
+from flask_cors import CORS
+from flask_login import login_user, logout_user
 
-from lb_local.database import UserDatabase
-from lb_local.model.user import User
-from lb_local.model.service import Service
-from lb_local.model.credential import Credential
-from lb_local.model.database import user_db
-from lb_local.view.admin import UserModelView, ServiceModelView
-from lb_local.view.service import service_bp
-from lb_local.view.index import index_bp
-from lb_local.view.credential import credential_bp, load_credential
-from lb_local.login import load_user, login_forbidden, fetch_token, login_manager, update_token
 import config
+from lb_local.database import UserDatabase
+from lb_local.login import fetch_token, login_manager
+from lb_local.model.credential import Credential
+from lb_local.model.service import Service
+from lb_local.model.user import User
+from lb_local.view.admin import UserModelView, ServiceModelView
+from lb_local.view.credential import credential_bp
+from lb_local.view.index import index_bp
+from lb_local.view.service import service_bp
 
 # TODO:
 # - Pass hints and error messages from content resolver
@@ -89,7 +83,7 @@ def auth():
     try:
         user = User.select().where(User.name == userinfo["sub"]).get()
         user.access_token = token["access_token"]
-        user.access_token_expires_at = datetime.fromtimestamp(token["expires_at"], tz=timezone.utc)
+        user.access_token_expires_at = datetime.fromtimestamp(token["expires_at"], tz=None)
         if "refresh_token" in token:
             user.refresh_token = token["refresh_token"]
     except peewee.DoesNotExist:
@@ -98,7 +92,7 @@ def auth():
                 name=userinfo["sub"],
                 access_token=token["access_token"],
                 refresh_token=token.get("refresh_token"),
-                access_token_expires_at=datetime.fromtimestamp(token["expires_at"]),
+                access_token_expires_at=datetime.fromtimestamp(token["expires_at"], tz=None),
                 login_id=str(uuid.uuid4())
             )
         else:

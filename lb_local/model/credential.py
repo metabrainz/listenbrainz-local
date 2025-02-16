@@ -1,5 +1,5 @@
-import datetime
 from peewee import *
+
 from lb_local.model.database import user_db
 from lb_local.model.service import Service
 

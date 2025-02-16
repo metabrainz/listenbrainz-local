@@ -1,12 +1,13 @@
 import logging
 import os
+import sys
 
 import peewee
 
-from lb_local.model.database import user_db, setup_db
-from lb_local.model.user import User
-from lb_local.model.service import Service
 from lb_local.model.credential import Credential
+from lb_local.model.database import user_db, setup_db
+from lb_local.model.service import Service
+from lb_local.model.user import User
 
 logger = logging.getLogger(__name__)
 

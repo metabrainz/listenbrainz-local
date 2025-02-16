@@ -1,10 +1,8 @@
 import uuid
-import validators
 
 from flask import Blueprint, render_template, request, redirect, url_for, flash, session
-from flask_login import login_required
-from werkzeug.exceptions import BadRequest
 import peewee
+from flask_login import login_required
 
 from lb_local.model.credential import Credential
 from lb_local.model.service import Service

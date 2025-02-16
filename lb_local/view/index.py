@@ -3,16 +3,16 @@ import uuid
 from copy import copy
 from urllib.parse import urlparse
 
-from flask import Blueprint, render_template, request, current_app, redirect, url_for, flash, session, make_response
-from flask_cors import cross_origin
-from werkzeug.exceptions import BadRequest
+from flask import Blueprint, render_template, request, current_app, session, make_response
 from flask_login import login_required
-from troi.playlist import _deserialize_from_jspf, PlaylistElement
-from troi.content_resolver.subsonic import SubsonicDatabase, Database
 from troi.content_resolver.lb_radio import ListenBrainzRadioLocal
-from troi.local.periodic_jams_local import PeriodicJamsLocal
+from troi.content_resolver.subsonic import SubsonicDatabase, Database
 from troi.content_resolver.top_tags import TopTags
 from troi.content_resolver.unresolved_recording import UnresolvedRecordingTracker
+from troi.local.periodic_jams_local import PeriodicJamsLocal
+from troi.playlist import _deserialize_from_jspf, PlaylistElement
+from werkzeug.exceptions import BadRequest
+
 from lb_local.login import login_forbidden
 
 index_bp = Blueprint("index_bp", __name__)
