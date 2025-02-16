@@ -1,8 +1,9 @@
+import hashlib
 import uuid
 
 from flask import Blueprint, render_template, request, redirect, url_for, flash, session
 import peewee
-from flask_login import login_required
+from flask_login import login_required, current_user
 
 from lb_local.model.credential import Credential
 from lb_local.model.service import Service
@@ -50,32 +51,51 @@ def credential_add_post():
     service_id = request.form.get("service", None)
     user_name = request.form.get("user_name", "")
     password = request.form.get("password", "")
-    if not user_name or not password:
-        flash("Both user name and password are required.")
+    owner = current_user.user_id
+    shared = request.form.get("shared", "off")
+    shared = True if shared == "on" else False
+    if not user_name or ((not password) and _id == -1):
+        if _id == -1:
+            flash("Both user name and password are required.")
+        else:
+            flash("User name is required.")
+        services = Service.select()
         return render_template("credential-add.html",
                                user_name=user_name,
                                service_id=service_id,
-                               password=password)
+                               password=password,
+                               services=services)
 
-    print(service_id)
     service = Service.get(Service.id == service_id)
-    subsonic = subsonic_credentials_url_args(user_name, password, service.url)
+
+    if password:
+        salt = str(uuid.uuid4())
+        h = hashlib.new('md5')
+        h.update(bytes(password, "utf-8"))
+        h.update(bytes(salt, "utf-8"))
+        token = h.hexdigest()
+
     try:
         if _id >= 1:
             credential = Credential.get(id=_id)
             credential.service = service_id
+            credential.owner = owner
             credential.user_name = user_name
-            credential.salt = subsonic["salt"]
-            credential.token = subsonic["token"]
+            credential.shared = shared
+            if password:
+                credential.token = token
+                credential.salt = salt
         else:
             credential = Credential.create(service=service,
+                                           owner=owner,
                                            user_name=user_name,
-                                           salt=subsonic["salt"],
-                                           token=subsonic["token"])
+                                           salt=salt,
+                                           token=token,
+                                           shared=shared)
 
         credential.save()
     except peewee.IntegrityError as err:
-        flash("Bummer dude.")
+        flash("Bummer dude. (%s)" % err)
         return render_template("credential-add.html", user_name=user_name, service=service, password=password)
 
     return redirect(url_for("credential_bp.credential_index"))
@@ -88,9 +108,10 @@ def credential_list():
 
 def load_credential(user):
     credential = Credential.select().first()
-    service = Service.get(Service.id == credential.service.id)
-    session["user"]["subsonic_url"] = service.url
-    session["user"]["subsonic_user"] = credential.user_name
-    session["user"]["subsonic_salt"] = credential.salt
-    session["user"]["subsonic_token"] = credential.token
-    print(session["user"])
+    if credential is not None:
+        session["user"]["subsonic_user"] = credential.user_name
+        session["user"]["subsonic_salt"] = credential.salt
+        session["user"]["subsonic_token"] = credential.token
+        service = Service.get(Service.id == credential.service.id)
+        if service is not None:
+            session["user"]["subsonic_url"] = service.url

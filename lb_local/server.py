@@ -17,7 +17,7 @@ from lb_local.model.credential import Credential
 from lb_local.model.service import Service
 from lb_local.model.user import User
 from lb_local.view.admin import UserModelView, ServiceModelView
-from lb_local.view.credential import credential_bp
+from lb_local.view.credential import credential_bp, load_credential
 from lb_local.view.index import index_bp
 from lb_local.view.service import service_bp
 
