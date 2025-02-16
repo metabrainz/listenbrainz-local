@@ -2,18 +2,18 @@ import json
 from copy import copy
 from urllib.parse import urlparse
 
-from flask import Blueprint, render_template, request, current_app, redirect, url_for, flash
-from werkzeug.exceptions import BadRequest
+from flask import Blueprint, render_template, request, current_app
 from flask_login import login_required
-from troi.playlist import _deserialize_from_jspf, PlaylistElement
-from troi.content_resolver.subsonic import SubsonicDatabase, Database
 from troi.content_resolver.lb_radio import ListenBrainzRadioLocal
-from troi.local.periodic_jams_local import PeriodicJamsLocal
+from troi.content_resolver.subsonic import SubsonicDatabase, Database
 from troi.content_resolver.top_tags import TopTags
 from troi.content_resolver.unresolved_recording import UnresolvedRecordingTracker
-from lb_local.login import subsonic_credentials_url_args
+from troi.local.periodic_jams_local import PeriodicJamsLocal
+from troi.playlist import _deserialize_from_jspf, PlaylistElement
+from werkzeug.exceptions import BadRequest
 
 from lb_local.login import login_forbidden
+from lb_local.login import subsonic_credentials_url_args
 
 index_bp = Blueprint("index_bp", __name__)
 
@@ -36,9 +36,9 @@ def lb_radio_get():
     prompt = request.args.get("prompt", "")
     return render_template('lb-radio.html', prompt=prompt,
                            page="lb-radio",
-                           subsonic=subsonic_credentials_url_args(current_user.config["SUBSONIC_USER"],
-                                                                  current_user.config["SUBSONIC_PASSWORD"],
-                                                                  current_user.config["SUBSONIC_URL"]))
+                           subsonic=subsonic_credentials_url_args(current_app.config["SUBSONIC_USER"],
+                                                                  current_app.config["SUBSONIC_PASSWORD"],
+                                                                  current_app.config["SUBSONIC_URL"]))
 
 
 @index_bp.route("/lb-radio", methods=["POST"])
@@ -102,9 +102,9 @@ def playlist_create():
 def weekly_jams_get():
     return render_template('weekly-jams.html',
                            page="weekly-jams",
-                           subsonic=subsonic_credentials_url_args(current_user.config["SUBSONIC_USER"],
-                                                                  current_user.config["SUBSONIC_PASSWORD"],
-                                                                  current_user.config["SUBSONIC_URL"]))
+                           subsonic=subsonic_credentials_url_args(current_app.config["SUBSONIC_USER"],
+                                                                  current_app.config["SUBSONIC_PASSWORD"],
+                                                                  current_app.config["SUBSONIC_URL"]))
 
 
 @index_bp.route("/weekly-jams", methods=["POST"])

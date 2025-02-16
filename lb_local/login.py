@@ -1,17 +1,17 @@
+import hashlib
+import uuid
 from datetime import datetime, timezone
 from functools import wraps
-import uuid
-import hashlib
 
-from flask import Flask, render_template, request, current_app, redirect, url_for, flash
-from flask_login import login_user, logout_user, login_required, current_user, LoginManager
 import peewee
+from flask import redirect, url_for
+from flask_login import current_user, LoginManager
+
 from lb_local.model.user import User
 
 login_manager = LoginManager()
 login_manager.login_view = ".welcome"
 
-import config
 
 @login_manager.user_loader
 def load_user(login_id):

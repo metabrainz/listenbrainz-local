@@ -1,14 +1,12 @@
 import uuid
-import validators
 
+import peewee
 from flask import Blueprint, render_template, request, redirect, url_for, flash
 from flask_login import login_required
-from werkzeug.exceptions import BadRequest
-import peewee
 
+from lb_local.login import subsonic_credentials_url_args
 from lb_local.model.credential import Credential
 from lb_local.model.service import Service
-from lb_local.login import subsonic_credentials_url_args
 
 credential_bp = Blueprint("credential_bp", __name__)
 

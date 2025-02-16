@@ -1,6 +1,7 @@
-from flask import request, session, current_app, redirect, url_for
-from flask_login import current_user
+from flask import request, redirect, url_for
 from flask_admin.contrib.peewee import ModelView
+from flask_login import current_user
+
 
 class UserModelView(ModelView):
 
@@ -18,12 +19,11 @@ class UserModelView(ModelView):
 
 class ServiceModelView(ModelView):
 
-    form_excluded_columns = ('uuid')
+    form_excluded_columns = ('uuid',)
     can_create = False
 
     def is_accessible(self):
-        user = session.get('user')
-        return user["is_admin"]
+        return current_user.is_admin
 
     def inaccessible_callback(self, name, **kwargs):
         return redirect(url_for('index', next=request.url))

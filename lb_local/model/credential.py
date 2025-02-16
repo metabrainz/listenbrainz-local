@@ -1,5 +1,5 @@
-import datetime
 from peewee import *
+
 from lb_local.model.database import user_db
 from lb_local.model.service import Service
 
@@ -19,4 +19,4 @@ class Credential(Model):
     token = TextField(null=False)
 
     def __repr__(self):
-        return "<Service('%s')>" % (self.name or "")
+        return "<Service('%s')>" % (self.user_name or "")
