@@ -1,8 +1,10 @@
 import json
+import uuid
 from copy import copy
 from urllib.parse import urlparse
 
-from flask import Blueprint, render_template, request, current_app, redirect, url_for, flash
+from flask import Blueprint, render_template, request, current_app, redirect, url_for, flash, session, make_response
+from flask_cors import cross_origin
 from werkzeug.exceptions import BadRequest
 from flask_login import login_required
 from troi.playlist import _deserialize_from_jspf, PlaylistElement
@@ -11,8 +13,6 @@ from troi.content_resolver.lb_radio import ListenBrainzRadioLocal
 from troi.local.periodic_jams_local import PeriodicJamsLocal
 from troi.content_resolver.top_tags import TopTags
 from troi.content_resolver.unresolved_recording import UnresolvedRecordingTracker
-from lb_local.login import subsonic_credentials_url_args
-
 from lb_local.login import login_forbidden
 
 index_bp = Blueprint("index_bp", __name__)
@@ -32,13 +32,18 @@ def welcome():
 @index_bp.route("/lb-radio", methods=["GET"])
 @login_required
 def lb_radio_get():
-
+    user = session["user"]
     prompt = request.args.get("prompt", "")
-    return render_template('lb-radio.html', prompt=prompt,
+    t = render_template('lb-radio.html', prompt=prompt,
                            page="lb-radio",
-                           subsonic=subsonic_credentials_url_args(current_user.config["SUBSONIC_USER"],
-                                                                  current_user.config["SUBSONIC_PASSWORD"],
-                                                                  current_user.config["SUBSONIC_URL"]))
+                           subsonic={ "url": user["subsonic_url"],
+                                      "user": user["subsonic_user"],
+                                      "salt": user["subsonic_salt"],
+                                      "token": user["subsonic_token"] })
+    r = make_response(t)
+    if user["subsonic_url"]:
+        r.headers.set('Access-Control-Allow-Origin', user["subsonic_url"])
+    return r
 
 
 @index_bp.route("/lb-radio", methods=["POST"])
@@ -100,12 +105,17 @@ def playlist_create():
 @index_bp.route("/weekly-jams", methods=["GET"])
 @login_required
 def weekly_jams_get():
-    return render_template('weekly-jams.html',
+    user = session["user"]
+    t = render_template('weekly-jams.html',
                            page="weekly-jams",
-                           subsonic=subsonic_credentials_url_args(current_user.config["SUBSONIC_USER"],
-                                                                  current_user.config["SUBSONIC_PASSWORD"],
-                                                                  current_user.config["SUBSONIC_URL"]))
-
+                           subsonic={ "url": user["subsonic_url"],
+                                                                 "user": user["subsonic_user"],
+                                                                 "salt": user["subsonic_salt"],
+                                                                 "token": user["subsonic_token"] })
+    r = make_response(t)
+    if user["subsonic_url"]:
+        r.headers.set('Access-Control-Allow-Origin', user["subsonic_url"])
+    return r
 
 @index_bp.route("/weekly-jams", methods=["POST"])
 @login_required

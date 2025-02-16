@@ -3,15 +3,9 @@ USER_DATABASE_FILE = "lb-local.db"
 DATABASE_FILE = "test.db"
 DOMAIN = "127.0.0.1:5000"
 SECRET_KEY = ""
-
-# To connect to a subsonic API
-SUBSONIC_URL = "http://127.0.0.1:4533"   # include http:// or https://
-SUBSONIC_USER = ""
-SUBSONIC_PASSWORD = ""
+ADMIN_USERS = []
 
 # MusicBrainz OAuth2 Details
 MUSICBRAINZ_CLIENT_ID=""
 MUSICBRAINZ_CLIENT_SECRET=""
 MUSICBRAINZ_BASE_URL=""
-
-ADMIN_USERS = []

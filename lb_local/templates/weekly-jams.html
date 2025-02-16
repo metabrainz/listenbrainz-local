@@ -45,7 +45,10 @@
 {% block scripts %}
 <script type="text/javascript">
     document.addEventListener("DOMContentLoaded", () => {
-          init_player("{{ subsonic.url}}", "{{ subsonic.args |safe}}");
+          init_player("{{ subsonic.url}}",
+                      "{{ subsonic.user}}",
+                      "{{ subsonic.salt}}",
+                      "{{ subsonic.token}}");
           //htmx.logAll();
           update_buttons();
     });

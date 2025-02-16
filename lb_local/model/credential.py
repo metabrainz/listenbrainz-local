@@ -19,4 +19,4 @@ class Credential(Model):
     token = TextField(null=False)
 
     def __repr__(self):
-        return "<Service('%s')>" % (self.name or "")
+        return "<Credential('%s')>" % (self.user_name or "")

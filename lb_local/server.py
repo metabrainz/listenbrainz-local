@@ -23,8 +23,8 @@ from lb_local.model.database import user_db
 from lb_local.view.admin import UserModelView, ServiceModelView
 from lb_local.view.service import service_bp
 from lb_local.view.index import index_bp
-from lb_local.view.credential import credential_bp
-from lb_local.login import load_user, login_forbidden, fetch_token, login_manager, update_token, subsonic_credentials_url_args
+from lb_local.view.credential import credential_bp, load_credential
+from lb_local.login import load_user, login_forbidden, fetch_token, login_manager, update_token
 import config
 
 # TODO:
@@ -42,7 +42,8 @@ def create_app():
     app = Flask(__name__, static_url_path=STATIC_PATH, static_folder=STATIC_FOLDER, template_folder=TEMPLATE_FOLDER)
     app.config.from_object('config')
 
-    CORS(app, origins=[f"{config.SUBSONIC_URL}"])
+    # UPdate with credentials from config
+    CORS(app)
     oauth = OAuth(app, fetch_token=fetch_token)
     oauth.register(name='musicbrainz',
                    authorize_url="https://musicbrainz.org/oauth2/authorize",
@@ -107,6 +108,7 @@ def auth():
     user.save()
 
     login_user(user)
+    load_credential(user)
 
     return redirect("/")
 

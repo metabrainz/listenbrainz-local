@@ -76,8 +76,12 @@ block content -%}
 {% endblock%} {% block scripts %}
 <script type="text/javascript">
     document.addEventListener("DOMContentLoaded", () => {
-        init_player("{{ subsonic.url}}", "{{ subsonic.args |safe}}");
-        //htmx.logAll();
+        init_player(
+            "{{ subsonic.url}}",
+            "{{ subsonic.user}}",
+            "{{ subsonic.salt}}",
+            "{{ subsonic.token}}",
+        );
         update_buttons();
     });
 

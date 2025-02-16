@@ -1,16 +1,17 @@
 import uuid
 import validators
 
-from flask import Blueprint, render_template, request, redirect, url_for, flash
+from flask import Blueprint, render_template, request, redirect, url_for, flash, session
 from flask_login import login_required
 from werkzeug.exceptions import BadRequest
 import peewee
 
 from lb_local.model.credential import Credential
 from lb_local.model.service import Service
-from lb_local.login import subsonic_credentials_url_args
 
 credential_bp = Blueprint("credential_bp", __name__)
+
+# TODO: After editing credential, update session
 
 @credential_bp.route("/", methods=["GET"])
 @login_required
@@ -86,3 +87,12 @@ def credential_add_post():
 def credential_list():
     credentials = Credential.select()
     return render_template("component/credential-list.html", credentials=credentials)
+
+def load_credential(user):
+    credential = Credential.select().first()
+    service = Service.get(Service.id == credential.service.id)
+    session["user"]["subsonic_url"] = service.url
+    session["user"]["subsonic_user"] = credential.user_name
+    session["user"]["subsonic_salt"] = credential.salt
+    session["user"]["subsonic_token"] = credential.token
+    print(session["user"])

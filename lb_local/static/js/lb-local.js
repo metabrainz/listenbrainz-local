@@ -46,9 +46,8 @@ function on_play() {
     update_button_states();
 }
 
-function init_player(url, args) {
-    subsonic_info = { url: url, args: args };
-    console.log(subsonic_info);
+function init_player(url, user, salt, token) {
+    subsonic_info = { url: url, user: user, salt: salt, token: token };
 }
 
 function enter_event(event, arg = null) {
@@ -217,7 +216,13 @@ function play_track(file_id) {
         "/rest/stream?id=" +
         file_id +
         "&" +
-        subsonic_info.args;
+        "u=" +
+        subsonic_info.user +
+        "&s=" +
+        subsonic_info.salt +
+        "&t=" +
+        subsonic_info.token +
+        "&v=1.14.0&c=lb-local";
     stop_playing();
     sound = new Howl({
         src: [url],
