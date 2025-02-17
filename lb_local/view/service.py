@@ -22,23 +22,23 @@ def service_add():
     return render_template("service-add.html", mode="Add")
 
 
-@service_bp.route("/<uuid>/edit", methods=["GET"])
+@service_bp.route("/<_uuid>/edit", methods=["GET"])
 @login_required
-def service_edit(uuid):
-    service = Service.get(Service.uuid == uuid)
+def service_edit(_uuid):
+    service = Service.get(Service.uuid == _uuid)
     return render_template("service-add.html", mode="Edit", service=service)
 
 
-@service_bp.route("/<uuid>/delete", methods=["GET"])
+@service_bp.route("/<_uuid>/delete", methods=["GET"])
 @login_required
-def service_delete(uuid):
+def service_delete(_uuid):
     try:
-        service = Service.get(Service.uuid == uuid)
+        service = Service.get(Service.uuid == _uuid)
         service.delete_instance()
         flash("Service deleted")
     except peewee.DoesNotExist:
-        flash("Service %s not found" % uuid)
-    except peewee.IntegrityError as err:
+        flash("Service %s not found" % _uuid)
+    except peewee.IntegrityError:
         flash("Service still in use and cannot be deleted.")
 
     return redirect(url_for("service_bp.service_index"))
@@ -70,7 +70,7 @@ def service_add_post():
         else:
             service = Service.create(name=name, url=url, uuid=uuid.uuid4())
         service.save()
-    except peewee.IntegrityError as err:
+    except peewee.IntegrityError:
         flash("Duplicate service name or service URL.")
         return render_template("service-add.html", name=name, url=url)
 

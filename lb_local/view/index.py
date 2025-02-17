@@ -1,5 +1,4 @@
 import json
-import uuid
 from copy import copy
 from urllib.parse import urlparse
 
@@ -11,7 +10,7 @@ from troi.content_resolver.top_tags import TopTags
 from troi.content_resolver.unresolved_recording import UnresolvedRecordingTracker
 from troi.local.periodic_jams_local import PeriodicJamsLocal
 from troi.playlist import _deserialize_from_jspf, PlaylistElement
-from werkzeug.exceptions import BadRequest
+from werkzeug.exceptions import BadRequest, ServiceUnavailable
 
 from lb_local.login import login_forbidden
 
@@ -121,7 +120,7 @@ def weekly_jams_post():
     try:
         recordings = playlist.playlists[0].recordings
     except (IndexError, KeyError, AttributeError):
-        return
+        raise ServiceUnavailable()
 
     return render_template('component/playlist-table.html', recordings=recordings, jspf=json.dumps(playlist.get_jspf()))
 
@@ -132,8 +131,8 @@ def tags():
     db = Database(current_app.config["DATABASE_FILE"], quiet=False)
     db.open()
     tt = TopTags()
-    tags = tt.get_top_tags(250)
-    return render_template("top-tags.html", tags=tags, page="top-tags")
+    ts = tt.get_top_tags(250)
+    return render_template("top-tags.html", tags=ts, page="top-tags")
 
 
 @index_bp.route("/unresolved", methods=["GET"])

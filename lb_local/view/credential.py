@@ -60,7 +60,7 @@ def credential_delete(id):
         flash("Credential deleted")
     except peewee.DoesNotExist:
         flash("Credential %s not found" % uuid)
-    except peewee.IntegrityError as err:
+    except peewee.IntegrityError:
         flash("Credential still in use and cannot be deleted.")
 
     return redirect(url_for("credential_bp.credential_index"))
@@ -81,7 +81,7 @@ def credential_add_post():
             flash("Both user name and password are required.")
         else:
             flash("User name is required.")
-        services = load_current_services_for_user()
+        services = Service.select()
         return render_template("credential-add.html",
                                user_name=user_name,
                                service_id=service_id,
@@ -118,7 +118,7 @@ def credential_add_post():
     return redirect(url_for("credential_bp.credential_index"))
 
 
-def load_credential(user):
+def load_credential():
     # TODO: Add the DB file support as well
     credential = Credential.select().first()
     subsonic = {}

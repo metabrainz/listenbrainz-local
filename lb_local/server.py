@@ -101,7 +101,7 @@ def auth():
     user.save()
 
     login_user(user)
-    load_credential(user)
+    load_credential()
 
     return redirect("/")
 
