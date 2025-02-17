@@ -1,3 +1,5 @@
+import uuid
+
 from flask_login import UserMixin
 from peewee import *
 
@@ -15,7 +17,7 @@ class User(Model, UserMixin):
         table_name = "user"
 
     user_id = AutoField(primary_key=True)
-    login_id = TextField(null=True, unique=True)
+    login_id = TextField(null=True, unique=True, default=lambda: str(uuid.uuid4()))
     name = TextField(null=False, unique=True)
     access_token = TextField(null=True)
     refresh_token = TextField(null=True)

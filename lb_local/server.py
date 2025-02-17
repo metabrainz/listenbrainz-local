@@ -85,7 +85,6 @@ def auth():
         user = User.select().where(User.name == userinfo["sub"]).get()
         user.access_token = token["access_token"]
         user.access_token_expires_at = datetime.fromtimestamp(token["expires_at"], tz=None)
-        user.login_id=str(uuid.uuid4())
         if "refresh_token" in token:
             user.refresh_token = token["refresh_token"]
     except peewee.DoesNotExist:
@@ -93,8 +92,7 @@ def auth():
             user = User(name=userinfo["sub"],
                         access_token=token["access_token"],
                         refresh_token=token.get("refresh_token"),
-                        access_token_expires_at=datetime.fromtimestamp(token["expires_at"], tz=None),
-                        login_id=str(uuid.uuid4()))
+                        access_token_expires_at=datetime.fromtimestamp(token["expires_at"], tz=None))
         else:
             flash("Sorry, you do not have an account on this server.")
             return redirect("/welcome")
