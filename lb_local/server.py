@@ -85,6 +85,7 @@ def auth():
         user = User.select().where(User.name == userinfo["sub"]).get()
         user.access_token = token["access_token"]
         user.access_token_expires_at = datetime.fromtimestamp(token["expires_at"], tz=None)
+        user.login_id=str(uuid.uuid4())
         if "refresh_token" in token:
             user.refresh_token = token["refresh_token"]
     except peewee.DoesNotExist:
