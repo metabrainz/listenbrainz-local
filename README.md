@@ -6,4 +6,4 @@ LB Radio and Weekly jams exists now and many other recommendation tools will be 
 
 # Screenshot
 
-![screenshot](/misc/screenshot.png)
+![screenshot](/misc/lb-local-screenshot.png)
