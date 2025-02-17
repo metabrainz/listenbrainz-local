@@ -1,9 +1,9 @@
 # listenbrainz-local
 
-ListenBrainz local brings recommendation features to your local Subsonic hosted music collection. ListenBrainz local
-bring LB Radio and Weekly Jams to your local collection.
+ListenBrainz local brings recommendation features to your local Subsonic hosted music collection. Support for
+LB Radio and Weekly jams exists now and many other recommendation tools will be added over time.
 
 
 # Screenshot
 
-![alt text](http://url/to/img.png)
+![screenshot](/misc/screenshot.png)
