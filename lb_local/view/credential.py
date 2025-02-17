@@ -12,6 +12,7 @@ credential_bp = Blueprint("credential_bp", __name__)
 
 # TODO: After editing credential, update session
 
+
 def load_current_credentials_for_user():
     user_id = current_user.user_id
     return Credential.select().where((Credential.owner == user_id) | (Credential.shared == True))
@@ -122,9 +123,7 @@ def load_credential(user):
     credential = Credential.select().first()
     subsonic = {}
     if credential is not None:
-        subsonic = { "user": credential.user_name,
-                     "salt": credential.salt,
-                     "token": credential.token}
+        subsonic = {"user": credential.user_name, "salt": credential.salt, "token": credential.token}
         service = Service.get(Service.id == credential.service.id)
         if service is not None:
             subsonic["url"] = service.url

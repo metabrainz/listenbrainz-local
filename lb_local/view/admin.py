@@ -17,9 +17,10 @@ class UserModelView(ModelView):
         # TODO: Revoke session for user
         pass
 
+
 class ServiceModelView(ModelView):
 
-    form_excluded_columns = ('uuid',)
+    form_excluded_columns = ('uuid', )
     can_create = False
 
     def is_accessible(self):

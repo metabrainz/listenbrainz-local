@@ -31,9 +31,7 @@ class UserDatabase:
             os.makedirs(db_dir, exist_ok=True)
             setup_db(self.db_file)
             user_db.connect()
-            user_db.create_tables((
-                User, Service, Credential
-            ))
+            user_db.create_tables((User, Service, Credential))
         except Exception as e:
             logger.error("Failed to create db file %r: %s" % (self.db_file, e))
 

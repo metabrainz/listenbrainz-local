@@ -12,6 +12,7 @@ login_manager.login_view = "index_bp.welcome"
 
 import config
 
+
 @login_manager.user_loader
 def load_user(login_id):
     try:
@@ -21,6 +22,7 @@ def load_user(login_id):
 
 
 def login_forbidden(f):
+
     @wraps(f)
     def decorated(*args, **kwargs):
         if not current_user.is_anonymous:

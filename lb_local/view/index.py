@@ -17,6 +17,7 @@ from lb_local.login import login_forbidden
 
 index_bp = Blueprint("index_bp", __name__)
 
+
 @index_bp.route("/")
 @login_required
 def index():
@@ -33,9 +34,7 @@ def welcome():
 @login_required
 def lb_radio_get():
     prompt = request.args.get("prompt", "")
-    t = render_template('lb-radio.html', prompt=prompt,
-                           page="lb-radio",
-                           subsonic=session["subsonic"])
+    t = render_template('lb-radio.html', prompt=prompt, page="lb-radio", subsonic=session["subsonic"])
     r = make_response(t)
     if session["subsonic"]["url"]:
         r.headers.set('Access-Control-Allow-Origin', session["subsonic"]["url"])
@@ -100,13 +99,12 @@ def playlist_create():
 @index_bp.route("/weekly-jams", methods=["GET"])
 @login_required
 def weekly_jams_get():
-    t = render_template('weekly-jams.html',
-                           page="weekly-jams",
-                           subsonic=session["subsonic"])
+    t = render_template('weekly-jams.html', page="weekly-jams", subsonic=session["subsonic"])
     r = make_response(t)
     if session["subsonic"]["url"]:
         r.headers.set('Access-Control-Allow-Origin', session["subsonic"]["url"])
     return r
+
 
 @index_bp.route("/weekly-jams", methods=["POST"])
 @login_required

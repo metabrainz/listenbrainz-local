@@ -9,21 +9,25 @@ from lb_local.model.service import Service
 
 service_bp = Blueprint("service_bp", __name__)
 
+
 @service_bp.route("/", methods=["GET"])
 @login_required
 def service_index():
     return render_template("service.html", page="service")
+
 
 @service_bp.route("/add", methods=["GET"])
 @login_required
 def service_add():
     return render_template("service-add.html", mode="Add")
 
+
 @service_bp.route("/<uuid>/edit", methods=["GET"])
 @login_required
 def service_edit(uuid):
     service = Service.get(Service.uuid == uuid)
     return render_template("service-add.html", mode="Edit", service=service)
+
 
 @service_bp.route("/<uuid>/delete", methods=["GET"])
 @login_required
@@ -38,6 +42,7 @@ def service_delete(uuid):
         flash("Service still in use and cannot be deleted.")
 
     return redirect(url_for("service_bp.service_index"))
+
 
 @service_bp.route("/add", methods=["POST"])
 @login_required
@@ -70,6 +75,7 @@ def service_add_post():
         return render_template("service-add.html", name=name, url=url)
 
     return redirect(url_for("service_bp.service_index"))
+
 
 @service_bp.route("/list", methods=["GET"])
 @login_required

@@ -29,6 +29,7 @@ STATIC_PATH = "/static"
 STATIC_FOLDER = "static"
 TEMPLATE_FOLDER = "templates"
 
+
 def create_app():
     exists = os.path.exists(config.USER_DATABASE_FILE)
     udb = UserDatabase(config.USER_DATABASE_FILE, False)
@@ -88,13 +89,11 @@ def auth():
             user.refresh_token = token["refresh_token"]
     except peewee.DoesNotExist:
         if userinfo["sub"] in config.ADMIN_USERS:
-            user = User(
-                name=userinfo["sub"],
-                access_token=token["access_token"],
-                refresh_token=token.get("refresh_token"),
-                access_token_expires_at=datetime.fromtimestamp(token["expires_at"], tz=None),
-                login_id=str(uuid.uuid4())
-            )
+            user = User(name=userinfo["sub"],
+                        access_token=token["access_token"],
+                        refresh_token=token.get("refresh_token"),
+                        access_token_expires_at=datetime.fromtimestamp(token["expires_at"], tz=None),
+                        login_id=str(uuid.uuid4()))
         else:
             flash("Sorry, you do not have an account on this server.")
             return redirect("/welcome")
