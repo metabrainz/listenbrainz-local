@@ -1,7 +1,7 @@
 import hashlib
 import uuid
 
-from flask import Blueprint, render_template, request, redirect, url_for, flash, session
+from flask import Blueprint, render_template, request, redirect, url_for, flash
 import peewee
 from flask_login import login_required, current_user
 
@@ -12,10 +12,25 @@ credential_bp = Blueprint("credential_bp", __name__)
 
 # TODO: After editing credential, update session
 
+def load_current_credentials_for_user():
+    user_id = current_user.user_id
+    return Credential.select((Credential.owner == user_id) | (Credential.shared == True))
+
+
 @credential_bp.route("/", methods=["GET"])
 @login_required
 def credential_index():
     return render_template("credential.html", page="credential")
+
+
+@credential_bp.route("/list", methods=["GET"])
+@login_required
+def credential_list():
+    credentials = load_current_credentials_for_user()
+    from icecream import ic
+    ic(credentials)
+    return render_template("component/credential-list.html", credentials=credentials)
+
 
 @credential_bp.route("/add", methods=["GET"])
 @login_required
@@ -23,12 +38,14 @@ def credential_add():
     services = Service.select()
     return render_template("credential-add.html", mode="Add", services=services)
 
+
 @credential_bp.route("/<id>/edit", methods=["GET"])
 @login_required
 def credential_edit(id):
     credential = Credential.get(Credential.id == id)
     services = Service.select()
     return render_template("credential-add.html", mode="Edit", credential=credential, services=services)
+
 
 @credential_bp.route("/<id>/delete", methods=["GET"])
 @login_required
@@ -43,6 +60,7 @@ def credential_delete(id):
         flash("Credential still in use and cannot be deleted.")
 
     return redirect(url_for("credential_bp.credential_index"))
+
 
 @credential_bp.route("/add", methods=["POST"])
 @login_required
@@ -59,7 +77,7 @@ def credential_add_post():
             flash("Both user name and password are required.")
         else:
             flash("User name is required.")
-        services = Service.select()
+        services = load_current_services_for_user()
         return render_template("credential-add.html",
                                user_name=user_name,
                                service_id=service_id,
@@ -86,12 +104,7 @@ def credential_add_post():
                 credential.token = token
                 credential.salt = salt
         else:
-            credential = Credential.create(service=service,
-                                           owner=owner,
-                                           user_name=user_name,
-                                           salt=salt,
-                                           token=token,
-                                           shared=shared)
+            credential = Credential.create(service=service, owner=owner, user_name=user_name, salt=salt, token=token, shared=shared)
 
         credential.save()
     except peewee.IntegrityError as err:
@@ -100,18 +113,13 @@ def credential_add_post():
 
     return redirect(url_for("credential_bp.credential_index"))
 
-@credential_bp.route("/list", methods=["GET"])
-@login_required
-def credential_list():
-    credentials = Credential.select()
-    return render_template("component/credential-list.html", credentials=credentials)
 
 def load_credential(user):
     credential = Credential.select().first()
     if credential is not None:
-        session["user"]["subsonic_user"] = credential.user_name
-        session["user"]["subsonic_salt"] = credential.salt
-        session["user"]["subsonic_token"] = credential.token
+        current_user["subsonic_user"] = credential.user_name
+        current_user["user"]["subsonic_salt"] = credential.salt
+        current_user["user"]["subsonic_token"] = credential.token
         service = Service.get(Service.id == credential.service.id)
         if service is not None:
-            session["user"]["subsonic_url"] = service.url
+            current_user["user"]["subsonic_url"] = service.url

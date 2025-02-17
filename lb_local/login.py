@@ -8,7 +8,7 @@ import peewee
 from lb_local.model.user import User
 
 login_manager = LoginManager()
-login_manager.login_view = ".welcome"
+login_manager.login_view = "index_bp.welcome"
 
 import config
 
