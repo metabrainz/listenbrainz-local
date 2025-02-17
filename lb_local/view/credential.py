@@ -14,21 +14,22 @@ credential_bp = Blueprint("credential_bp", __name__)
 
 def load_current_credentials_for_user():
     user_id = current_user.user_id
-    return Credential.select((Credential.owner == user_id) | (Credential.shared == True))
+    return Credential.select().where((Credential.owner == user_id) | (Credential.shared == True))
 
 
 @credential_bp.route("/", methods=["GET"])
 @login_required
 def credential_index():
-    return render_template("credential.html", page="credential")
+    services = Service.select()
+    if not services:
+        flash("You need to add a service before adding a credential")
+    return render_template("credential.html", page="credential", services=services)
 
 
 @credential_bp.route("/list", methods=["GET"])
 @login_required
 def credential_list():
     credentials = load_current_credentials_for_user()
-    from icecream import ic
-    ic(credentials)
     return render_template("component/credential-list.html", credentials=credentials)
 
 
@@ -36,6 +37,8 @@ def credential_list():
 @login_required
 def credential_add():
     services = Service.select()
+    if not services:
+        flash("You need to add a service before adding a credential")
     return render_template("credential-add.html", mode="Add", services=services)
 
 
