@@ -150,3 +150,9 @@ body {
 .form-buttons {
     margin-top: 1.2em;
 }
+
+#scan-log {
+    height: 100%;
+    margin-top: 1.2em;
+    font-family: monospace;
+}

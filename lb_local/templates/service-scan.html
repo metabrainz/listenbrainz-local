@@ -1,0 +1,19 @@
+{%- extends 'include/base.html' -%} {%- block title -%}services{% endblock %}
+{%- block content -%}
+
+<h2>Sync service</h2>
+
+{% with messages = get_flashed_messages() %} {% if messages %} {% for message in
+messages %}
+<div class="alert alert-warning" role="alert">{{ message }}</div>
+{% endfor %} {% endif %} {% endwith %}
+
+<div class="form-buttons text-end">
+    <a class="btn btn-lg btn-primary">Scan</a>
+</div>
+
+<div class="form-body" id="scan-log"></div>
+
+{% endblock%} {% block scripts %}
+<script type="text/javascript"></script>
+{% endblock %}

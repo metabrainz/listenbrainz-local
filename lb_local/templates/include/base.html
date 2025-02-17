@@ -42,9 +42,9 @@
         {% endblock %}
     </head>
     <body>
-        <div class="container-md vh-100">
+        <div class="container-md">
             {% if no_navbar %} {% else %} {% include 'include/navbar.html' %}
-            <div class="row main-row">
+            <div class="row main-row h-100">
                 <div class="col-md-12">
                     {% endif %} {% block content %} {% endblock %} {% if
                     no_navbar %} {% else %}

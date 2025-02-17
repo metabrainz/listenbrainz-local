@@ -1,4 +1,5 @@
 import uuid
+from time import time
 
 import peewee
 import validators
@@ -14,6 +15,18 @@ service_bp = Blueprint("service_bp", __name__)
 @login_required
 def service_index():
     return render_template("service.html", page="service")
+
+
+@service_bp.route("/list", methods=["GET"])
+@login_required
+def service_list():
+    services = Service.select()
+    for service in services:
+        if service.last_scanned:
+            service.last_scanned_text = "%s seconds ago" % int(time() - service.last_scanned)
+        else:
+            service.last_scanned_text = ""
+    return render_template("component/service-list.html", services=services)
 
 
 @service_bp.route("/add", methods=["GET"])
@@ -76,9 +89,7 @@ def service_add_post():
 
     return redirect(url_for("service_bp.service_index"))
 
-
-@service_bp.route("/list", methods=["GET"])
+@service_bp.route("/<_uuid>/sync", methods=["GET"])
 @login_required
-def service_list():
-    services = Service.select()
-    return render_template("component/service-list.html", services=services)
+def service_scan(_uuid):
+    return render_template("service-scan.html", page="service")

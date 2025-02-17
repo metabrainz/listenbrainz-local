@@ -3,7 +3,8 @@
     <thead>
         <th>URL</th>
         <th>name</th>
-        <th>UUID</th>
+        <th>status</th>
+        <th>last sync</th>
         <th>actions</th>
     </thead>
     <tbody>
@@ -11,8 +12,10 @@
         <tr>
             <td>{{ service.name }}</td>
             <td>{{ service.url }}</td>
-            <td>{{ service.uuid }}</td>
+            <td>{{ service.status or "not scanned" }}</td>
+            <td>{{ service.last_scanned_text }}</td>
             <td>
+                <a href="/service/{{ service.uuid }}/sync">Sync</a> |
                 <a href="/service/{{ service.uuid }}/edit">Edit</a> |
                 <a href="/service/{{ service.uuid }}/delete">Delete</a>
             </td>
