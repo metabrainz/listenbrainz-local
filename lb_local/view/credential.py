@@ -1,7 +1,7 @@
 import hashlib
 import uuid
 
-from flask import Blueprint, render_template, request, redirect, url_for, flash
+from flask import Blueprint, render_template, request, redirect, url_for, flash, session
 import peewee
 from flask_login import login_required, current_user
 
@@ -118,11 +118,15 @@ def credential_add_post():
 
 
 def load_credential(user):
+    # TODO: Add the DB file support as well
     credential = Credential.select().first()
+    subsonic = {}
     if credential is not None:
-        current_user["subsonic_user"] = credential.user_name
-        current_user["user"]["subsonic_salt"] = credential.salt
-        current_user["user"]["subsonic_token"] = credential.token
+        subsonic = { "user": credential.user_name,
+                     "salt": credential.salt,
+                     "token": credential.token}
         service = Service.get(Service.id == credential.service.id)
         if service is not None:
-            current_user["user"]["subsonic_url"] = service.url
+            subsonic["url"] = service.url
+
+    session["subsonic"] = subsonic

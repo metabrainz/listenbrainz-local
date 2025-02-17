@@ -3,7 +3,7 @@ import uuid
 from copy import copy
 from urllib.parse import urlparse
 
-from flask import Blueprint, render_template, request, current_app, session, make_response
+from flask import Blueprint, render_template, request, current_app, make_response, session
 from flask_login import login_required
 from troi.content_resolver.lb_radio import ListenBrainzRadioLocal
 from troi.content_resolver.subsonic import SubsonicDatabase, Database
@@ -32,17 +32,13 @@ def welcome():
 @index_bp.route("/lb-radio", methods=["GET"])
 @login_required
 def lb_radio_get():
-    user = session["user"]
     prompt = request.args.get("prompt", "")
     t = render_template('lb-radio.html', prompt=prompt,
                            page="lb-radio",
-                           subsonic={ "url": user["subsonic_url"],
-                                      "user": user["subsonic_user"],
-                                      "salt": user["subsonic_salt"],
-                                      "token": user["subsonic_token"] })
+                           subsonic=session["subsonic"])
     r = make_response(t)
-    if user["subsonic_url"]:
-        r.headers.set('Access-Control-Allow-Origin', user["subsonic_url"])
+    if session["subsonic"]["url"]:
+        r.headers.set('Access-Control-Allow-Origin', session["subsonic"]["url"])
     return r
 
 
@@ -89,11 +85,10 @@ def playlist_create():
     playlist_element = PlaylistElement()
     playlist_element.playlists = [playlist]
 
-    url = urlparse(current_app.config["SUBSONIC_URL"])
+    url = urlparse(session["subsonic"]["url"])
     conf = copy(current_app.config)
     conf["SUBSONIC_HOST"] = "%s://%s" % (url.scheme, url.hostname)
     conf["SUBSONIC_PORT"] = int(url.port)
-    print(conf)
 
     db = SubsonicDatabase(current_app.config["DATABASE_FILE"], Config(**conf), quiet=False)
     db.open()
@@ -105,16 +100,12 @@ def playlist_create():
 @index_bp.route("/weekly-jams", methods=["GET"])
 @login_required
 def weekly_jams_get():
-    user = session["user"]
     t = render_template('weekly-jams.html',
                            page="weekly-jams",
-                           subsonic={ "url": user["subsonic_url"],
-                                                                 "user": user["subsonic_user"],
-                                                                 "salt": user["subsonic_salt"],
-                                                                 "token": user["subsonic_token"] })
+                           subsonic=session["subsonic"])
     r = make_response(t)
-    if user["subsonic_url"]:
-        r.headers.set('Access-Control-Allow-Origin', user["subsonic_url"])
+    if session["subsonic"]["url"]:
+        r.headers.set('Access-Control-Allow-Origin', session["subsonic"]["url"])
     return r
 
 @index_bp.route("/weekly-jams", methods=["POST"])
