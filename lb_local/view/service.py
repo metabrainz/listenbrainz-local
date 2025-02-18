@@ -93,3 +93,8 @@ def service_add_post():
 @login_required
 def service_scan(_uuid):
     return render_template("service-scan.html", page="service")
+
+@service_bp.route("/<_uuid>/sync/start", methods=["GET"])
+@login_required
+def service_scan_start(_uuid):
+    return render_template("service-scan.html", page="service")
