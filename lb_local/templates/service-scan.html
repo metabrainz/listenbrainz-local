@@ -9,7 +9,15 @@ messages %}
 {% endfor %} {% endif %} {% endwith %}
 
 <div class="form-buttons text-end">
-    <a class="btn btn-lg btn-primary">Scan</a>
+    <form action="/service/{{ uuid }}/sync/start" method="POST">
+        <button
+            type="submit"
+            class="btn btn-lg btn-primary"
+            hx-class="btn btn-lg btn-primary"
+        >
+            Scan
+        </button>
+    </form>
 </div>
 
 <div class="form-body" id="scan-log"></div>

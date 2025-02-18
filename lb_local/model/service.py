@@ -19,7 +19,7 @@ class Service(Model):
     last_scanned = IntegerField(null=True)
     scan_log = TextField(null=True)
 
-    # This will contain the text for the last scanned field. Can I do this?
+    # This will contain the text for the last scanned field passed to the UI
     last_scanned_text = None
 
     def __repr__(self):

@@ -3,10 +3,11 @@ from time import time
 
 import peewee
 import validators
-from flask import Blueprint, render_template, request, redirect, url_for, flash
+from flask import Blueprint, render_template, request, redirect, url_for, flash, current_app
 from flask_login import login_required
 
 from lb_local.model.service import Service
+from lb_local.model.credential import Credential
 
 service_bp = Blueprint("service_bp", __name__)
 
@@ -92,9 +93,16 @@ def service_add_post():
 @service_bp.route("/<_uuid>/sync", methods=["GET"])
 @login_required
 def service_scan(_uuid):
-    return render_template("service-scan.html", page="service")
+    return render_template("service-scan.html", page="service", uuid=_uuid)
 
-@service_bp.route("/<_uuid>/sync/start", methods=["GET"])
+@service_bp.route("/<_uuid>/sync/start", methods=["POST"])
 @login_required
 def service_scan_start(_uuid):
-    return render_template("service-scan.html", page="service")
+    credential = Credential.select().first()
+    service = Service.get(Service.uuid == _uuid)
+    added = current_app.config["SYNC_MANAGER"].request_service_scan(service, credential)
+    if added:
+        flash("The sync has been added to the queue -- it should start soon.")
+    else:
+        flash("There is already a sync waiting or in process for this service.")
+    return render_template("service-scan.html", page="service", uuid=_uuid)

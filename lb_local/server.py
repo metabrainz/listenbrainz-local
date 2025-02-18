@@ -20,6 +20,7 @@ from lb_local.view.admin import UserModelView, ServiceModelView
 from lb_local.view.credential import credential_bp, load_credential
 from lb_local.view.index import index_bp
 from lb_local.view.service import service_bp
+from lb_local.sync import SyncManager
 
 # TODO:
 # - Pass hints and error messages from content resolver
@@ -33,9 +34,11 @@ TEMPLATE_FOLDER = "templates"
 def create_app():
     exists = os.path.exists(config.USER_DATABASE_FILE)
     udb = UserDatabase(config.USER_DATABASE_FILE, False)
+    sync_manager = SyncManager()
 
     app = Flask(__name__, static_url_path=STATIC_PATH, static_folder=STATIC_FOLDER, template_folder=TEMPLATE_FOLDER)
     app.config.from_object('config')
+    app.config["SYNC_MANAGER"] = sync_manager
 
     # UPdate with credentials from config
     CORS(app)
@@ -60,7 +63,6 @@ def create_app():
         udb.open()
 
     return app, oauth
-
 
 app, oauth = create_app()
 app.register_blueprint(index_bp)
