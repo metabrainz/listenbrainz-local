@@ -2,14 +2,17 @@ import os
 from copy import copy
 import logging
 from logging.handlers import QueueHandler
-from queue import Queue
+from queue import Queue, Empty
 from threading import Lock, Thread
+from time import time
 
 from flask import current_app
 from troi.content_resolver.subsonic import SubsonicDatabase
 from urllib.parse import urlparse
 
 from lb_local.model.service import Service
+
+LOG_EXPIRY_DURATION = 60 * 60  # in s
 
 logging_queue = Queue()
 logger = logging.getLogger("troi_subsonic_scan")
@@ -28,6 +31,9 @@ class SyncManager(Thread):
         self.lock = Lock()
         self.job_data = {}
         self._exit = False
+        
+    def exit(self):
+        self._exit = True
 
     def request_service_scan(self, service, credential):
         added = False
@@ -35,14 +41,12 @@ class SyncManager(Thread):
         if service.uuid not in self.job_data:
             added = True
             self.job_queue.put((service, credential))
-            self.job_data[service.uuid] = { "service": service, "credential": credential, "scan_log": list() }
+            self.job_data[service.uuid] = { "service": service, "credential": credential, "sync_log": "", "completed": False, "expire_at": time() + LOG_EXPIRY_DURATION }
         self.lock.release()
 
         return added
 
-    def scan_service(self, service, credential):
-        print("Start scanning")
-
+    def sync_service(self, service, credential):
         url = urlparse(service.url)
         conf = copy(current_app.config)
         conf["SUBSONIC_HOST"] = "%s://%s" % (url.scheme, url.hostname)
@@ -52,7 +56,7 @@ class SyncManager(Thread):
         conf["SUBSONIC_SALT"] = credential.salt
         conf["SUBSONIC_TOKEN"] = credential.token
 
-        #TODO: how to report errors
+        #TODO: how to report errors -- add to scan log for now
         index_dir = os.path.join(current_app.config["SERVICES_DIRECTORY"], service.uuid)
         try:
             os.makedirs(index_dir)
@@ -67,6 +71,59 @@ class SyncManager(Thread):
         db.open()
         db.sync()
 
-    def run():
-        while not _self.exit():
-            pass
+        self.lock.acquire()
+        self.job_data[service.uuid]["completed"] = True
+        self.lock.release()
+        
+        print("scan complete")
+    
+    def get_sync_log(self, service):
+        self.lock.acquire()
+        try:
+            logs = self.job_data[service]["sync_log"]
+        except KeyError:
+            return None
+        finally:
+            self.lock.release()
+        
+        loaded_rows = False
+        while True:
+            try:
+                rec = logging_queue.get_nowait()
+                logs += rec.message + "\n"
+                loaded_rows = True
+            except Empty:
+                break
+            
+        self.lock.acquire()
+        try:
+            completed = self.job_data[service]["completed"]
+        except KeyError:
+            return None
+        finally:
+            self.lock.release()
+
+        if not loaded_rows and completed:
+            print("get log notify completed")
+            return None
+
+        self.lock.acquire()
+        self.job_data["sync_log"] = logs
+        self.lock.release()
+        
+        print("log, normal end", completed);
+        return logs, completed
+
+    def run(self):
+        
+        #TODO: Cleanup old logs
+        while not self.exit():
+            try:
+                service, credential = self.job_queue.get()
+            except Empty:
+                sleep(.5)
+                continue
+
+            from lb_local.server import app
+            with app.app_context():
+                self.sync_service(service, credential)

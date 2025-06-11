@@ -1,0 +1,10 @@
+<textarea id="log-text"
+          name="log-text"
+          hx-get="/service/{{ uuid }}/sync/log" 
+          {% if update %}
+            hx-trigger="every 3s"
+          {% endif %}
+          hx-include="false"
+          style="width: 100%; height: 100%">
+        {{ logs }}
+</textarea> 

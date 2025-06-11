@@ -5,6 +5,7 @@ import peewee
 import validators
 from flask import Blueprint, render_template, request, redirect, url_for, flash, current_app
 from flask_login import login_required
+from werkzeug.exceptions import BadRequest
 
 from lb_local.model.service import Service
 from lb_local.model.credential import Credential
@@ -23,10 +24,10 @@ def service_index():
 def service_list():
     services = Service.select()
     for service in services:
-        if service.last_scanned:
-            service.last_scanned_text = "%s seconds ago" % int(time() - service.last_scanned)
+        if service.last_synched:
+            service.last_synched_text = "%s seconds ago" % int(time() - service.last_synched)
         else:
-            service.last_scanned_text = ""
+            service.last_synched_text = ""
     return render_template("component/service-list.html", services=services)
 
 
@@ -92,17 +93,31 @@ def service_add_post():
 
 @service_bp.route("/<_uuid>/sync", methods=["GET"])
 @login_required
-def service_scan(_uuid):
-    return render_template("service-scan.html", page="service", uuid=_uuid)
+def service_sync(_uuid):
+    return render_template("service-sync.html", page="service", uuid=_uuid)
 
 @service_bp.route("/<_uuid>/sync/start", methods=["POST"])
 @login_required
-def service_scan_start(_uuid):
+def service_sync_start(_uuid):
     credential = Credential.select().first()
     service = Service.get(Service.uuid == _uuid)
     added = current_app.config["SYNC_MANAGER"].request_service_scan(service, credential)
-    if added:
-        flash("The sync has been added to the queue -- it should start soon.")
-    else:
+    if not added:
         flash("There is already a sync waiting or in process for this service.")
-    return render_template("service-scan.html", page="service", uuid=_uuid)
+        return render_template("service-sync.html", page="service", uuid=_uuid)
+
+    return render_template("component/sync-log.html", logs="The sync has been enqueued, it should start soon.", update=True, uuid=_uuid)
+
+@service_bp.route("/<_uuid>/sync/log")
+@login_required
+def service_sync_log(_uuid):
+    try:
+        logs, completed = current_app.config["SYNC_MANAGER"].get_sync_log(_uuid)
+    except TypeError:
+        return BadRequest("What are you smoking?")
+
+    if logs is None:
+        raise BadRequest("Cannot find service with uuid %s" % _uuid)
+
+    print("log update: ", completed)    
+    return render_template("component/sync-log.html", logs=logs, update=not completed, uuid=_uuid)

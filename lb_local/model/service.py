@@ -16,11 +16,8 @@ class Service(Model):
     url = TextField(null=False, unique=True)
     uuid = TextField(null=False)
     status = TextField(null=True)
-    last_scanned = IntegerField(null=True)
+    last_synched = IntegerField(null=True)
     scan_log = TextField(null=True)
-
-    # This will contain the text for the last scanned field passed to the UI
-    last_scanned_text = None
 
     def __repr__(self):
         return "<Service('%s')>" % (self.name or "")

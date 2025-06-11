@@ -1,3 +1,4 @@
+import atexit
 import os
 import uuid
 from datetime import datetime
@@ -34,11 +35,9 @@ TEMPLATE_FOLDER = "templates"
 def create_app():
     exists = os.path.exists(config.USER_DATABASE_FILE)
     udb = UserDatabase(config.USER_DATABASE_FILE, False)
-    sync_manager = SyncManager()
 
     app = Flask(__name__, static_url_path=STATIC_PATH, static_folder=STATIC_FOLDER, template_folder=TEMPLATE_FOLDER)
     app.config.from_object('config')
-    app.config["SYNC_MANAGER"] = sync_manager
 
     # UPdate with credentials from config
     CORS(app)
@@ -57,11 +56,15 @@ def create_app():
 
     login_manager.init_app(app)
 
+    sync_manager = SyncManager()
+    sync_manager.start()
+    app.config["SYNC_MANAGER"] = sync_manager
+
     if not exists:
         udb.create()
     else:
         udb.open()
-
+        
     return app, oauth
 
 app, oauth = create_app()
@@ -69,6 +72,10 @@ app.register_blueprint(index_bp)
 app.register_blueprint(service_bp, url_prefix="/service")
 app.register_blueprint(credential_bp, url_prefix="/credential")
 
+#    print("got teardown request")
+#    if app.config["SYNC_MANAGER"] is not None:
+#        app.config["SYNC_MANAGER"].exit()
+#    app.config["SYNC_MANAGER"] = None
 
 @app.route("/login")
 def login_redirect():

@@ -12,7 +12,7 @@
         <tr>
             <td>{{ service.name }}</td>
             <td>{{ service.url }}</td>
-            <td>{{ service.status or "not scanned" }}</td>
+            <td>{{ service.status or "not synced" }}</td>
             <td>{{ service.last_scanned_text }}</td>
             <td>
                 <a href="/service/{{ service.uuid }}/sync">Sync</a> |
