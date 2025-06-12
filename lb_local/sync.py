@@ -82,7 +82,7 @@ class SyncManager(Thread):
         try:
             logs = self.job_data[service]["sync_log"]
         except KeyError:
-            return None
+            return None, True
         finally:
             self.lock.release()
         
@@ -104,11 +104,10 @@ class SyncManager(Thread):
             self.lock.release()
 
         if not loaded_rows and completed:
-            print("get log notify completed")
-            return None
+            return logs, completed
 
         self.lock.acquire()
-        self.job_data["sync_log"] = logs
+        self.job_data[service]["sync_log"] = logs
         self.lock.release()
         
         print("log, normal end", completed);

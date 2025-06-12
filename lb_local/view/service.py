@@ -114,10 +114,13 @@ def service_sync_log(_uuid):
     try:
         logs, completed = current_app.config["SYNC_MANAGER"].get_sync_log(_uuid)
     except TypeError:
+        print("bad request")
         return BadRequest("What are you smoking?")
 
     if logs is None:
+        print("empty logs")
         raise BadRequest("Cannot find service with uuid %s" % _uuid)
 
-    print("log update: ", completed)    
-    return render_template("component/sync-log.html", logs=logs, update=not completed, uuid=_uuid)
+    print("log update completed: ", completed)    
+    print(logs)
+    return render_template("component/sync-log.html", logs=logs, update=(not completed), uuid=_uuid)

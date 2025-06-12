@@ -1,10 +1,10 @@
-<textarea id="log-text"
-          name="log-text"
-          hx-get="/service/{{ uuid }}/sync/log" 
-          {% if update %}
-            hx-trigger="every 3s"
-          {% endif %}
-          hx-include="false"
-          style="width: 100%; height: 100%">
-        {{ logs }}
+<textarea id="scan-log"
+    {% if update %}
+        hx-trigger="every 5s"
+        hx-get="/service/{{ uuid }}/sync/log" 
+        hx-swap="outerHTML"
+        hx-target="#scan-log"
+    {% endif %}
+    hx-include="false">
+    {{ logs }}
 </textarea> 

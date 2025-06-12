@@ -153,6 +153,7 @@ body {
 
 #scan-log {
     height: 100%;
+    width: 100%;
     margin-top: 1.2em;
     font-family: monospace;
 }
