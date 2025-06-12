@@ -38,6 +38,8 @@ class SyncManager(Thread):
     def request_service_scan(self, service, credential):
         added = False
         self.lock.acquire()
+        if service.uuid in self.job_data and self.job_data[service.uuid]["completed"]:
+            del self.job_data[service.uuid]
         if service.uuid not in self.job_data:
             added = True
             self.job_queue.put((service, credential))

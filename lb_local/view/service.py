@@ -103,8 +103,7 @@ def service_sync_start(_uuid):
     service = Service.get(Service.uuid == _uuid)
     added = current_app.config["SYNC_MANAGER"].request_service_scan(service, credential)
     if not added:
-        flash("There is already a sync waiting or in process for this service.")
-        return render_template("service-sync.html", page="service", uuid=_uuid)
+        return render_template("component/sync-log.html", logs="There is a sync already queued, it should start soon.", update=True, uuid=_uuid)
 
     return render_template("component/sync-log.html", logs="The sync has been enqueued, it should start soon.", update=True, uuid=_uuid)
 
