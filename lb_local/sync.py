@@ -5,6 +5,7 @@ from logging.handlers import QueueHandler
 from queue import Queue, Empty
 from threading import Lock, Thread
 from time import time
+import traceback
 
 from flask import current_app
 from troi.content_resolver.subsonic import SubsonicDatabase
@@ -13,11 +14,13 @@ from urllib.parse import urlparse
 from lb_local.model.service import Service
 
 LOG_EXPIRY_DURATION = 60 * 60  # in s
+APP_LOG_LEVEL_NUM = 19
+
 
 logging_queue = Queue()
 logger = logging.getLogger("troi_subsonic_scan")
 logger.addHandler(QueueHandler(logging_queue))
-logger.setLevel(logging.INFO)
+logger.setLevel(APP_LOG_LEVEL_NUM)
 
 class Config:
         def __init__(self, **entries):
@@ -79,16 +82,15 @@ class SyncManager(Thread):
                     logging_queue.get_nowait()
                 except Empty:
                     break
+            traceback_str = traceback.format_exc()
             self.lock.acquire()
-            self.job_data[service.uuid]["sync_log"] += "An error occurred when syncing the collection:\n" + str(err) + "\n"
+            self.job_data[service.uuid]["sync_log"] += "An error occurred when syncing the collection:\n" + str(traceback_str) + "\n"
             self.lock.release()
 
         self.lock.acquire()
         self.job_data[service.uuid]["completed"] = True
         self.lock.release()
         
-        print("scan complete")
-    
     def get_sync_log(self, service):
         self.lock.acquire()
         try:
@@ -122,7 +124,6 @@ class SyncManager(Thread):
         self.job_data[service]["sync_log"] = logs
         self.lock.release()
         
-        print("log, normal end", completed);
         return logs, completed
 
     def run(self):

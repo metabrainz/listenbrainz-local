@@ -1,4 +1,4 @@
-<textarea id="scan-log"
+<textarea id="scan-log" readonly
     {% if update %}
         hx-trigger="every 2s"
         hx-get="/service/{{ uuid }}/sync/log" 

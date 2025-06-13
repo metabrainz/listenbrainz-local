@@ -42,10 +42,10 @@
         {% endblock %}
     </head>
     <body>
-        <div class="container-md">
+        <div class="container-md d-flex flex-column" style="height: 100vh;">
             {% if no_navbar %} {% else %} {% include 'include/navbar.html' %}
-            <div class="row main-row h-100">
-                <div class="col-md-12">
+            <div class="row main-row flex-grow-1">
+                <div class="col-md-12 d-flex flex-column">
                     {% endif %} {% block content %} {% endblock %} {% if
                     no_navbar %} {% else %}
                 </div>

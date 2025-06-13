@@ -120,6 +120,4 @@ def service_sync_log(_uuid):
         print("empty logs")
         raise BadRequest("Cannot find service with uuid %s" % _uuid)
 
-    print("log update completed: ", completed)    
-    print(logs)
     return render_template("component/sync-log.html", logs=logs, update=(not completed), uuid=_uuid)
