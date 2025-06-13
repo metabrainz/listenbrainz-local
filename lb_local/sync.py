@@ -70,8 +70,18 @@ class SyncManager(Thread):
         if not os.path.exists(db_file):
             db.create()
 
-        db.open()
-        db.sync()
+        try:
+            db.open()
+            db.sync()
+        except Exception as err:
+            while True:
+                try:
+                    logging_queue.get_nowait()
+                except Empty:
+                    break
+            self.lock.acquire()
+            self.job_data[service.uuid]["sync_log"] += "An error occurred when syncing the collection:\n" + str(err) + "\n"
+            self.lock.release()
 
         self.lock.acquire()
         self.job_data[service.uuid]["completed"] = True
