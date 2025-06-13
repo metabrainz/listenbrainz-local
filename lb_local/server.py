@@ -2,6 +2,7 @@ import atexit
 import os
 import uuid
 from datetime import datetime
+import signal
 
 import peewee
 from authlib.integrations.flask_client import OAuth
@@ -31,6 +32,19 @@ STATIC_PATH = "/static"
 STATIC_FOLDER = "static"
 TEMPLATE_FOLDER = "templates"
 
+sync_manager = SyncManager()
+sync_manager.daemon = True
+sync_manager.start()
+
+def signal_handler(signum, frame):
+    global sync_manager
+    if sync_manager is not None:
+        sync_manager.exit()
+    sync_manager = None
+    raise KeyboardInterrupt
+    
+signal.signal(signal.SIGTERM, signal_handler)
+signal.signal(signal.SIGINT, signal_handler)
 
 def create_app():
     exists = os.path.exists(config.USER_DATABASE_FILE)
@@ -56,8 +70,6 @@ def create_app():
 
     login_manager.init_app(app)
 
-    sync_manager = SyncManager()
-    sync_manager.start()
     app.config["SYNC_MANAGER"] = sync_manager
 
     if not exists:
@@ -71,11 +83,6 @@ app, oauth = create_app()
 app.register_blueprint(index_bp)
 app.register_blueprint(service_bp, url_prefix="/service")
 app.register_blueprint(credential_bp, url_prefix="/credential")
-
-#    print("got teardown request")
-#    if app.config["SYNC_MANAGER"] is not None:
-#        app.config["SYNC_MANAGER"].exit()
-#    app.config["SYNC_MANAGER"] = None
 
 @app.route("/login")
 def login_redirect():

@@ -13,6 +13,13 @@ from urllib.parse import urlparse
 
 from lb_local.model.service import Service
 
+# NOTES:
+#    This module is very basic right now. The UI is poor, buttons are not enabled/disabled, the page cannot be reloaded, etc.
+#    There are many things that need to be improved and if someone wants to help, please jump in!
+
+
+# TODO: Cleanup old log entries after a while
+
 LOG_EXPIRY_DURATION = 60 * 60  # in s
 APP_LOG_LEVEL_NUM = 19
 
@@ -36,6 +43,7 @@ class SyncManager(Thread):
         self._exit = False
         
     def exit(self):
+        print("thread exit requested")
         self._exit = True
 
     def request_service_scan(self, service, credential):
@@ -128,14 +136,15 @@ class SyncManager(Thread):
 
     def run(self):
         
-        #TODO: Cleanup old logs
-        while not self.exit():
+        while not self._exit:
             try:
                 service, credential = self.job_queue.get()
             except Empty:
-                sleep(.5)
+                sleep(.1)
                 continue
 
             from lb_local.server import app
             with app.app_context():
                 self.sync_service(service, credential)
+                
+        print("thread exit")
