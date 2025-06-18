@@ -6,11 +6,10 @@ from queue import Queue, Empty
 from threading import Lock, Thread
 from time import time
 import traceback
+from urllib.parse import urlparse
 
 from flask import current_app
 from troi.content_resolver.subsonic import SubsonicDatabase
-from urllib.parse import urlparse
-
 from lb_local.model.service import Service
 
 # NOTES:
@@ -43,34 +42,37 @@ class SyncManager(Thread):
         self._exit = False
         
     def exit(self):
-        print("thread exit requested")
         self._exit = True
 
     def request_service_scan(self, service, credential):
         added = False
         self.lock.acquire()
-        if service.uuid in self.job_data and self.job_data[service.uuid]["completed"]:
-            del self.job_data[service.uuid]
-        if service.uuid not in self.job_data:
+        if service.slug in self.job_data and self.job_data[service.slug]["completed"]:
+            del self.job_data[service.slug]
+        if service.slug not in self.job_data:
             added = True
             self.job_queue.put((service, credential))
-            self.job_data[service.uuid] = { "service": service, "credential": credential, "sync_log": "", "completed": False, "expire_at": time() + LOG_EXPIRY_DURATION }
+            self.job_data[service.slug] = { "service": service, "credential": credential, "sync_log": "", "completed": False, "expire_at": time() + LOG_EXPIRY_DURATION }
         self.lock.release()
 
         return added
-
+    
     def sync_service(self, service, credential):
+        
         url = urlparse(service.url)
-        conf = copy(current_app.config)
-        conf["SUBSONIC_HOST"] = "%s://%s" % (url.scheme, url.hostname)
-        conf["SUBSONIC_PORT"] = int(url.port)
-
-        conf["SUBSONIC_USER"] = credential.user_name
-        conf["SUBSONIC_SALT"] = credential.salt
-        conf["SUBSONIC_TOKEN"] = credential.token
+        conf = {
+            "SUBSONIC_SERVERS": {
+                service.slug: {
+                    "host": "%s://%s" % (url.scheme, url.hostname),
+                    "port": int(url.port),
+                    "username": credential.user_name,
+                    "password": credential.password
+                }
+            }
+        }
 
         #TODO: how to report errors -- add to scan log for now
-        index_dir = os.path.join(current_app.config["SERVICES_DIRECTORY"], service.uuid)
+        index_dir = os.path.join(current_app.config["SERVICES_DIRECTORY"], service.slug)
         try:
             os.makedirs(index_dir)
         except FileExistsError:
@@ -83,7 +85,7 @@ class SyncManager(Thread):
 
         try:
             db.open()
-            db.sync()
+            db.sync(service.slug)
         except Exception as err:
             while True:
                 try:
@@ -92,11 +94,11 @@ class SyncManager(Thread):
                     break
             traceback_str = traceback.format_exc()
             self.lock.acquire()
-            self.job_data[service.uuid]["sync_log"] += "An error occurred when syncing the collection:\n" + str(traceback_str) + "\n"
+            self.job_data[service.slug]["sync_log"] += "An error occurred when syncing the collection:\n" + str(traceback_str) + "\n"
             self.lock.release()
 
         self.lock.acquire()
-        self.job_data[service.uuid]["completed"] = True
+        self.job_data[service.slug]["completed"] = True
         self.lock.release()
         
     def get_sync_log(self, service):

@@ -12,9 +12,8 @@ class Service(Model):
         database = user_db
         table_name = "service"
 
-    name = TextField(null=False, unique=True)
+    slug = TextField(null=False, unique=True)
     url = TextField(null=False, unique=True)
-    uuid = TextField(null=False)
     status = TextField(null=True)
     last_synched = IntegerField(null=True)
     scan_log = TextField(null=True)

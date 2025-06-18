@@ -1,7 +1,7 @@
 <textarea id="scan-log" readonly
     {% if update %}
         hx-trigger="every 2s"
-        hx-get="/service/{{ uuid }}/sync/log" 
+        hx-get="/service/{{ slug }}/sync/log" 
         hx-swap="outerHTML"
         hx-target="#scan-log"
     {% endif %}

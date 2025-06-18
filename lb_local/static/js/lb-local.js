@@ -46,8 +46,8 @@ function on_play() {
   update_button_states();
 }
 
-function init_player(url, user, salt, token) {
-  subsonic_info = { url: url, user: user, salt: salt, token: token };
+function init_player(url, user, password) {
+  subsonic_info = { url: url, user: user, password: password };
   console.log(subsonic_info);
 }
 
@@ -204,6 +204,7 @@ function jump(index) {
 function play_track(file_id) {
   //For testing with only short tracks...
   //file_id = "cf22184021802f7ebbf0e461d11fc42d";
+  # TODO: Calculate salt and token
   url =
     subsonic_info.url +
     "/rest/stream?id=" +

@@ -1,7 +1,7 @@
 flask~=3.1.0
 flask-admin~=1.6.1
 icecream
-troi[nmslib]@git+https://github.com/metabrainz/troi-recommendation-playground.git@add-logging-name
+troi[nmslib]@git+https://github.com/metabrainz/troi-recommendation-playground.git@multiple-subsonic-sources
 flask-cors~=5.0.0
 authlib~=1.4.1
 peewee~=3.17.9

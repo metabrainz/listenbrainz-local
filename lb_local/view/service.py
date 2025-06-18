@@ -1,4 +1,3 @@
-import uuid
 from time import time
 
 import peewee
@@ -37,22 +36,22 @@ def service_add():
     return render_template("service-add.html", mode="Add")
 
 
-@service_bp.route("/<_uuid>/edit", methods=["GET"])
+@service_bp.route("/<slug>/edit", methods=["GET"])
 @login_required
-def service_edit(_uuid):
-    service = Service.get(Service.uuid == _uuid)
+def service_edit(slug):
+    service = Service.get(Service.slug == slug)
     return render_template("service-add.html", mode="Edit", service=service)
 
 
-@service_bp.route("/<_uuid>/delete", methods=["GET"])
+@service_bp.route("/<slug>/delete", methods=["GET"])
 @login_required
-def service_delete(_uuid):
+def service_delete(slug):
     try:
-        service = Service.get(Service.uuid == _uuid)
+        service = Service.get(Service.slug == slug)
         service.delete_instance()
         flash("Service deleted")
     except peewee.DoesNotExist:
-        flash("Service %s not found" % _uuid)
+        flash("Service %s not found" % slug)
     except peewee.IntegrityError:
         flash("Service still in use and cannot be deleted.")
 
@@ -62,62 +61,63 @@ def service_delete(_uuid):
 @service_bp.route("/add", methods=["POST"])
 @login_required
 def service_add_post():
-    name = request.form.get("name", "")
+    slug = request.form.get("slug", "")
     url = request.form.get("url", "")
-    _uuid = request.form.get("uuid", "")
-    if not url or not name:
-        flash("Both name and URL are required.")
-        return render_template("service-add.html", name=name, url=url)
+    if not url or not slug:
+        flash("Both URL and nickname are required.")
+        return render_template("service-add.html", slug=slug, url=url)
 
     if not url.startswith("https://") and not url.startswith("http://"):
         flash("URL must start with http:// or https://")
-        return render_template("service-add.html", name=name, url=url)
+        return render_template("service-add.html", slug=slug, url=url)
 
-    if not validators.url(url):
+    if not validators.url(url, simple_host=True):
         flash("Invalid URL")
-        return render_template("service-add.html", name=name, url=url)
+        return render_template("service-add.html", slug=slug, url=url)
 
     try:
-        if _uuid:
-            service = Service.get(uuid=_uuid)
-            service.name = name
+        try:
+            service = Service.get(slug=slug)
+            service.name = slug
             service.url = url
-        else:
-            service = Service.create(name=name, url=url, uuid=uuid.uuid4())
+            flash("Service nickname is already being used, please provide a unique one.")
+            return render_template("service-add.html", slug=slug, url=url)
+        except peewee.DoesNotExist:
+            service = Service.create(slug=slug, url=url)
         service.save()
     except peewee.IntegrityError:
-        flash("Duplicate service name or service URL.")
-        return render_template("service-add.html", name=name, url=url)
+        return render_template("service-add.html", slug=slug, url=url)
 
     return redirect(url_for("service_bp.service_index"))
 
-@service_bp.route("/<_uuid>/sync", methods=["GET"])
+@service_bp.route("/<slug>/sync", methods=["GET"])
 @login_required
-def service_sync(_uuid):
-    return render_template("service-sync.html", page="service", uuid=_uuid)
+def service_sync(slug):
+    return render_template("service-sync.html", page="service", slug=slug)
 
-@service_bp.route("/<_uuid>/sync/start", methods=["POST"])
+@service_bp.route("/<slug>/sync/start", methods=["POST"])
 @login_required
-def service_sync_start(_uuid):
+def service_sync_start(slug):
+    # TODO: load the proper credential, not just the first one
     credential = Credential.select().first()
-    service = Service.get(Service.uuid == _uuid)
+    service = Service.get(Service.slug == slug)
     added = current_app.config["SYNC_MANAGER"].request_service_scan(service, credential)
     if not added:
-        return render_template("component/sync-log.html", logs="There is a sync already queued, it should start soon.", update=True, uuid=_uuid)
+        return render_template("component/sync-log.html", logs="There is a sync already queued, it should start soon.", update=True, slug=slug)
 
-    return render_template("component/sync-log.html", logs="The sync has been enqueued, it should start soon.", update=True, uuid=_uuid)
+    return render_template("component/sync-log.html", logs="The sync has been enqueued, it should start soon.", update=True, slug=slug)
 
-@service_bp.route("/<_uuid>/sync/log")
+@service_bp.route("/<slug>/sync/log")
 @login_required
-def service_sync_log(_uuid):
+def service_sync_log(slug):
     try:
-        logs, completed = current_app.config["SYNC_MANAGER"].get_sync_log(_uuid)
+        logs, completed = current_app.config["SYNC_MANAGER"].get_sync_log(slug)
     except TypeError:
         print("bad request")
         return BadRequest("What are you smoking?")
 
     if logs is None:
         print("empty logs")
-        raise BadRequest("Cannot find service with uuid %s" % _uuid)
+        raise BadRequest("Cannot find service with slug %s" % slug)
 
-    return render_template("component/sync-log.html", logs=logs, update=(not completed), uuid=_uuid)
+    return render_template("component/sync-log.html", logs=logs, update=(not completed), slug=slug)

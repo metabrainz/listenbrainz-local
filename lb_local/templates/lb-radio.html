@@ -79,8 +79,7 @@ block content -%}
         init_player(
             "{{ subsonic.url}}",
             "{{ subsonic.user}}",
-            "{{ subsonic.salt}}",
-            "{{ subsonic.token}}",
+            "{{ subsonic.password}}"
         );
         update_buttons();
     });

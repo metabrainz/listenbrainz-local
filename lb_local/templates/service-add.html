@@ -12,12 +12,12 @@ messages %}
     <div class="form-body">
         <div class="mb-3">
             <label for="exampleInputName" class="form-label"
-                >Service name</label
+                >Service nickname</label
             >
             <input
                 type="text"
-                name="name"
-                value="{{ (service and service.name) or name or ''}}"
+                name="slug"
+                value="{{ (service and service.slug) or name or ''}}"
                 class="form-control form-control-lg"
                 id="exampleInputName"
             />
@@ -39,8 +39,8 @@ messages %}
     </div>
     <input
         type="hidden"
-        name="uuid"
-        value="{{ (service and service.uuid) or ''}}"
+        name="slug"
+        value="{{ (service and service.slug) or ''}}"
     />
     <div class="form-buttons text-end">
         <a class="btn btn-lg btn-secondary" href="/service">Cancel</a>

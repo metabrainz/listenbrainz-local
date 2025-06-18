@@ -17,8 +17,7 @@ class Credential(Model):
     owner = ForeignKeyField(User)
     service = ForeignKeyField(Service)
     user_name = TextField(null=False)
-    salt = TextField(null=False)
-    token = TextField(null=False)
+    password = TextField(null=False)
     shared = BooleanField(null=False)
 
     def __repr__(self):

@@ -1,8 +1,8 @@
 {% if services|length > 0 %}
 <table class="table table-striped table-border" id="services-list-table">
     <thead>
+        <th>nickname</th>
         <th>URL</th>
-        <th>name</th>
         <th>status</th>
         <th>last sync</th>
         <th>actions</th>
@@ -10,14 +10,14 @@
     <tbody>
         {% for service in services %}
         <tr>
-            <td>{{ service.name }}</td>
+            <td>{{ service.slug }}</td>
             <td>{{ service.url }}</td>
             <td>{{ service.status or "not synced" }}</td>
             <td>{{ service.last_scanned_text }}</td>
             <td>
-                <a href="/service/{{ service.uuid }}/sync">Sync</a> |
-                <a href="/service/{{ service.uuid }}/edit">Edit</a> |
-                <a href="/service/{{ service.uuid }}/delete">Delete</a>
+                <a href="/service/{{ service.slug }}/sync">Sync</a> |
+                <a href="/service/{{ service.slug }}/edit">Edit</a> |
+                <a href="/service/{{ service.slug }}/delete">Delete</a>
             </td>
         </tr>
         {% endfor %}

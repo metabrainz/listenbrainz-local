@@ -59,7 +59,7 @@ def credential_delete(id):
         credential.delete_instance()
         flash("Credential deleted")
     except peewee.DoesNotExist:
-        flash("Credential %s not found" % uuid)
+        flash("Credential %s not found" % id)
     except peewee.IntegrityError:
         flash("Credential still in use and cannot be deleted.")
 
@@ -90,13 +90,6 @@ def credential_add_post():
 
     service = Service.get(Service.id == service_id)
 
-    if password:
-        salt = str(uuid.uuid4())
-        h = hashlib.new('md5')
-        h.update(bytes(password, "utf-8"))
-        h.update(bytes(salt, "utf-8"))
-        token = h.hexdigest()
-
     try:
         if _id >= 1:
             credential = Credential.get(id=_id)
@@ -105,10 +98,9 @@ def credential_add_post():
             credential.user_name = user_name
             credential.shared = shared
             if password:
-                credential.token = token
-                credential.salt = salt
+                credential.password = password
         else:
-            credential = Credential.create(service=service, owner=owner, user_name=user_name, salt=salt, token=token, shared=shared)
+            credential = Credential.create(service=service, owner=owner, user_name=user_name, password=password, shared=shared)
 
         credential.save()
     except peewee.IntegrityError as err:
@@ -123,7 +115,7 @@ def load_credential():
     credential = Credential.select().first()
     subsonic = {}
     if credential is not None:
-        subsonic = {"user": credential.user_name, "salt": credential.salt, "token": credential.token}
+        subsonic = {"user": credential.user_name, "password": credential.password}
         service = Service.get(Service.id == credential.service.id)
         if service is not None:
             subsonic["url"] = service.url
