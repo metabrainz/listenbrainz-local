@@ -1,5 +1,6 @@
 import hashlib
 import uuid
+from urllib.parse import urlparse
 
 from flask import Blueprint, render_template, request, redirect, url_for, flash, session
 import peewee
@@ -11,11 +12,35 @@ from lb_local.model.service import Service
 credential_bp = Blueprint("credential_bp", __name__)
 
 # TODO: After editing credential, update session
+# TODO: Restrict adding more than one credential per user per service
 
+def load_credentials(user_id):
 
-def load_current_credentials_for_user():
-    user_id = current_user.user_id
-    return Credential.select().where((Credential.owner == user_id) | (Credential.shared == True))
+    credentials = Credential.select().where(Credential.owner == user_id)
+
+    config = {}
+    service_count = 0
+    for credential in credentials:
+        url = urlparse(credential.service.url)
+        config[credential.service.slug] = {
+            "host": "%s://%s" % (url.scheme, url.hostname),
+            "port": int(url.port),
+            "username": credential.user_name,
+            "password": credential.password
+        }
+        service_count += 1
+
+    # This function could be called outside the app context, then don't update the session
+    try:
+        session["subsonic"] = config
+        if service_count == 1: 
+            session["cors_url"] = "%s://%s" % (url.scheme, url.hostname)
+        else:
+            session["cors_url"] = "*"
+    except RuntimeError:
+        pass
+        
+    return { "SUBSONIC_SERVERS" : config}
 
 
 @credential_bp.route("/", methods=["GET"])
@@ -30,8 +55,8 @@ def credential_index():
 @credential_bp.route("/list", methods=["GET"])
 @login_required
 def credential_list():
-    credentials = load_current_credentials_for_user()
-    return render_template("component/credential-list.html", credentials=credentials)
+    return render_template("component/credential-list.html", 
+        credentials=Credential.select().where((Credential.owner == current_user.user_id) | (Credential.shared == True)))
 
 
 @credential_bp.route("/add", methods=["GET"])
@@ -108,16 +133,3 @@ def credential_add_post():
         return render_template("credential-add.html", user_name=user_name, service=service, password=password)
 
     return redirect(url_for("credential_bp.credential_index"))
-
-
-def load_credential():
-    # TODO: Add the DB file support as well
-    credential = Credential.select().first()
-    subsonic = {}
-    if credential is not None:
-        subsonic = {"user": credential.user_name, "password": credential.password}
-        service = Service.get(Service.id == credential.service.id)
-        if service is not None:
-            subsonic["url"] = service.url
-
-    session["subsonic"] = subsonic

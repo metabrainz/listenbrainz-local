@@ -3,7 +3,7 @@ from time import time
 import peewee
 import validators
 from flask import Blueprint, render_template, request, redirect, url_for, flash, current_app
-from flask_login import login_required
+from flask_login import login_required, current_user
 from werkzeug.exceptions import BadRequest
 
 from lb_local.model.service import Service
@@ -98,10 +98,9 @@ def service_sync(slug):
 @service_bp.route("/<slug>/sync/start", methods=["POST"])
 @login_required
 def service_sync_start(slug):
-    # TODO: load the proper credential, not just the first one
-    credential = Credential.select().first()
     service = Service.get(Service.slug == slug)
-    added = current_app.config["SYNC_MANAGER"].request_service_scan(service, credential)
+    credential = Credential.select().where(Credential.owner == current_user.user_id and Credential.service == service.id)
+    added = current_app.config["SYNC_MANAGER"].request_service_scan(service, credential, current_user.user_id)
     if not added:
         return render_template("component/sync-log.html", logs="There is a sync already queued, it should start soon.", update=True, slug=slug)
 

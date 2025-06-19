@@ -18,10 +18,11 @@ from lb_local.model.credential import Credential
 from lb_local.model.service import Service
 from lb_local.model.user import User
 from lb_local.view.admin import UserModelView, ServiceModelView
-from lb_local.view.credential import credential_bp, load_credential
+from lb_local.view.credential import credential_bp, load_credentials
 from lb_local.view.index import index_bp
 from lb_local.view.service import service_bp
 from lb_local.sync import SyncManager
+from troi.content_resolver.subsonic import SubsonicDatabase
 
 # TODO:
 # - Pass hints and error messages from content resolver
@@ -33,7 +34,11 @@ TEMPLATE_FOLDER = "templates"
 
 sync_manager = SyncManager()
 sync_manager.daemon = True
-sync_manager.start()
+#sync_manager.start()
+
+class Config:
+    def __init__(self, **entries):
+        self.__dict__.update(entries)
 
 def signal_handler(signum, frame):
     global sync_manager
@@ -46,8 +51,9 @@ signal.signal(signal.SIGTERM, signal_handler)
 signal.signal(signal.SIGINT, signal_handler)
 
 def create_app():
-    exists = os.path.exists(config.USER_DATABASE_FILE)
-    udb = UserDatabase(config.USER_DATABASE_FILE, False)
+    print(config.DATABASE_FILE)
+    exists = os.path.exists(config.DATABASE_FILE)
+    udb = UserDatabase(config.DATABASE_FILE, False)
 
     app = Flask(__name__, static_url_path=STATIC_PATH, static_folder=STATIC_FOLDER, template_folder=TEMPLATE_FOLDER)
     app.config.from_object('config')
@@ -72,8 +78,12 @@ def create_app():
     app.config["SYNC_MANAGER"] = sync_manager
 
     if not exists:
+        print("Database does not exist, createing tables")
         udb.create()
+        db = SubsonicDatabase(config.DATABASE_FILE, Config(**{}), quiet=False)
+        db.create()
     else:
+        print("Database exists, opening...")
         udb.open()
         
     return app, oauth
@@ -115,7 +125,6 @@ def auth():
     user.save()
 
     login_user(user)
-    load_credential()
 
     return redirect("/")
 

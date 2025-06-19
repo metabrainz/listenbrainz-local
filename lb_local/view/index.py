@@ -3,7 +3,7 @@ from copy import copy
 from urllib.parse import urlparse
 
 from flask import Blueprint, render_template, request, current_app, make_response, session
-from flask_login import login_required
+from flask_login import login_required, current_user
 from troi.content_resolver.lb_radio import ListenBrainzRadioLocal
 from troi.content_resolver.subsonic import SubsonicDatabase, Database
 from troi.content_resolver.top_tags import TopTags
@@ -11,6 +11,7 @@ from troi.content_resolver.unresolved_recording import UnresolvedRecordingTracke
 from troi.local.periodic_jams_local import PeriodicJamsLocal
 from troi.playlist import _deserialize_from_jspf, PlaylistElement
 from werkzeug.exceptions import BadRequest, ServiceUnavailable
+from lb_local.view.credential import load_credentials
 
 from lb_local.login import login_forbidden
 
@@ -33,10 +34,11 @@ def welcome():
 @login_required
 def lb_radio_get():
     prompt = request.args.get("prompt", "")
+    load_credentials(current_user.user_id)
     t = render_template('lb-radio.html', prompt=prompt, page="lb-radio", subsonic=session["subsonic"])
     r = make_response(t)
-    if session["subsonic"]["url"]:
-        r.headers.set('Access-Control-Allow-Origin', session["subsonic"]["url"])
+    if session["cors_url"]:
+        r.headers.set('Access-Control-Allow-Origin', session["cors_url"])
     return r
 
 
@@ -44,6 +46,7 @@ def lb_radio_get():
 @login_required
 def lb_radio_post():
 
+    load_credentials(current_user.user_id)
     try:
         prompt = request.form["prompt"]
     except KeyError:
@@ -54,6 +57,7 @@ def lb_radio_post():
     except KeyError:
         raise BadRequest("argument 'mode' is required.")
 
+    db = SubsonicDatabase(current_app.config["DATABASE_FILE"], current_app.config, quiet=False)
     db = SubsonicDatabase(current_app.config["DATABASE_FILE"], current_app.config, quiet=False)
     db.open()
     r = ListenBrainzRadioLocal(quiet=False)
@@ -98,10 +102,12 @@ def playlist_create():
 @index_bp.route("/weekly-jams", methods=["GET"])
 @login_required
 def weekly_jams_get():
+    load_credentials(current_user.user_id)
+
     t = render_template('weekly-jams.html', page="weekly-jams", subsonic=session["subsonic"])
     r = make_response(t)
-    if session["subsonic"]["url"]:
-        r.headers.set('Access-Control-Allow-Origin', session["subsonic"]["url"])
+    if session["cors_url"]:
+        r.headers.set('Access-Control-Allow-Origin', session["cors_url"])
     return r
 
 

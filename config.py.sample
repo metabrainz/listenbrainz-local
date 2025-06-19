@@ -1,6 +1,5 @@
 # General configuration
-USER_DATABASE_FILE = "lb-local.db"
-DATABASE_FILE = "test.db"
+DATABASE_FILE = "lb-local.db"
 DOMAIN = "127.0.0.1:5000"
 SECRET_KEY = ""
 ADMIN_USERS = []

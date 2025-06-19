@@ -7,10 +7,12 @@ from threading import Lock, Thread
 from time import time
 import traceback
 from urllib.parse import urlparse
+from lb_local.view.credential import load_credentials
 
 from flask import current_app
 from troi.content_resolver.subsonic import SubsonicDatabase
 from lb_local.model.service import Service
+import config
 
 # NOTES:
 #    This module is very basic right now. The UI is poor, buttons are not enabled/disabled, the page cannot be reloaded, etc.
@@ -44,45 +46,33 @@ class SyncManager(Thread):
     def exit(self):
         self._exit = True
 
-    def request_service_scan(self, service, credential):
+    def request_service_scan(self, service, credential, user_id):
         added = False
         self.lock.acquire()
         if service.slug in self.job_data and self.job_data[service.slug]["completed"]:
             del self.job_data[service.slug]
         if service.slug not in self.job_data:
             added = True
-            self.job_queue.put((service, credential))
+            self.job_queue.put((service, credential, user_id))
             self.job_data[service.slug] = { "service": service, "credential": credential, "sync_log": "", "completed": False, "expire_at": time() + LOG_EXPIRY_DURATION }
         self.lock.release()
 
         return added
     
-    def sync_service(self, service, credential):
+    def sync_service(self, service, credential, user_id):
         
         url = urlparse(service.url)
-        conf = {
-            "SUBSONIC_SERVERS": {
-                service.slug: {
-                    "host": "%s://%s" % (url.scheme, url.hostname),
-                    "port": int(url.port),
-                    "username": credential.user_name,
-                    "password": credential.password
-                }
-            }
-        }
+        conf = load_credentials(user_id)
 
         #TODO: how to report errors -- add to scan log for now
-        index_dir = os.path.join(current_app.config["SERVICES_DIRECTORY"], service.slug)
-        try:
-            os.makedirs(index_dir)
-        except FileExistsError:
-            pass
+#        index_dir = os.path.join(current_app.config["SERVICES_DIRECTORY"], service.slug)
+#        try:
+#            os.makedirs(index_dir)
+#        except FileExistsError:
+#            pass
 
-        db_file = os.path.join(index_dir, "subsonic.db")
-        db = SubsonicDatabase(db_file, Config(**conf), quiet=False)
-        if not os.path.exists(db_file):
-            db.create()
-
+#        db_file = os.path.join(index_dir, "subsonic.db")
+        db = SubsonicDatabase(config.DATABASE_FILE, Config(**conf), quiet=False)
         try:
             db.open()
             db.sync(service.slug)
@@ -140,13 +130,11 @@ class SyncManager(Thread):
         
         while not self._exit:
             try:
-                service, credential = self.job_queue.get()
+                service, credential, user_id = self.job_queue.get()
             except Empty:
                 sleep(.1)
                 continue
 
             from lb_local.server import app
             with app.app_context():
-                self.sync_service(service, credential)
-                
-        print("thread exit")
+                self.sync_service(service, credential, user_id)
