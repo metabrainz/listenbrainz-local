@@ -35,7 +35,7 @@ def welcome():
 def lb_radio_get():
     prompt = request.args.get("prompt", "")
     load_credentials(current_user.user_id)
-    t = render_template('lb-radio.html', prompt=prompt, page="lb-radio", subsonic=session["subsonic"])
+    t = render_template('lb-radio.html', prompt=prompt, page="lb-radio", subsonic=json.dumps(session["subsonic"]))
     r = make_response(t)
     if session["cors_url"]:
         r.headers.set('Access-Control-Allow-Origin', session["cors_url"])
@@ -58,10 +58,11 @@ def lb_radio_post():
         raise BadRequest("argument 'mode' is required.")
 
     db = SubsonicDatabase(current_app.config["DATABASE_FILE"], current_app.config, quiet=False)
-    db = SubsonicDatabase(current_app.config["DATABASE_FILE"], current_app.config, quiet=False)
     db.open()
     r = ListenBrainzRadioLocal(quiet=False)
     playlist = r.generate(mode, prompt, .8)
+    from icecream import ic
+    ic(playlist.playlists[0])
     try:
         recordings = playlist.playlists[0].recordings
     except (IndexError, KeyError, AttributeError):

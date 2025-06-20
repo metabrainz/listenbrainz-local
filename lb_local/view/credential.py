@@ -22,11 +22,20 @@ def load_credentials(user_id):
     service_count = 0
     for credential in credentials:
         url = urlparse(credential.service.url)
+        salt = str(uuid.uuid4())
+        h = hashlib.new('md5')
+        h.update(bytes(credential.password, "utf-8"))
+        h.update(bytes(salt, "utf-8"))
+        token = h.hexdigest()
+
         config[credential.service.slug] = {
             "host": "%s://%s" % (url.scheme, url.hostname),
+            "url": credential.service.url,
             "port": int(url.port),
             "username": credential.user_name,
-            "password": credential.password
+            "password": credential.password,
+            "salt": salt,
+            "token": token
         }
         service_count += 1
 

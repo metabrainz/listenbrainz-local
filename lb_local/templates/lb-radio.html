@@ -76,11 +76,7 @@ block content -%}
 {% endblock%} {% block scripts %}
 <script type="text/javascript">
     document.addEventListener("DOMContentLoaded", () => {
-        init_player(
-            "{{ subsonic.url}}",
-            "{{ subsonic.user}}",
-            "{{ subsonic.password}}"
-        );
+        init_player({{ subsonic|safe }});
         update_buttons();
     });
 

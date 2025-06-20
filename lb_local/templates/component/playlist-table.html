@@ -11,6 +11,7 @@
         <tr id="row{{ loop.index0 }}"
             hx-on:click="enter_event(EVENT_JUMP, {{ loop.index0 }})">
             <input type="hidden" value="{{ rec.musicbrainz["subsonic_id"]}}" id="recording{{ loop.index0 }}"/>
+            <input type="hidden" value="{{ rec.musicbrainz["file_source"]}}" id="recording{{ loop.index0 }}_source"/>
             <td>
                 <a onclick="enter_event(EVENT_JUMP, {{ loop.index0 }})">
                     <img src="http://coverartarchive.org/release/{{ rec.release.mbid }}/front-250"

@@ -11,6 +11,7 @@ from lb_local.view.credential import load_credentials
 
 from flask import current_app
 from troi.content_resolver.subsonic import SubsonicDatabase
+from troi.content_resolver.metadata_lookup import MetadataLookup
 from lb_local.model.service import Service
 import config
 
@@ -31,8 +32,8 @@ logger.addHandler(QueueHandler(logging_queue))
 logger.setLevel(APP_LOG_LEVEL_NUM)
 
 class Config:
-        def __init__(self, **entries):
-            self.__dict__.update(entries)
+    def __init__(self, **entries):
+        self.__dict__.update(entries)
 
 class SyncManager(Thread):
 
@@ -64,18 +65,14 @@ class SyncManager(Thread):
         url = urlparse(service.url)
         conf = load_credentials(user_id)
 
-        #TODO: how to report errors -- add to scan log for now
-#        index_dir = os.path.join(current_app.config["SERVICES_DIRECTORY"], service.slug)
-#        try:
-#            os.makedirs(index_dir)
-#        except FileExistsError:
-#            pass
-
-#        db_file = os.path.join(index_dir, "subsonic.db")
         db = SubsonicDatabase(config.DATABASE_FILE, Config(**conf), quiet=False)
         try:
             db.open()
             db.sync(service.slug)
+
+            lookup = MetadataLookup(False)
+            lookup.lookup()
+
         except Exception as err:
             while True:
                 try:
@@ -127,7 +124,7 @@ class SyncManager(Thread):
         return logs, completed
 
     def run(self):
-        
+
         while not self._exit:
             try:
                 service, credential, user_id = self.job_queue.get()

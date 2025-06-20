@@ -34,7 +34,7 @@ TEMPLATE_FOLDER = "templates"
 
 sync_manager = SyncManager()
 sync_manager.daemon = True
-#sync_manager.start()
+sync_manager.start()
 
 class Config:
     def __init__(self, **entries):

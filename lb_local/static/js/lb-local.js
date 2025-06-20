@@ -46,9 +46,9 @@ function on_play() {
   update_button_states();
 }
 
-function init_player(url, user, password) {
-  subsonic_info = { url: url, user: user, password: password };
-  console.log(subsonic_info);
+function init_player(_subsonic_info) {
+  console.log(_subsonic_info);
+  subsonic_info = _subsonic_info;
 }
 
 function enter_event(event, arg = null) {
@@ -128,9 +128,10 @@ function play_pause() {
     current_playing_index = 0;
   } else clear_playing_now_row(current_playing_index);
   file_id = document.getElementById("recording" + current_playing_index).value;
+  file_source = document.getElementById("recording" + current_playing_index + "_source").value;
 
   set_playing_now_row(current_playing_index);
-  play_track(file_id);
+  play_track(file_id, file_source);
   update_button_states();
 }
 
@@ -201,21 +202,22 @@ function jump(index) {
   }
 }
 
-function play_track(file_id) {
+function play_track(file_id, file_source) {
   //For testing with only short tracks...
   //file_id = "cf22184021802f7ebbf0e461d11fc42d";
-  # TODO: Calculate salt and token
+  console.log(file_source);
+  console.log(subsonic_info);
   url =
-    subsonic_info.url +
+    subsonic_info[file_source].url +
     "/rest/stream?id=" +
     file_id +
     "&" +
     "u=" +
-    subsonic_info.user +
+    subsonic_info[file_source].username +
     "&s=" +
-    subsonic_info.salt +
+    subsonic_info[file_source].salt +
     "&t=" +
-    subsonic_info.token +
+    subsonic_info[file_source].token +
     "&v=1.14.0&c=lb-local";
   stop_playing();
   sound = new Howl({
