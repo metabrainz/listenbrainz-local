@@ -1,17 +1,14 @@
 services:
-
-  web:
+  lb_local:
     build: .
     image: listenbrainz-local
-    expose:
-      - "3031"
+    ports:
+      - "127.0.0.1:8000:3031"
     volumes:
-      - .:/code/mayhem.cat:z
+      - .:/code/lb-local:z
     environment:
-      - VIRTUAL_HOST=mayhem.cat
-      - LETSENCRYPT_HOST=mayhem.cat
-      - LETSENCRYPT_EMAIL=mayhem@gmail.com
-
-networks:
-  default:
-    name: nginx-proxy
+      - SECRET_KEY=${SECRET_KEY}
+      - ADMIN_USERS=${ADMIN_USERS}
+      - DOMAIN=${DOMAIN}
+      - MUSICBRAINZ_CLIENT_ID=${MUSICBRAINZ_CLIENT_ID}
+      - MUSICBRAINZ_CLIENT_SECRET=${MUSICBRAINZ_CLIENT_SECRET}

@@ -25,5 +25,5 @@ RUN apt-get purge -y build-essential && \
 COPY . /code/lb-local/
 
 CMD uwsgi --gid=www-data --uid=www-data --http-socket :3031 \
-          --vhost --module=server --callable=app --chdir=/code/lb-local \
-          --enable-threads --processes=15
+          --vhost --module=lb_local.server --callable=app --chdir=/code/lb-local \
+          --enable-threads --processes=10

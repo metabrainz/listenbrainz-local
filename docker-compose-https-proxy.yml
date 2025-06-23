@@ -1,0 +1,17 @@
+services:
+
+  web:
+    build: .
+    image: listenbrainz-local
+    expose:
+      - "3031"
+    volumes:
+      - .:/code/mayhem.cat:z
+    environment:
+      - VIRTUAL_HOST=mayhem.cat
+      - LETSENCRYPT_HOST=mayhem.cat
+      - LETSENCRYPT_EMAIL=mayhem@gmail.com
+
+networks:
+  default:
+    name: nginx-proxy
