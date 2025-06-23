@@ -4,7 +4,7 @@ import logging
 from logging.handlers import QueueHandler
 from queue import Queue, Empty
 from threading import Lock, Thread
-from time import time
+from time import monotonic
 import traceback
 from urllib.parse import urlparse
 from lb_local.view.credential import load_credentials
@@ -19,8 +19,6 @@ import config
 #    This module is very basic right now. The UI is poor, buttons are not enabled/disabled, the page cannot be reloaded, etc.
 #    There are many things that need to be improved and if someone wants to help, please jump in!
 
-
-# TODO: Cleanup old log entries after a while
 
 LOG_EXPIRY_DURATION = 60 * 60  # in s
 APP_LOG_LEVEL_NUM = 19
@@ -55,8 +53,10 @@ class SyncManager(Thread):
         if service.slug not in self.job_data:
             added = True
             self.job_queue.put((service, credential, user_id))
-            self.job_data[service.slug] = { "service": service, "credential": credential, "sync_log": "", "completed": False, "expire_at": time() + LOG_EXPIRY_DURATION }
+            self.job_data[service.slug] = { "service": service, "credential": credential, "sync_log": "", "completed": False, "expire_at": monotonic() + LOG_EXPIRY_DURATION }
         self.lock.release()
+        
+        self.clear_out_old_logs()
 
         return added
     
@@ -123,6 +123,16 @@ class SyncManager(Thread):
         
         return logs, completed
 
+    def clear_out_old_logs(self):
+        self.lock.acquire()
+        valid_jobs = []
+        for job in self.job_data:
+            if job["expire_at"] > monotonic():
+                valid_jobs.append(job)
+                
+        self.job_data = valid_jobs
+        self.lock.release()
+        
     def run(self):
 
         while not self._exit:
