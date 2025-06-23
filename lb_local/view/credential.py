@@ -12,7 +12,6 @@ from lb_local.model.service import Service
 credential_bp = Blueprint("credential_bp", __name__)
 
 # TODO: After editing credential, update session
-# TODO: Restrict adding more than one credential per user per service
 
 def load_credentials(user_id):
 
@@ -138,7 +137,10 @@ def credential_add_post():
 
         credential.save()
     except peewee.IntegrityError as err:
-        flash("Bummer dude. (%s)" % err)
+        if str(err).startswith("UNIQUE constraint failed"):
+            flash("Cannot create more than one credential per user/service.")
+        else:
+            flash("Database error. (%s)" % err)
         return render_template("credential-add.html", user_name=user_name, service=service, password=password)
 
     return redirect(url_for("credential_bp.credential_index"))

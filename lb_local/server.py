@@ -26,7 +26,7 @@ from troi.content_resolver.subsonic import SubsonicDatabase
 
 # TODO:
 # - Pass hints and error messages from content resolver
-# - Resolve playlists
+# - Import and Resolve playlists
 
 STATIC_PATH = "/static"
 STATIC_FOLDER = "static"
@@ -78,7 +78,7 @@ def create_app():
     app.config["SYNC_MANAGER"] = sync_manager
 
     if not exists:
-        print("Database does not exist, createing tables")
+        print("Database does not exist, creating tables")
         udb.create()
         db = SubsonicDatabase(config.DATABASE_FILE, Config(**{}), quiet=False)
         db.create()

@@ -1,20 +1,17 @@
-version: "3.3"
-
 services:
 
   web:
     build: .
-    image: listenbrainz-local 
+    image: listenbrainz-local
     expose:
       - "3031"
     volumes:
-      - .:/code/lblocal:z
+      - .:/code/mayhem.cat:z
     environment:
-      - VIRTUAL_HOST=local.listenbrainz.org
-      - LETSENCRYPT_HOST=local.listenbrainz.org
-      - LETSENCRYPT_EMAIL=rob@listenbrainz.org
+      - VIRTUAL_HOST=mayhem.cat
+      - LETSENCRYPT_HOST=mayhem.cat
+      - LETSENCRYPT_EMAIL=mayhem@gmail.com
 
 networks:
   default:
-    name: production
-    external: true
+    name: nginx-proxy
