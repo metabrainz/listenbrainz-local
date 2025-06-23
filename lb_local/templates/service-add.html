@@ -37,10 +37,13 @@ messages %}
             </div>
         </div>
     </div>
-    <input
-        type="hidden"
-        name="slug"
-        value="{{ (service and service.slug) or ''}}"
+    <input type="hidden"
+           name="mode"
+           value="{{ mode }}"
+    />
+    <input type="hidden"
+           name="old_slug"
+           value="{{ slug }}"
     />
     <div class="form-buttons text-end">
         <a class="btn btn-lg btn-secondary" href="/service">Cancel</a>

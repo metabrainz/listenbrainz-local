@@ -11,8 +11,6 @@ from lb_local.model.service import Service
 
 credential_bp = Blueprint("credential_bp", __name__)
 
-# TODO: After editing credential, update session
-
 def load_credentials(user_id):
 
     credentials = Credential.select().where(Credential.owner == user_id)
@@ -45,6 +43,7 @@ def load_credentials(user_id):
             session["cors_url"] = "%s://%s" % (url.scheme, url.hostname)
         else:
             session["cors_url"] = "*"
+        print("Session object updated.")
     except RuntimeError:
         pass
         
@@ -96,6 +95,8 @@ def credential_delete(id):
     except peewee.IntegrityError:
         flash("Credential still in use and cannot be deleted.")
 
+    load_credentials(current_user.user_id)
+
     return redirect(url_for("credential_bp.credential_index"))
 
 
@@ -142,5 +143,7 @@ def credential_add_post():
         else:
             flash("Database error. (%s)" % err)
         return render_template("credential-add.html", user_name=user_name, service=service, password=password)
+
+    load_credentials(current_user.user_id)
 
     return redirect(url_for("credential_bp.credential_index"))

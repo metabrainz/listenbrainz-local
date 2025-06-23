@@ -8,6 +8,7 @@ from werkzeug.exceptions import BadRequest
 
 from lb_local.model.service import Service
 from lb_local.model.credential import Credential
+from lb_local.view.credential import load_credentials
 
 service_bp = Blueprint("service_bp", __name__)
 
@@ -40,7 +41,7 @@ def service_add():
 @login_required
 def service_edit(slug):
     service = Service.get(Service.slug == slug)
-    return render_template("service-add.html", mode="Edit", service=service)
+    return render_template("service-add.html", mode="Edit", service=service, slug=slug)
 
 
 @service_bp.route("/<slug>/delete", methods=["GET"])
@@ -61,7 +62,11 @@ def service_delete(slug):
 @service_bp.route("/add", methods=["POST"])
 @login_required
 def service_add_post():
+    mode = request.form.get("mode", "")
+    old_slug = request.form.get("old_slug", "")
+    print("add save: mode '%s' '%s'" % (mode, old_slug))
     slug = request.form.get("slug", "")
+    print("new slug '%s'" % slug)
     url = request.form.get("url", "")
     if not url or not slug:
         flash("Both URL and nickname are required.")
@@ -75,18 +80,24 @@ def service_add_post():
         flash("Invalid URL")
         return render_template("service-add.html", slug=slug, url=url)
 
-    try:
+    if mode == "Add":
         try:
-            service = Service.get(slug=slug)
-            service.name = slug
-            service.url = url
+            service = Service.create(slug=slug, url=url)
+            service.save()
+        except peewee.IntegrityError:
             flash("Service nickname is already being used, please provide a unique one.")
             return render_template("service-add.html", slug=slug, url=url)
+    else:
+        try:
+            service = Service.get(slug=old_slug)
+            service.slug = slug
+            service.url = url
         except peewee.DoesNotExist:
-            service = Service.create(slug=slug, url=url)
+            flash("Service does not exist. Internal error.")
+            return render_template("service-add.html", slug=slug, url=url)
         service.save()
-    except peewee.IntegrityError:
-        return render_template("service-add.html", slug=slug, url=url)
+
+    load_credentials(current_user.user_id)
 
     return redirect(url_for("service_bp.service_index"))
 
