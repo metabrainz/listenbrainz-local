@@ -1,0 +1,34 @@
+{%- extends 'include/base.html' -%} {%- block title -%}services{% endblock %}
+{%- block content -%}
+
+<h2>Sync service</h2>
+
+{% with messages = get_flashed_messages() %} {% if messages %} {% for message in
+messages %}
+<div class="alert alert-warning" role="alert">{{ message }}</div>
+{% endfor %} {% endif %} {% endwith %}
+
+<p><span style="font-size: 0.7rem;">Note: This screen is buggy and not very userfiendly. If someone wants to help, this is a good place to do it!</span></p>
+
+<div class="form-buttons text-end">
+    <form>
+        <button
+            type="submit"
+            class="btn btn-lg btn-primary"
+            hx-post="/service/{{ slug }}/sync/start"
+            hx-class="btn btn-lg btn-primary"
+            hx-target="#scan-log"
+            hx-swap="outerHTML"
+        >
+            Sync
+        </button>
+    </form>
+</div>
+
+<div class="form-body" style="width: 100%; height: 100%">
+    <textarea id="scan-log" readonly>Logs will appear here once the sync starts. </textarea>
+</div>
+
+{% endblock%} {% block scripts %}
+<script type="text/javascript"></script>
+{% endblock %}
