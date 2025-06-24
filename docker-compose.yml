@@ -6,13 +6,14 @@ services:
     build: .
     image: listenbrainz-local
     ports:
-      - "127.0.0.1:8200:3031"
+      - "${DOMAIN}:${PORT}:3031"
     volumes:
       - lb_local_data:/data:z
     environment:
       - SECRET_KEY=${SECRET_KEY}
       - ADMIN_USERS=${ADMIN_USERS}
       - DOMAIN=${DOMAIN}
+      - PORT=${PORT}
       - MUSICBRAINZ_CLIENT_ID=${MUSICBRAINZ_CLIENT_ID}
       - MUSICBRAINZ_CLIENT_SECRET=${MUSICBRAINZ_CLIENT_SECRET}
       - DATABASE_FILE=/data/lb-local.db

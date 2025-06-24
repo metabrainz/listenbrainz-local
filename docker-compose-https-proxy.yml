@@ -1,3 +1,6 @@
+volumes:
+  lb_local_data:
+
 services:
 
   web:
@@ -6,11 +9,19 @@ services:
     expose:
       - "3031"
     volumes:
-      - .:/code/mayhem.cat:z
+      - lb_local_data:/data:z
+    restart: unless-stopped
     environment:
-      - VIRTUAL_HOST=mayhem.cat
-      - LETSENCRYPT_HOST=mayhem.cat
-      - LETSENCRYPT_EMAIL=mayhem@gmail.com
+      - SECRET_KEY=${SECRET_KEY}
+      - ADMIN_USERS=${ADMIN_USERS}
+      - DOMAIN=${DOMAIN}
+      - PORT=${PORT}
+      - MUSICBRAINZ_CLIENT_ID=${MUSICBRAINZ_CLIENT_ID}
+      - MUSICBRAINZ_CLIENT_SECRET=${MUSICBRAINZ_CLIENT_SECRET}
+      - DATABASE_FILE=/data/lb-local.db
+      - VIRTUAL_HOST=${DOMAIN}
+      - LETSENCRYPT_HOST=${DOMAIN}
+      - LETSENCRYPT_EMAIL=${EMAIL}
 
 networks:
   default:

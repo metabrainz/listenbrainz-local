@@ -8,16 +8,63 @@ Note: Your collection must be tagged with MBIDs in order for this project to wor
 
 Support for LB Radio and Weekly jams exists now -- music playback and saving playlists to the subsonic hosts are now working and many other recommendation tools will be added over time. 
 
-This project is a web app that requires a subsonic hosted music collection. Projects that we've tested with
-include:
+This project is a web app that requires a subsonic hosted music collection:
 
 * [Funkwhale](https://www.funkwhale.audio/)
 * [Gonic](https://github.com/sentriz/gonic)
 * [Navidrome](https://www.navidrome.org/)
 
+So far we've only tested with Navidrome, so we would appreciate help testing others setups.
+
 # Installation
 
-We're not quite ready for others to start playing with this project yet, it is under active development! But soon we will have a baseline of features working where we can invite others to come play.
+We recommend the Docker setup for users who wish run this service; if you want to do development
+a python virtual environment setup is better.
+
+## Docker Setup
+
+First, make sure you have Docker installed and correctly setup. ( https://docs.docker.com/engine/install/ )
+
+Second, clone this repo and then in the listenbrainz-local directory create a file called .env
+that contains the following configuration lines:
+
+```
+SECRET_KEY="any string of your choice"
+ADMIN_USERS=<comma separated list of LB username that should be admins to setup lb-local.>
+DOMAIN=<the fully qualified domain where lb-local will be available, without port number>
+PORT=<the port numer where lb-local will be available>
+MUSICBRAINZ_CLIENT_ID=<MB client id, see https://musicbrainz.org/account/applications >
+MUSICBRAINZ_CLIENT_SECRET=<MB client secret, see https://musicbrainz.org/account/applications >
+```
+
+Note: Put values in "" if the values contain spaces.
+
+Save this file and then:
+
+```
+docker compose build && docker compose up
+```
+
+And LB Local will be available at the specified DOMAIN:PORT specified above!
+
+## Docker Setup with Encryption (TLS)
+
+If you wish to also create a proxy with TLS (https) support, then follow the steps above, but also
+add the following to your .env file:
+
+```
+EMAIL=<your email address>
+```
+
+The PORT configuration will be ignored in this setup and port 443 will be used.
+
+Then start the service with:
+
+```
+docker compose build && docker compose up
+```
+
+
 
 # Screenshot
 

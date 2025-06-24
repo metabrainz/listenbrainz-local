@@ -32,6 +32,7 @@ except ImportError:
 
 # TODO:
 # - Pass hints and error messages from content resolver
+# - Properly parse ADMIN_USERS
 # - Import and Resolve playlists
 
 STATIC_PATH = "/static"
@@ -63,8 +64,8 @@ def create_app():
         app.config.from_object('config')
 
     env_config = {} 
-    for k in ("DATABASE_FILE", "SECRET_KEY", "DOMAIN", "ADMIN_USERS", "MUSICBRAINZ_CLIENT_ID",
-              "MUSICBRAINZ_CLIENT_SECRET", "MUSICBRAINZ_BASE_URL"):
+    for k in ("DATABASE_FILE", "SECRET_KEY", "DOMAIN", "PORT", "ADMIN_USERS",
+              "MUSICBRAINZ_CLIENT_ID", "MUSICBRAINZ_CLIENT_SECRET", "MUSICBRAINZ_BASE_URL"):
         if k in os.environ:
             env_config[k] = os.environ[k]
             
@@ -89,7 +90,7 @@ def create_app():
     oauth = OAuth(app, fetch_token=fetch_token)
     oauth.register(name='musicbrainz',
                    authorize_url="https://musicbrainz.org/oauth2/authorize",
-                   redirect_uri=config.DOMAIN + "/auth",
+                   redirect_uri="%s:%s/auth" % (config.DOMAIN, config.PORT),
                    access_token_url="https://musicbrainz.org/oauth2/token",
                    client_kwargs={"scope": "profile"},
                    authorize_params={"access_type": "offline"},
