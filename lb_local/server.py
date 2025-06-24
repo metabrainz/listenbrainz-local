@@ -5,7 +5,7 @@ import signal
 
 import peewee
 from authlib.integrations.flask_client import OAuth
-from flask import Flask, redirect, url_for, flash
+from flask import Flask, redirect, url_for, flash, current_app
 from flask_admin import Admin
 from flask_admin.contrib.peewee import ModelView
 from flask_cors import CORS
@@ -67,7 +67,10 @@ def create_app():
     for k in ("DATABASE_FILE", "SECRET_KEY", "DOMAIN", "PORT", "ADMIN_USERS",
               "MUSICBRAINZ_CLIENT_ID", "MUSICBRAINZ_CLIENT_SECRET", "MUSICBRAINZ_BASE_URL"):
         if k in os.environ:
-            env_config[k] = os.environ[k]
+            if k == "ADMIN_USERS":
+                env_config[k] = os.environ[k].split(",")
+            else:
+                env_config[k] = os.environ[k]
             
     if env_config:
         app.config.from_mapping(env_config)
@@ -90,7 +93,7 @@ def create_app():
     oauth = OAuth(app, fetch_token=fetch_token)
     oauth.register(name='musicbrainz',
                    authorize_url="https://musicbrainz.org/oauth2/authorize",
-                   redirect_uri="%s:%s/auth" % (config.DOMAIN, config.PORT),
+                   redirect_uri="%s:%s/auth" % (app.config["DOMAIN"], app.config["PORT"]),
                    access_token_url="https://musicbrainz.org/oauth2/token",
                    client_kwargs={"scope": "profile"},
                    authorize_params={"access_type": "offline"},
@@ -132,7 +135,7 @@ def auth():
         if "refresh_token" in token:
             user.refresh_token = token["refresh_token"]
     except peewee.DoesNotExist:
-        if userinfo["sub"] in config.ADMIN_USERS:
+        if userinfo["sub"] in current_app.config["ADMIN_USERS"]:
             user = User(name=userinfo["sub"],
                         access_token=token["access_token"],
                         refresh_token=token.get("refresh_token"),
