@@ -13,7 +13,6 @@ from flask import current_app
 from troi.content_resolver.subsonic import SubsonicDatabase
 from troi.content_resolver.metadata_lookup import MetadataLookup
 from lb_local.model.service import Service
-import config
 
 # NOTES:
 #    This module is very basic right now. The UI is poor, buttons are not enabled/disabled, the page cannot be reloaded, etc.
@@ -56,7 +55,7 @@ class SyncManager(Thread):
             self.job_data[service.slug] = { "service": service, "credential": credential, "sync_log": "", "completed": False, "expire_at": monotonic() + LOG_EXPIRY_DURATION }
         self.lock.release()
         
-        self.clear_out_old_logs()
+#        self.clear_out_old_logs()
 
         return added
     
@@ -65,7 +64,9 @@ class SyncManager(Thread):
         url = urlparse(service.url)
         conf = load_credentials(user_id)
 
-        db = SubsonicDatabase(config.DATABASE_FILE, Config(**conf), quiet=False)
+        from lb_local.server import app
+        with app.app_context():
+            db = SubsonicDatabase(current_app.config["DATABASE_FILE"], Config(**conf), quiet=False)
         try:
             db.open()
             db.sync(service.slug)
@@ -127,8 +128,8 @@ class SyncManager(Thread):
         self.lock.acquire()
         valid_jobs = []
         for job in self.job_data:
-            if job["expire_at"] > monotonic():
-                valid_jobs.append(job)
+            if self.job_data[job]["expire_at"] > monotonic():
+                valid_jobs.append(self.job_data[job])
                 
         self.job_data = valid_jobs
         self.lock.release()

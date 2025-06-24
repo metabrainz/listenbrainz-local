@@ -1,9 +1,9 @@
 import uuid
 
+from flask import current_app
 from flask_login import UserMixin
 from peewee import *
 
-import config
 from lb_local.model.database import user_db
 
 
@@ -11,6 +11,12 @@ class User(Model, UserMixin):
     """
        Store user information
     """
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs) 
+        from lb_local.server import app
+        with app.app_context():
+            self.admin_user = current_app.config["ADMIN_USERS"]
 
     class Meta:
         database = user_db
@@ -39,7 +45,7 @@ class User(Model, UserMixin):
 
     @property
     def is_admin(self):
-        return self.name in config.ADMIN_USERS
+        return self.name in self.admin_users
 
     def __repr__(self):
         return "<User('%s' '%s')>" % (self.user_id, self.name or "")

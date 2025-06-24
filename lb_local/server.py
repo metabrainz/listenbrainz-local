@@ -11,7 +11,6 @@ from flask_admin.contrib.peewee import ModelView
 from flask_cors import CORS
 from flask_login import login_user, logout_user
 
-import config
 from lb_local.database import UserDatabase
 from lb_local.login import fetch_token, login_manager
 from lb_local.model.credential import Credential
@@ -23,6 +22,13 @@ from lb_local.view.index import index_bp
 from lb_local.view.service import service_bp
 from lb_local.sync import SyncManager
 from troi.content_resolver.subsonic import SubsonicDatabase
+
+try:
+    import config
+    have_config = True
+except ImportError:
+    have_config = False
+    
 
 # TODO:
 # - Pass hints and error messages from content resolver
@@ -51,12 +57,32 @@ signal.signal(signal.SIGTERM, signal_handler)
 signal.signal(signal.SIGINT, signal_handler)
 
 def create_app():
-    print(config.DATABASE_FILE)
-    exists = os.path.exists(config.DATABASE_FILE)
-    udb = UserDatabase(config.DATABASE_FILE, False)
 
     app = Flask(__name__, static_url_path=STATIC_PATH, static_folder=STATIC_FOLDER, template_folder=TEMPLATE_FOLDER)
-    app.config.from_object('config')
+    if have_config:
+        app.config.from_object('config')
+
+    env_config = {} 
+    for k in ("DATABASE_FILE", "SECRET_KEY", "DOMAIN", "ADMIN_USERS", "MUSICBRAINZ_CLIENT_ID",
+              "MUSICBRAINZ_CLIENT_SECRET", "MUSICBRAINZ_BASE_URL"):
+        if k in os.environ:
+            env_config[k] = os.environ[k]
+            
+    if env_config:
+        app.config.from_mapping(env_config)
+
+    db_file = app.config["DATABASE_FILE"]
+    print(db_file)
+    exists = os.path.exists(db_file)
+    udb = UserDatabase(db_file, False)
+    if not exists:
+        print("Database does not exist, creating tables")
+        udb.create()
+        db = SubsonicDatabase(app.config["DATABASE_FILE"], Config(**{}), quiet=False)
+        db.create()
+    else:
+        print("Database exists, opening...")
+        udb.open()
 
     # UPdate with credentials from config
     CORS(app)
@@ -77,14 +103,6 @@ def create_app():
 
     app.config["SYNC_MANAGER"] = sync_manager
 
-    if not exists:
-        print("Database does not exist, creating tables")
-        udb.create()
-        db = SubsonicDatabase(config.DATABASE_FILE, Config(**{}), quiet=False)
-        db.create()
-    else:
-        print("Database exists, opening...")
-        udb.open()
         
     return app, oauth
 

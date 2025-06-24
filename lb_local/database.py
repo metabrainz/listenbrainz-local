@@ -29,6 +29,7 @@ class UserDatabase:
         try:
             db_dir = os.path.dirname(os.path.realpath(self.db_file))
             os.makedirs(db_dir, exist_ok=True)
+            print("call setup_db: '%s' '%s'" % (self.db_file, db_dir))
             setup_db(self.db_file)
             user_db.connect()
             user_db.create_tables((User, Service, Credential))

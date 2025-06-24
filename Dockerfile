@@ -4,9 +4,10 @@ RUN apt-get update \
     && apt-get install -y --no-install-recommends \
                        build-essential \
                        git \
+                       sqlite3 \
     && rm -rf /var/lib/apt/lists/*
 
-RUN mkdir /code
+RUN mkdir /code /data && chown www-data:www-data /data
 WORKDIR /code
 
 RUN pip3.13 install setuptools uwsgi
