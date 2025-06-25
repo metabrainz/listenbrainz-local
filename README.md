@@ -39,7 +39,12 @@ MUSICBRAINZ_CLIENT_SECRET=<MB client secret, see https://musicbrainz.org/account
 
 Note: Put values in "" if the values contain spaces.
 
-Save this file and then:
+When adding a MusicBrainz application, create the application here: https://musicbrainz.org/account/applications .
+For 'Callback URI' enter:
+
+http://<domain>[:<port>]/auth -> http://mydomain.com:500/auth
+
+Then continue with:
 
 ```
 docker compose build && docker compose up
@@ -64,6 +69,21 @@ Then start the service with:
 docker compose build && docker compose up
 ```
 
+## Development setup
+
+Currently it is easy to run the app from the command line, so that is the recommended approach for development:
+
+```
+cp config.py.sample config.py
+vim config.py
+<edit config -- see above for details on what value to put>
+python3 -mvenv .virtualenv
+source .virtualenv/bin/activate
+pip install -r requirements.txt
+./lb_local.py
+```
+
+The app should then be available at the URL configured in config.py.
 
 
 # Screenshot
