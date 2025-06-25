@@ -4,7 +4,8 @@ ListenBrainz local brings recommendation features to your local Subsonic hosted 
 lack recommendations or good playlisting tools and this project aims to create another layer on top of these projects to show
 what can actually be done when you have lots of good music metadata. 
 
-Note: Your collection must be tagged with MBIDs in order for this project to work.
+Note: **Your collection must be tagged with MBIDs in order for this project to work.** Please do not open any
+bug reports asking us to make ListenBrainz Local work with an untagged collection. We will *never* do this.
 
 Support for LB Radio and Weekly jams exists now -- music playback and saving playlists to the subsonic hosts are now working and many other recommendation tools will be added over time. 
 
@@ -15,6 +16,18 @@ This project is a web app that requires a subsonic hosted music collection:
 * [Navidrome](https://www.navidrome.org/)
 
 So far we've only tested with Navidrome, so we would appreciate help testing others setups.
+
+## Important Security Consideration
+
+Due to the current state of the services (navidrome, etc) not all of these services are currently
+supporting strong auth that does not pass plaintext passwords. The ListenBrainz team is actively
+contributing to these projects, but this process isn't complete yet.
+
+In the meantime **password are stored in plaintext in the database and passed in plaintext to
+the front-end**. 
+
+Clearly we will fix this as soon as we are able.
+
 
 # Installation
 

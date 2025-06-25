@@ -43,7 +43,6 @@ def load_credentials(user_id):
             session["cors_url"] = "%s://%s" % (url.scheme, url.hostname)
         else:
             session["cors_url"] = "*"
-        print("Session object updated.")
     except RuntimeError:
         pass
         

@@ -46,9 +46,31 @@ function on_play() {
   update_button_states();
 }
 
+function on_error(song_id, error_code) {
+  if (song_id == null)
+    return;
+  if (Number.isInteger(error_code)) {
+    if (error_code == 4) {
+      msg = "Cannot play track. Are the credentials for this service correct?";
+    } 
+    else if (error_code == 3) {
+      msg = "Cannot play track due to some audio or audio file format issue.";
+    } 
+    else {
+      msg = "Cannot play track due to a network error.";
+    } 
+  } else {
+    msg = error_code + " This error may happen if your credentials for the services are incorrect.";
+  }
+  update_button_states();
+  document.getElementById("playback-errors").style.display = "block"
+  document.getElementById("playback-errors").textContent = msg;
+}
+
 function init_player(_subsonic_info) {
   console.log(_subsonic_info);
   subsonic_info = _subsonic_info;
+  update_button_states();
 }
 
 function enter_event(event, arg = null) {
@@ -225,6 +247,7 @@ function play_track(file_id, file_source) {
     html5: true,
     onend: on_end,
     onplay: on_play,
+    onloaderror: on_error,
   });
   sound.play();
   interval_id = setInterval(timer_update, 100);
