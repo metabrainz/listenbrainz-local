@@ -1,3 +1,8 @@
+{% if errors %}
+    <div id="errors" style="margin-top: 1.5em" class="alert alert-warning" role="alert">
+        {{ errors }}
+    </div>
+{% else %}
 {% include 'include/player.html' %}
 <table class="table" id="playlist-table">
     <thead>
@@ -38,3 +43,4 @@
     {% endfor %}
     </tbody>
 </table>
+{% endif %}

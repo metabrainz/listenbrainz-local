@@ -60,15 +60,16 @@ def lb_radio_post():
     db = SubsonicDatabase(current_app.config["DATABASE_FILE"], current_app.config, quiet=False)
     db.open()
     r = ListenBrainzRadioLocal(quiet=False)
-    playlist = r.generate(mode, prompt, .8)
-    from icecream import ic
-    ic(playlist.playlists[0])
+    try:
+        playlist = r.generate(mode, prompt, .8)
+    except RuntimeError as err:
+        return render_template('component/playlist-table.html', errors=str(err))
+
     try:
         recordings = playlist.playlists[0].recordings
     except (IndexError, KeyError, AttributeError):
-        # TODO: Display this on the web page
-        db.metadata_sanity_check(include_subsonic=True)
-        return
+        msgs = db.metadata_sanity_check(include_subsonic=True, return_as_array=True)
+        return render_template('component/playlist-table.html', errors="\n".join(msgs))
 
     return render_template('component/playlist-table.html', recordings=recordings, jspf=json.dumps(playlist.get_jspf()))
 
@@ -123,11 +124,15 @@ def weekly_jams_post():
     db = SubsonicDatabase(current_app.config["DATABASE_FILE"], current_app.config, quiet=False)
     db.open()
     r = PeriodicJamsLocal(user_name, .8, quiet=False)
-    playlist = r.generate()
+    try:
+        playlist = r.generate()
+    except RuntimeError as err:
+        return render_template('component/playlist-table.html', errors=str(err))
     try:
         recordings = playlist.playlists[0].recordings
     except (IndexError, KeyError, AttributeError):
-        raise ServiceUnavailable()
+        msgs = db.metadata_sanity_check(include_subsonic=True, return_as_array=True)
+        return render_template('component/playlist-table.html', errors="\n".join(msgs))
 
     return render_template('component/playlist-table.html', recordings=recordings, jspf=json.dumps(playlist.get_jspf()))
 
