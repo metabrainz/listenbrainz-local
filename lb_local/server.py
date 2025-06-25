@@ -31,11 +31,10 @@ except ImportError:
     
 
 # TODO:
-# - Pass hints and error messages from content resolver
 # - Properly parse ADMIN_USERS and throw errors.
-# - Catch playback error and report to user
 # - Adding credentials requirs ADMIN access. Is that smart?
 # - Import and Resolve playlists
+# - Saving playlists is broken
 
 STATIC_PATH = "/static"
 STATIC_FOLDER = "static"

@@ -6,6 +6,33 @@
 {% include 'include/player.html' %}
 <div id="playback-errors" style="margin-top: 1.5em; display: none" class="alert alert-warning" role="alert">
 </div>
+<div id="save-playlist" style="margin-top: 1.5em; display: block">
+    <form hx-post="/playlist/create"
+          hx-target="#save-playlist"
+          hx-swap="innerHTML"
+          hx-ext="json-enc">
+      <fieldset>
+        <label for="playlist_name">Playlist name</label>
+        <input type="text"
+               name="playlist_name"
+               id="playlist_name"
+               class="form-control-lg"
+               placeholder="playlist name"
+               style="width: 40%"
+               hx-on:input="update_playlist_buttons();"/>
+        <select name="service" id="services">
+          {% for service in services %}
+            <option value="{{service}}">{{service}}</option>
+          {% endfor %}
+        </select>
+        <input type="hidden" name="jspf" value="{{jspf}}">
+        <button class="btn btn-lg btn-primary"
+               type="submit"
+               id="submit-button">
+            Save playlist</button>
+      </fieldset>
+    </form>
+</div>
 <table class="table" id="playlist-table">
     <thead>
         <th>cover</th>

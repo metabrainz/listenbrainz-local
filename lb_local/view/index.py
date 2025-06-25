@@ -35,7 +35,10 @@ def welcome():
 def lb_radio_get():
     prompt = request.args.get("prompt", "")
     load_credentials(current_user.user_id)
-    t = render_template('lb-radio.html', prompt=prompt, page="lb-radio", subsonic=json.dumps(session["subsonic"]))
+    t = render_template('lb-radio.html', 
+                        prompt=prompt, 
+                        page="lb-radio",
+                        subsonic=json.dumps(session["subsonic"]))
     r = make_response(t)
     if session["cors_url"]:
         r.headers.set('Access-Control-Allow-Origin', session["cors_url"])
@@ -71,7 +74,10 @@ def lb_radio_post():
         msgs = db.metadata_sanity_check(include_subsonic=True, return_as_array=True)
         return render_template('component/playlist-table.html', errors="\n".join(msgs))
 
-    return render_template('component/playlist-table.html', recordings=recordings, jspf=json.dumps(playlist.get_jspf()))
+    return render_template('component/playlist-table.html',
+                           recordings=recordings,
+                           jspf=json.dumps(playlist.get_jspf()),
+                           services=session["subsonic"].keys())
 
 
 class Config:
@@ -83,20 +89,18 @@ class Config:
 @index_bp.route("/playlist/create", methods=["POST"])
 @login_required
 def playlist_create():
-    jspf = request.get_json()
+    jdata = request.get_json()
+    playlist_jspf = jdata["jspf"]
+    service = jdata["service"]
+    playlist_name = jdata["playlist_name"]
 
-    playlist = _deserialize_from_jspf(json.loads(jspf["jspf"]))
+    playlist = _deserialize_from_jspf(json.loads(playlist_jspf))
     playlist_element = PlaylistElement()
     playlist_element.playlists = [playlist]
 
-    url = urlparse(session["subsonic"]["url"])
-    conf = copy(current_app.config)
-    conf["SUBSONIC_HOST"] = "%s://%s" % (url.scheme, url.hostname)
-    conf["SUBSONIC_PORT"] = int(url.port)
-
-    db = SubsonicDatabase(current_app.config["DATABASE_FILE"], Config(**conf), quiet=False)
+    db = SubsonicDatabase(current_app.config["DATABASE_FILE"], Config(**{ "SUBSONIC_SERVERS": current_app.config }), quiet=False)
     db.open()
-    db.upload_playlist(playlist_element)
+    db.upload_playlist(playlist_element, playlist_name, service)
 
     return ('', 204)
 
@@ -134,7 +138,9 @@ def weekly_jams_post():
         msgs = db.metadata_sanity_check(include_subsonic=True, return_as_array=True)
         return render_template('component/playlist-table.html', errors="\n".join(msgs))
 
-    return render_template('component/playlist-table.html', recordings=recordings, jspf=json.dumps(playlist.get_jspf()))
+    return render_template('component/playlist-table.html',
+                           services=session["subsonic"].keys(),
+                           jspf=json.dumps(playlist.get_jspf()))
 
 
 @index_bp.route("/top-tags", methods=["GET"])
