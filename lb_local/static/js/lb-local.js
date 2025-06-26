@@ -227,8 +227,6 @@ function jump(index) {
 function play_track(file_id, file_source) {
   //For testing with only short tracks...
   //file_id = "cf22184021802f7ebbf0e461d11fc42d";
-  console.log(file_source);
-  console.log(subsonic_info);
   url =
     subsonic_info[file_source].url +
     "/rest/stream?id=" +

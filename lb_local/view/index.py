@@ -91,7 +91,7 @@ def playlist_create():
     jdata = request.get_json()
     playlist_jspf = jdata["jspf"]
     service = jdata["service"]
-    playlist_name = jdata["playlist_name"]
+    playlist_name = jdata["playlist-name"]
 
     playlist = _deserialize_from_jspf(json.loads(playlist_jspf))
     playlist_element = PlaylistElement()
