@@ -81,7 +81,6 @@ def lb_radio_post():
 
 
 class Config:
-
     def __init__(self, **entries):
         self.__dict__.update(entries)
 
@@ -98,9 +97,13 @@ def playlist_create():
     playlist_element = PlaylistElement()
     playlist_element.playlists = [playlist]
 
-    db = SubsonicDatabase(current_app.config["DATABASE_FILE"], Config(**{ "SUBSONIC_SERVERS": current_app.config }), quiet=False)
-    db.open()
-    db.upload_playlist(playlist_element, playlist_name, service)
+    conf = load_credentials(current_user.user_id)
+    try:
+        db = SubsonicDatabase(current_app.config["DATABASE_FILE"], Config(**conf), quiet=False)
+        db.open()
+        db.upload_playlist(playlist_element, service, playlist_name)
+    except RuntimeError as err:
+        return render_template('component/playlist-save-result.html', msg=err)
 
     return ('', 204)
 

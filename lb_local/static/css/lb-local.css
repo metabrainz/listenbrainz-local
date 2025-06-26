@@ -126,6 +126,14 @@ body {
     border-radius: 10px;
 }
 
+#save-playlist-div {
+    margin: .9em 0 1.1em 0;
+    display: none;
+    border-radius: 10px;
+    background-color: #d4c3eb;
+    padding: 1.2em;
+}
+
 #progress-bar-div {
     width: 100%;
     margin: 12px;

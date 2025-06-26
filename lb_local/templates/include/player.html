@@ -28,21 +28,14 @@
         >
             <i class="fa-solid fa-forward"></i>
         </button>
-        <form
-            hx-ext="json-enc"
-            hx-trigger="submit"
-            hx-post="/playlist/create"
-            id="lb-local-playlist"
+        <button
+            class="btn btn-secondary player-button"
+            type="submit"
+            id="save-playlist"
+            onclick="show_playlist()"
         >
-            <input type="hidden" name="jspf" value="{{ jspf }}" />
-            <button
-                class="btn btn-secondary player-button"
-                type="submit"
-                id="save-playlist"
-            >
-                <i class="fa-solid fa-download"></i>
-            </button>
-        </form>
+            <i class="fa-solid fa-download"></i>
+        </button>
         <div class="progress" hx-on:click="seek(event);" id="progress-bar-div">
             <div
                 id="progress-bar"
@@ -55,3 +48,9 @@
         </div>
     </div>
 </div>
+
+<script type="text/javascript">
+function show_playlist() {
+    document.getElementById("save-playlist-div").style.display = "block";
+}
+</script>
