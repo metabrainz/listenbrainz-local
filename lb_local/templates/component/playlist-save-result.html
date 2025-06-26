@@ -1,5 +1,12 @@
 <div id="save-result" style="margin-top: 1.0em; display: block">
-    <div class="alert alert-warning" role="alert">
-        {{ msg }}
+    {% if error %}
+    <div class="alert alert-danger" role="alert" style="border-radius: 10px;">
+        {{ error }}
     </div>
+    {% endif %}
+    {% if success %}
+    <div class="alert alert-success" role="alert" style="border-radius: 10px;">
+        {{ success }}
+    </div>
+    {% endif %}
 </div>

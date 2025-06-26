@@ -103,9 +103,9 @@ def playlist_create():
         db.open()
         db.upload_playlist(playlist_element, service, playlist_name)
     except RuntimeError as err:
-        return render_template('component/playlist-save-result.html', msg=err)
+        return render_template('component/playlist-save-result.html', error=err)
 
-    return ('', 204)
+    return render_template('component/playlist-save-result.html', success="Playlist saved.")
 
 
 @index_bp.route("/weekly-jams", methods=["GET"])
