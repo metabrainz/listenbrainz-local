@@ -65,7 +65,7 @@ def lb_radio_post():
 
     db = SubsonicDatabase(current_app.config["DATABASE_FILE"], current_app.config, quiet=False)
     db.open()
-    r = ListenBrainzRadioLocal(quiet=False)
+    r = ListenBrainzRadioLocal(quiet=True)
     try:
         playlist = r.generate(mode, prompt, .8)
     except RuntimeError as err:
@@ -102,7 +102,7 @@ def playlist_create():
 
     conf = load_credentials(current_user.user_id)
     try:
-        db = SubsonicDatabase(current_app.config["DATABASE_FILE"], Config(**conf), quiet=False)
+        db = SubsonicDatabase(current_app.config["DATABASE_FILE"], Config(**conf), quiet=True)
         db.open()
         db.upload_playlist(playlist_element, service, playlist_name)
     except RuntimeError as err:
@@ -131,9 +131,9 @@ def weekly_jams_post():
     except KeyError:
         raise BadRequest("argument 'user_name' is required.")
 
-    db = SubsonicDatabase(current_app.config["DATABASE_FILE"], current_app.config, quiet=False)
+    db = SubsonicDatabase(current_app.config["DATABASE_FILE"], current_app.config, quiet=True)
     db.open()
-    r = PeriodicJamsLocal(user_name, .8, quiet=False)
+    r = PeriodicJamsLocal(user_name, .8, quiet=True)
     try:
         playlist = r.generate()
     except RuntimeError as err:
@@ -152,7 +152,7 @@ def weekly_jams_post():
 @index_bp.route("/top-tags", methods=["GET"])
 @login_required
 def tags():
-    db = Database(current_app.config["DATABASE_FILE"], quiet=False)
+    db = Database(current_app.config["DATABASE_FILE"], quiet=True)
     db.open()
     tt = TopTags()
     ts = tt.get_top_tags(250)
@@ -162,7 +162,7 @@ def tags():
 @index_bp.route("/unresolved", methods=["GET"])
 @login_required
 def unresolved():
-    db = Database(current_app.config["DATABASE_FILE"], quiet=False)
+    db = Database(current_app.config["DATABASE_FILE"], quiet=True)
     db.open()
     urt = UnresolvedRecordingTracker()
     return render_template("unresolved.html", unresolved=urt.get_releases(), page="unresolved")

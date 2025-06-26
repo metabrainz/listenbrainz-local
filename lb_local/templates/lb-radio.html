@@ -89,6 +89,7 @@ block content -%}
             console.log("triger form");
             form = document.getElementById("lb-radio-form");
             htmx.trigger(form, 'submit');
+            htmx.addClass(htmx.find("#prompt-examples"), "hidden");
         }
     });
 
