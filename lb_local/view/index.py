@@ -131,9 +131,9 @@ def weekly_jams_post():
     except KeyError:
         raise BadRequest("argument 'user_name' is required.")
 
-    db = SubsonicDatabase(current_app.config["DATABASE_FILE"], current_app.config, quiet=True)
+    db = SubsonicDatabase(current_app.config["DATABASE_FILE"], current_app.config, quiet=False)
     db.open()
-    r = PeriodicJamsLocal(user_name, .8, quiet=True)
+    r = PeriodicJamsLocal(user_name, .8, quiet=False)
     try:
         playlist = r.generate()
     except RuntimeError as err:
@@ -145,6 +145,7 @@ def weekly_jams_post():
         return render_template('component/playlist-table.html', errors="\n".join(msgs))
 
     return render_template('component/playlist-table.html',
+                           recordings=recordings,
                            services=session["subsonic"].keys(),
                            jspf=json.dumps(playlist.get_jspf()))
 

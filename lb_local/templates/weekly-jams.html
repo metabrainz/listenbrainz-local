@@ -9,9 +9,10 @@
     many times as you'd like in a week, but the underying recommendations only update each monday.
 </p>
 
-<form hx-post="/weekly-jams"
+<form id="weekly-jams-form"
+      hx-post="/weekly-jams"
       hx-target="#lb-local-playlist"
-      hx-swap="innerHTML"
+      hx-swap="innerHTML">
   <fieldset>
     <label for="prompt">User</label>
     <input type="text"
@@ -57,12 +58,12 @@
     }
 
     function update_buttons() {
-            input =  document.getElementById("prompt");
-            submit =  document.getElementById("submit-button");
-            if (input.value.length > 0)
-                submit.classList.remove("disabled");
-            else
-                submit.classList.add("disabled");
-        }
+        input =  document.getElementById("prompt");
+        submit =  document.getElementById("submit-button");
+        if (input.value.length > 0)
+            submit.classList.remove("disabled");
+        else
+            submit.classList.add("disabled");
+    }
 </script>
 {% endblock %}
