@@ -67,11 +67,11 @@
                 <a href="https://listenbrainz.org/release/{{ rec.release.mbid }}">{{ rec.release.name }}</a>
             </td>
             <td class="col tl-artist-col">
-                <img class="headphones" src="{{ url_for('static', filename='img/headphones.svg') }}">
                 {% for artist in rec.artist_credit.artists %}
-                    <a  href="/lb-radio?prompt={{ artist.name | safe }}">
-                        <a class="artist" href="https://listenbrainz.org/artist/{{ artist.mbid }}">{{ artist.name }}</a>
+                    <a  href="/lb-radio?prompt=artist:({{ artist.mbid | safe }})&title={{ artist.name }}">
+                       <i class="fa-solid fa-radio"></i>
                     </a>
+                    <a class="artist" href="https://listenbrainz.org/artist/{{ artist.mbid }}">{{ artist.name }}</a>
                     {{ artist.join_phrase }}
                 {% endfor %}
             </td>

@@ -34,9 +34,12 @@ def welcome():
 @login_required
 def lb_radio_get():
     prompt = request.args.get("prompt", "")
+    title = request.args.get("title", "");
+    print(title)
     load_credentials(current_user.user_id)
     t = render_template('lb-radio.html', 
                         prompt=prompt, 
+                        title=title, 
                         page="lb-radio",
                         subsonic=json.dumps(session["subsonic"]))
     r = make_response(t)

@@ -33,8 +33,8 @@ except ImportError:
 # TODO:
 # - Properly parse ADMIN_USERS and throw errors.
 # - Adding credentials requirs ADMIN access. Is that smart?
+# - Show LB radio hints and playlists title
 # - Import and Resolve playlists
-# - Saving playlists is broken
 
 STATIC_PATH = "/static"
 STATIC_FOLDER = "static"

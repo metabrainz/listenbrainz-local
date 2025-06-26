@@ -1,9 +1,15 @@
 {%- extends 'include/base.html' -%} {%- block title -%}home{% endblock %} {%-
 block content -%}
 
-<h2 style="margin-bottom: 0.5em">LB Radio</h2>
+<h2 style="margin-bottom: 0.5em">
+    {% if title %}
+        LB Radio for {{ title }}
+    {% else %}
+        LB Radio
+    {% endif %}
+</h2>
 
-<form hx-post="/lb-radio" hx-target="#lb-local-playlist" hx-swap="innerHTML">
+<form id="lb-radio-form" hx-post="/lb-radio" hx-target="#lb-local-playlist" hx-swap="innerHTML">
     <fieldset>
         <div class="col-auto">
             <label for="prompt" class="form-label">
@@ -78,6 +84,12 @@ block content -%}
     document.addEventListener("DOMContentLoaded", () => {
         init_player({{ subsonic|safe }});
         update_buttons();
+        input = document.getElementById("prompt");
+        if (input.value.length > 0) {
+            console.log("triger form");
+            form = document.getElementById("lb-radio-form");
+            htmx.trigger(form, 'submit');
+        }
     });
 
     function clear_page() {
@@ -87,7 +99,6 @@ block content -%}
     }
 
     function update_buttons() {
-        console.log("update buttons");
         input = document.getElementById("prompt");
         submit = document.getElementById("submit-button");
         if (input.value.length > 0)
