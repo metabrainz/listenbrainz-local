@@ -25,6 +25,11 @@ body {
 .prompt-example {
     margin-left: 2em;
 }
+
+#troi-hints {
+    margin-top: 1.1em;
+}
+
 .tl-header-row {
     font-weight: bold;
 }

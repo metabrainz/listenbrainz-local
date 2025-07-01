@@ -79,6 +79,7 @@ def lb_radio_post():
 
     return render_template('component/playlist-table.html',
                            recordings=recordings,
+                           hints=r.patch.user_feedback(),
                            jspf=json.dumps(playlist.get_jspf()),
                            services=session["subsonic"].keys())
 
@@ -146,6 +147,7 @@ def weekly_jams_post():
 
     return render_template('component/playlist-table.html',
                            recordings=recordings,
+                           hints=r.patch.user_feedback(),
                            services=session["subsonic"].keys(),
                            jspf=json.dumps(playlist.get_jspf()))
 

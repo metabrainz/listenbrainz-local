@@ -6,6 +6,18 @@
 {% include 'include/player.html' %}
 <div id="playback-errors" style="margin-top: 1.5em; display: none" class="alert alert-warning" role="alert">
 </div>
+{% if hints %}
+    <div id="troi-hints" class="alert alert-warning" role="alert">
+        <a onclick="hide_hints()" id="hide-hints-button" class="align-self-start">
+            <i class="fa-solid fa-close"></i>
+        </a>
+        <ul>
+            {% for hint in hints %}
+                <li>{{ hint }}</li>
+            {% endfor %} 
+        </ul>
+    </div>
+{% endif %}
 <div id="save-playlist-div">
     <form hx-post="/playlist/create"
           hx-target="#save-result"
@@ -82,6 +94,9 @@
 <script type="text/javascript">
 function hide_playlist() {
     document.getElementById("save-playlist-div").style.display = "none";
+}
+function hide_hints() {
+    document.getElementById("troi-hints").style.display = "none";
 }
 function update_save_buttons() {
   console.log("update save bt");
