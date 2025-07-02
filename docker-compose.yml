@@ -11,7 +11,7 @@ services:
       - lb_local_data:/data:z
     environment:
       - SECRET_KEY=${SECRET_KEY}
-      - ADMIN_USERS=${ADMIN_USERS}
+      - AUTHORIZED_USERS=${ADMIN_USERS}
       - DOMAIN=${DOMAIN}
       - PORT=${PORT}
       - MUSICBRAINZ_CLIENT_ID=${MUSICBRAINZ_CLIENT_ID}

@@ -3,7 +3,7 @@ DATABASE_FILE = "lb-local.db"
 DOMAIN = "127.0.0.1"
 PORT = 5000
 SECRET_KEY = ""
-ADMIN_USERS = []
+AUTHORIZED_USERS = []
 
 # MusicBrainz OAuth2 Details
 MUSICBRAINZ_CLIENT_ID=""

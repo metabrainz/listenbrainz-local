@@ -33,7 +33,6 @@ except ImportError:
 # TODO:
 # - Properly parse ADMIN_USERS and throw errors.
 # - Adding credentials requirs ADMIN access. Is that smart?
-# - Show LB radio hints and playlists title
 # - Import and Resolve playlists
 
 STATIC_PATH = "/static"
@@ -69,7 +68,7 @@ def create_app():
               "MUSICBRAINZ_CLIENT_ID", "MUSICBRAINZ_CLIENT_SECRET", "MUSICBRAINZ_BASE_URL"):
         if k in os.environ:
             if k == "ADMIN_USERS":
-                env_config[k] = os.environ[k].split(",")
+                env_config[k] = [ x.strip() for x in os.environ[k].split(",") ]
             else:
                 env_config[k] = os.environ[k]
             
