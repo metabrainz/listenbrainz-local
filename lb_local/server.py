@@ -31,7 +31,6 @@ except ImportError:
     
 
 # TODO:
-# - Properly parse ADMIN_USERS and throw errors.
 # - Adding credentials requirs ADMIN access. Is that smart?
 # - Import and Resolve playlists
 
@@ -64,10 +63,10 @@ def create_app():
         app.config.from_object('config')
 
     env_config = {} 
-    for k in ("DATABASE_FILE", "SECRET_KEY", "DOMAIN", "PORT", "ADMIN_USERS",
+    for k in ("DATABASE_FILE", "SECRET_KEY", "DOMAIN", "PORT", "AUTHORIZED_USERS",
               "MUSICBRAINZ_CLIENT_ID", "MUSICBRAINZ_CLIENT_SECRET", "MUSICBRAINZ_BASE_URL"):
         if k in os.environ:
-            if k == "ADMIN_USERS":
+            if k == "AUTHORIZED_USERS":
                 env_config[k] = [ x.strip() for x in os.environ[k].split(",") ]
             else:
                 env_config[k] = os.environ[k]
@@ -135,7 +134,7 @@ def auth():
         if "refresh_token" in token:
             user.refresh_token = token["refresh_token"]
     except peewee.DoesNotExist:
-        if userinfo["sub"] in current_app.config["ADMIN_USERS"]:
+        if userinfo["sub"] in current_app.config["AUTHORIZED_USERS"]:
             user = User(name=userinfo["sub"],
                         access_token=token["access_token"],
                         refresh_token=token.get("refresh_token"),

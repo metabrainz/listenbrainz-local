@@ -16,7 +16,7 @@ class User(Model, UserMixin):
         super().__init__(*args, **kwargs) 
         from lb_local.server import app
         with app.app_context():
-            self.admin_user = current_app.config["ADMIN_USERS"]
+            self.admin_user = current_app.config["AUTHORIZED_USERS"]
 
     class Meta:
         database = user_db

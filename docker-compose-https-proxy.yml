@@ -16,7 +16,7 @@ services:
     restart: unless-stopped
     environment:
       - SECRET_KEY=${SECRET_KEY}
-      - AUTHORIZED_USERS=${ADMIN_USERS}
+      - AUTHORIZED_USERS=${AUTHORIZED_USERS}
       - DOMAIN=${DOMAIN}
       - PORT=${PORT}
       - MUSICBRAINZ_CLIENT_ID=${MUSICBRAINZ_CLIENT_ID}
