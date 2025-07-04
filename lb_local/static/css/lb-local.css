@@ -28,6 +28,7 @@ body {
 
 #troi-hints {
     margin-top: 1.1em;
+    border-radius: 10px;
 }
 
 .tl-header-row {

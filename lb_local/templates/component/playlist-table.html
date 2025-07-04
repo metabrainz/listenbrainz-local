@@ -6,18 +6,6 @@
 {% include 'include/player.html' %}
 <div id="playback-errors" style="margin-top: 1.5em; display: none" class="alert alert-warning" role="alert">
 </div>
-{% if hints %}
-    <div id="troi-hints" class="alert alert-warning" role="alert">
-        <a onclick="hide_hints()" id="hide-hints-button" class="align-self-start">
-            <i class="fa-solid fa-close"></i>
-        </a>
-        <ul>
-            {% for hint in hints %}
-                <li>{{ hint }}</li>
-            {% endfor %} 
-        </ul>
-    </div>
-{% endif %}
 <div id="save-playlist-div">
     <form hx-post="/playlist/create"
           hx-target="#save-result"
@@ -29,6 +17,7 @@
                name="playlist-name"
                id="playlist-name"
                class="form-control-lg"
+               value="{{ playlist_name }}"
                placeholder="playlist name"
                style="width: 40%"
                hx-on:input="update_save_buttons();"/>
@@ -53,9 +42,21 @@
     </div>
 </div>
 <div>
-    <h2>{{ playlist.name }}</h2>
+    <h2>{{ playlist_name }}</h2>
     <div>{{ playlist_desc }}</div>
 </div>
+{% if hints %}
+    <div id="troi-hints" class="alert alert-warning" role="alert">
+        <a onclick="hide_hints()" id="hide-hints-button" class="align-self-start">
+            <i class="fa-solid fa-close float-end"></i>
+        </a>
+        <ul>
+            {% for hint in hints %}
+                <li>{{ hint }}</li>
+            {% endfor %} 
+        </ul>
+    </div>
+{% endif %}
 <table class="table" id="playlist-table">
     <thead>
         <th>cover</th>

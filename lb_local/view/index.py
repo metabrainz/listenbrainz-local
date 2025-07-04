@@ -69,6 +69,7 @@ def lb_radio_post():
     try:
         playlist = r.generate(mode, prompt, .8)
     except RuntimeError as err:
+        print("runtime error")
         return render_template('component/playlist-table.html', errors=str(err))
 
     try:
@@ -79,8 +80,8 @@ def lb_radio_post():
 
     return render_template('component/playlist-table.html',
                            recordings=recordings,
-                           playlist_name=playlist.name,
-                           playlist_desc=playlist.description,
+                           playlist_name=playlist.playlists[0].name,
+                           playlist_desc=playlist.playlists[0].description,
                            hints=r.patch.user_feedback(),
                            jspf=json.dumps(playlist.get_jspf()),
                            services=session["subsonic"].keys())
@@ -140,17 +141,19 @@ def weekly_jams_post():
     try:
         playlist = r.generate()
     except RuntimeError as err:
+        print("err 1")
         return render_template('component/playlist-table.html', errors=str(err))
     try:
         recordings = playlist.playlists[0].recordings
     except (IndexError, KeyError, AttributeError):
+        print("err 2")
         msgs = db.metadata_sanity_check(include_subsonic=True, return_as_array=True)
         return render_template('component/playlist-table.html', errors="\n".join(msgs))
-
+    
     return render_template('component/playlist-table.html',
                            recordings=recordings,
-                           playlist_name=playlist.name,
-                           playlist_desc=playlist.description,
+                           playlist_name=playlist.playlists[0].name,
+                           playlist_desc=playlist.playlists[0].description,
                            hints=r.patch.user_feedback(),
                            services=session["subsonic"].keys(),
                            jspf=json.dumps(playlist.get_jspf()))
