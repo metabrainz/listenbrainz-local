@@ -9,7 +9,7 @@ class UserModelView(ModelView):
 
     def is_accessible(self):
         try:
-            return current_user.is_admin
+            return current_user.is_authorized
         except AttributeError:
             return False
 
@@ -28,7 +28,7 @@ class ServiceModelView(ModelView):
 
     def is_accessible(self):
         try:
-            return current_user.is_admin
+            return current_user.is_authorized
         except AttributeError:
             return False
 

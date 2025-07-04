@@ -43,7 +43,7 @@ that contains the following configuration lines:
 
 ```
 SECRET_KEY="any string of your choice"
-ADMIN_USERS=<comma separated list of LB username that should be admins to setup lb-local.>
+AUTHORIZED_USERS=<comma separated list of LB usernames that are allowed to use this site>
 DOMAIN=<the fully qualified domain where lb-local will be available, without port number>
 PORT=<the port numer where lb-local will be available>
 MUSICBRAINZ_CLIENT_ID=<MB client id, see https://musicbrainz.org/account/applications >

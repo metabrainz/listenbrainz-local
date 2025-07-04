@@ -16,7 +16,7 @@ class User(Model, UserMixin):
         super().__init__(*args, **kwargs) 
         from lb_local.server import app
         with app.app_context():
-            self.admin_user = current_app.config["AUTHORIZED_USERS"]
+            self.authorized_users = current_app.config["AUTHORIZED_USERS"]
 
     class Meta:
         database = user_db
@@ -44,8 +44,8 @@ class User(Model, UserMixin):
         }
 
     @property
-    def is_admin(self):
-        return self.name in self.admin_users
+    def is_authorized(self):
+        return self.name in self.authorized_users
 
     def __repr__(self):
         return "<User('%s' '%s')>" % (self.user_id, self.name or "")

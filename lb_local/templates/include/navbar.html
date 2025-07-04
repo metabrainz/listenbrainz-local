@@ -54,7 +54,7 @@
                       <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
                         <li><a class="dropdown-item" href="/service">Services</a></lio>
                         <li><a class="dropdown-item" href="/credential">Credentials</a></lio>
-                        {% if current_user.is_admin %}
+                        {% if current_user.is_authorized %}
                             <li><a class="dropdown-item" href="/admin">Admin</a></lio>
                         {% endif %}
                         <li><hr class="dropdown-divider"></li>
