@@ -9,7 +9,7 @@ class UserModelView(ModelView):
 
     def is_accessible(self):
         try:
-            return current_user.is_authorized
+            return current_user.is_admin
         except AttributeError:
             return False
 
@@ -21,14 +21,14 @@ class UserModelView(ModelView):
         pass
 
 
-class ServiceModelView(ModelView):
+class ServiceCredentialModelView(ModelView):
 
     form_excluded_columns = ('uuid', )
     can_create = False
 
     def is_accessible(self):
         try:
-            return current_user.is_authorized
+            return current_user.is_admin
         except AttributeError:
             return False
 

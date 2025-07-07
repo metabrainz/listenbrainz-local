@@ -52,9 +52,11 @@
                         {{ current_user.name }}
                       </a>
                       <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
-                        <li><a class="dropdown-item" href="/service">Services</a></lio>
+                        {% if current_user.is_admin %}
+                            <li><a class="dropdown-item" href="/service">Services</a></lio>
+                        {% endif %}
                         <li><a class="dropdown-item" href="/credential">Credentials</a></lio>
-                        {% if current_user.is_authorized %}
+                        {% if current_user.is_admin %}
                             <li><a class="dropdown-item" href="/admin">Admin</a></lio>
                         {% endif %}
                         <li><hr class="dropdown-divider"></li>

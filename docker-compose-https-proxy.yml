@@ -17,6 +17,7 @@ services:
     environment:
       - SECRET_KEY=${SECRET_KEY}
       - AUTHORIZED_USERS=${AUTHORIZED_USERS}
+      - ADMIN_USERS=${ADMIN_USERS}
       - DOMAIN=${DOMAIN}
       - PORT=${PORT}
       - MUSICBRAINZ_CLIENT_ID=${MUSICBRAINZ_CLIENT_ID}

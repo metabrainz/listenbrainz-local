@@ -16,7 +16,7 @@ from lb_local.login import fetch_token, login_manager
 from lb_local.model.credential import Credential
 from lb_local.model.service import Service
 from lb_local.model.user import User
-from lb_local.view.admin import UserModelView, ServiceModelView
+from lb_local.view.admin import UserModelView, ServiceCredentialModelView
 from lb_local.view.credential import credential_bp, load_credentials
 from lb_local.view.index import index_bp
 from lb_local.view.service import service_bp
@@ -99,8 +99,8 @@ def create_app():
                    fetch_token=fetch_token)
     admin = Admin(app, name='ListenBrainz Local Admin')
     admin.add_view(UserModelView(User, "User"))
-    admin.add_view(ServiceModelView(Service, "Service"))
-    admin.add_view(ModelView(Credential, "Credential"))
+    admin.add_view(ServiceCredentialModelView(Service, "Service"))
+    admin.add_view(ServiceCredentialModelView(Credential, "Credential"))
 
     login_manager.init_app(app)
 

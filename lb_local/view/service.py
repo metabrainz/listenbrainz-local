@@ -4,7 +4,7 @@ import peewee
 import validators
 from flask import Blueprint, render_template, request, redirect, url_for, flash, current_app
 from flask_login import login_required, current_user
-from werkzeug.exceptions import BadRequest
+from werkzeug.exceptions import BadRequest, NotFound
 
 from lb_local.model.service import Service
 from lb_local.model.credential import Credential
@@ -16,12 +16,16 @@ service_bp = Blueprint("service_bp", __name__)
 @service_bp.route("/", methods=["GET"])
 @login_required
 def service_index():
+    if not current_user.is_admin:
+        raise NotFound
     return render_template("service.html", page="service")
 
 
 @service_bp.route("/list", methods=["GET"])
 @login_required
 def service_list():
+    if not current_user.is_admin:
+        raise NotFound
     services = Service.select()
     for service in services:
         if service.last_synched:
@@ -34,12 +38,16 @@ def service_list():
 @service_bp.route("/add", methods=["GET"])
 @login_required
 def service_add():
+    if not current_user.is_admin:
+        raise NotFound
     return render_template("service-add.html", mode="Add")
 
 
 @service_bp.route("/<slug>/edit", methods=["GET"])
 @login_required
 def service_edit(slug):
+    if not current_user.is_admin:
+        raise NotFound
     service = Service.get(Service.slug == slug)
     return render_template("service-add.html", mode="Edit", service=service, slug=slug)
 
@@ -47,6 +55,8 @@ def service_edit(slug):
 @service_bp.route("/<slug>/delete", methods=["GET"])
 @login_required
 def service_delete(slug):
+    if not current_user.is_admin:
+        raise NotFound
     try:
         service = Service.get(Service.slug == slug)
         service.delete_instance()
@@ -62,6 +72,8 @@ def service_delete(slug):
 @service_bp.route("/add", methods=["POST"])
 @login_required
 def service_add_post():
+    if not current_user.is_admin:
+        raise NotFound
     mode = request.form.get("mode", "")
     old_slug = request.form.get("old_slug", "")
     print("add save: mode '%s' '%s'" % (mode, old_slug))
@@ -104,11 +116,15 @@ def service_add_post():
 @service_bp.route("/<slug>/sync", methods=["GET"])
 @login_required
 def service_sync(slug):
+    if not current_user.is_admin:
+        raise NotFound
     return render_template("service-sync.html", page="service", slug=slug)
 
 @service_bp.route("/<slug>/sync/start", methods=["POST"])
 @login_required
 def service_sync_start(slug):
+    if not current_user.is_admin:
+        raise NotFound
     service = Service.get(Service.slug == slug)
     credential = Credential.select().where(Credential.owner == current_user.user_id and Credential.service == service.id)
     added = current_app.config["SYNC_MANAGER"].request_service_scan(service, credential, current_user.user_id)
@@ -120,6 +136,8 @@ def service_sync_start(slug):
 @service_bp.route("/<slug>/sync/log")
 @login_required
 def service_sync_log(slug):
+    if not current_user.is_admin:
+        raise NotFound
     try:
         logs, completed = current_app.config["SYNC_MANAGER"].get_sync_log(slug)
     except TypeError:
