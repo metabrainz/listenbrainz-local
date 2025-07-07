@@ -16,7 +16,8 @@ RUN mkdir /code/lb-local
 WORKDIR /code/lb-local
 
 COPY requirements.txt /code/lb-local
-RUN pip3.13 install --no-cache-dir -r requirements.txt
+#RUN pip3.13 install --no-cache-dir -r requirements.txt
+RUN pip3.13 install -r requirements.txt
 
 RUN apt-get purge -y build-essential && \
     apt-get autoremove -y && \

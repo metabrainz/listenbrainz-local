@@ -1,0 +1,21 @@
+# General configuration
+
+# Where to store the database file
+DATABASE_FILE=lb-local.db
+
+# Information on how to connect to this instance
+DOMAIN=127.0.0.1
+PORT=5000
+
+# Set the following value to any random string and don't share that string with anyone
+SECRET_KEY = ""
+
+# Authorized users is a list of ListenBrainz users authorized to use this service.
+AUTHORIZED_USERS = <comma separated list>
+
+# List of users allowed to admin this instance
+ADMIN_USERS = <comma separated list>
+
+# MusicBrainz OAuth2 Details
+MUSICBRAINZ_CLIENT_ID=
+MUSICBRAINZ_CLIENT_SECRET=

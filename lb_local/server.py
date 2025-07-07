@@ -1,5 +1,6 @@
 import atexit
 import os
+import sys
 from datetime import datetime
 import signal
 
@@ -10,6 +11,7 @@ from flask_admin import Admin
 from flask_admin.contrib.peewee import ModelView
 from flask_cors import CORS
 from flask_login import login_user, logout_user
+from dotenv import dotenv_values
 
 from lb_local.database import UserDatabase
 from lb_local.login import fetch_token, login_manager
@@ -23,13 +25,6 @@ from lb_local.view.service import service_bp
 from lb_local.sync import SyncManager
 from troi.content_resolver.subsonic import SubsonicDatabase
 
-try:
-    import config
-    have_config = True
-except ImportError:
-    have_config = False
-    
-
 # TODO:
 # - Adding credentials requirs ADMIN access. Is that smart?
 # - Import and Resolve playlists
@@ -37,6 +32,9 @@ except ImportError:
 STATIC_PATH = "/static"
 STATIC_FOLDER = "static"
 TEMPLATE_FOLDER = "templates"
+
+env_keys = ["DATABASE_FILE", "SECRET_KEY", "DOMAIN", "PORT", "AUTHORIZED_USERS",
+            "MUSICBRAINZ_CLIENT_ID", "MUSICBRAINZ_CLIENT_SECRET"]
 
 sync_manager = SyncManager()
 sync_manager.daemon = True
@@ -59,20 +57,25 @@ signal.signal(signal.SIGINT, signal_handler)
 def create_app():
 
     app = Flask(__name__, static_url_path=STATIC_PATH, static_folder=STATIC_FOLDER, template_folder=TEMPLATE_FOLDER)
-    if have_config:
-        app.config.from_object('config')
 
-    env_config = {} 
-    for k in ("DATABASE_FILE", "SECRET_KEY", "DOMAIN", "PORT", "AUTHORIZED_USERS",
-              "MUSICBRAINZ_CLIENT_ID", "MUSICBRAINZ_CLIENT_SECRET", "MUSICBRAINZ_BASE_URL"):
+    # Load the .env file config    
+    env_config = dotenv_values(".env")
+    print(env_config)
+    
+    # Have the docker-compose file override any settings from .env
+    for k in env_keys:
+        print("environ: %s -> %s" % (k, env_config.get(k, "")))
         if k in os.environ:
-            if k == "AUTHORIZED_USERS":
-                env_config[k] = [ x.strip() for x in os.environ[k].split(",") ]
-            else:
-                env_config[k] = os.environ[k]
+            print("override: %s -> %s" % (k, env_config[k]))
+            env_config[k] = os.environ[k]
             
-    if env_config:
-        app.config.from_mapping(env_config)
+        if k not in env_config:
+            print("Setting '%s' must be defined in .env file." % k)
+            sys.exit(-1)
+            
+    env_config["AUTHORIZED_USERS"] = [ x.strip() for x in env_config["AUTHORIZED_USERS"].split(",") ]
+    env_config["ADMIN_USERS"] = [ x.strip() for x in env_config["ADMIN_USERS"].split(",") ]
+    app.config.from_mapping(env_config)
 
     db_file = app.config["DATABASE_FILE"]
     print(db_file)
