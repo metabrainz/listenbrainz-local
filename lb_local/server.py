@@ -58,7 +58,6 @@ signal.signal(signal.SIGINT, signal_handler)
 def create_app():
 
     app = Flask(__name__, static_url_path=STATIC_PATH, static_folder=STATIC_FOLDER, template_folder=TEMPLATE_FOLDER)
-    app.logger.setLevel(logging.DEBUG)
 
     # Load the .env file config    
     env_config = dotenv_values(".env")
@@ -66,15 +65,13 @@ def create_app():
     # Have the docker-compose file override any settings from .env
     for k in env_keys:
         if k in env_config:
-            app.logger.info(".env: %s -> %s" % (k, env_config[k]))
-#            print(".env: %s -> %s" % (k, env_config[k]))
+            app.logger.warning(".env: %s -> %s" % (k, env_config[k]))
         if k in os.environ:
-            app.logger.info("docker: %s -> %s" % (k, os.environ[k]))
-#            print("docker: %s -> %s" % (k, os.environ[k]))
+            app.logger.warning("docker: %s -> %s" % (k, os.environ[k]))
             env_config[k] = os.environ[k]
             
         if k not in env_config:
-            app.logger.info("Setting '%s' must be defined in .env file." % k)
+            app.logger.error("Setting '%s' must be defined in .env file." % k)
             sys.exit(-1)
             
     env_config["AUTHORIZED_USERS"] = [ x.strip() for x in env_config["AUTHORIZED_USERS"].split(",") ]
