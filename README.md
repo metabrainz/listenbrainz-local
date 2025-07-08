@@ -34,12 +34,13 @@ Clearly we will fix this as soon as we are able.
 We recommend the Docker setup for users who wish run this service; if you want to do development
 a python virtual environment setup is better.
 
-Clone this repo and then in the listenbrainz-local directory create a file called .env
-that contains the following configuration lines:
+Clone this repo and then in the listenbrainz-local and copy the file _env to .env and then
+ensure that it contains the following completed configuration lines:
 
 ```
 SECRET_KEY="any string of your choice"
 AUTHORIZED_USERS=<comma separated list of LB usernames that are allowed to use this site>
+ADMIN_USERS=<comma separated list of LB usernames that are allowed to administer this site>
 DOMAIN=<the fully qualified domain where lb-local will be available, without port number>
 PORT=<the port numer where lb-local will be available>
 MUSICBRAINZ_CLIENT_ID=<MB client id, see https://musicbrainz.org/account/applications >
