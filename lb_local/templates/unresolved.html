@@ -26,10 +26,7 @@ content -%}
                 <br />
                 {% for artist in release.recordings[0].artists %}
                 <a href="/lb-radio?prompt={{ artist.name | safe }}">
-                    <img
-                        class="headphones"
-                        src="{{ url_for('static', filename='img/headphones.svg') }}"
-                    />
+                    <i class="fa-solid fa-radio"></i>
                 </a>
                 <b
                     ><a
@@ -40,6 +37,9 @@ content -%}
                 {{ artist.join_phrase }}
                 <br />
                 {% endfor %}
+            </p>
+            <p>
+              {{ release.lookup_count }} lookups
             </p>
         </div>
     </div>
