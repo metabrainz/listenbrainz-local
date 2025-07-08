@@ -15,7 +15,7 @@ RUN pip3.13 install setuptools uwsgi
 RUN mkdir /code/lb-local
 WORKDIR /code/lb-local
 
-COPY requirements.txt /code/lb-local
+COPY requirements.txt .env /code/lb-local
 #RUN pip3.13 install --no-cache-dir -r requirements.txt
 RUN pip3.13 install -r requirements.txt
 
