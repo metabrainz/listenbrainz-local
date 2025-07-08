@@ -1,7 +1,7 @@
 from peewee import *
 
 from lb_local.model.database import user_db
-
+from lb_local.model.user import User
 
 class Service(Model):
     """
@@ -12,6 +12,7 @@ class Service(Model):
         database = user_db
         table_name = "service"
 
+    owner = ForeignKeyField(User)
     slug = TextField(null=False, unique=True)
     url = TextField(null=False, unique=True)
     status = TextField(null=True)

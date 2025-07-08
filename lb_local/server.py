@@ -27,8 +27,8 @@ from lb_local.sync import SyncManager
 from troi.content_resolver.subsonic import SubsonicDatabase
 
 # TODO:
-# - Adding credentials requirs ADMIN access. Is that smart?
 # - Import and Resolve playlists
+# - WAL and FKs are not being created
 
 STATIC_PATH = "/static"
 STATIC_FOLDER = "static"
