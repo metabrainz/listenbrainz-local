@@ -69,6 +69,7 @@ class SyncManager(Thread):
             db = SubsonicDatabase(current_app.config["DATABASE_FILE"], Config(**conf), quiet=False)
         try:
             db.open()
+            print(service.slug)
             db.sync(service.slug)
 
             lookup = MetadataLookup(False)

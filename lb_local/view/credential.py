@@ -14,7 +14,9 @@ credential_bp = Blueprint("credential_bp", __name__)
 
 def load_credentials(user_id):
 
+    print("user id: %d" % user_id)
     credentials = Credential.select().where(Credential.owner == user_id)
+    print(credentials)
 
     config = {}
     service_count = 0
