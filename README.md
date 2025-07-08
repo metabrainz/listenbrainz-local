@@ -34,11 +34,7 @@ Clearly we will fix this as soon as we are able.
 We recommend the Docker setup for users who wish run this service; if you want to do development
 a python virtual environment setup is better.
 
-## Docker Setup
-
-First, make sure you have Docker installed and correctly setup. ( https://docs.docker.com/engine/install/ )
-
-Second, clone this repo and then in the listenbrainz-local directory create a file called .env
+Clone this repo and then in the listenbrainz-local directory create a file called .env
 that contains the following configuration lines:
 
 ```
@@ -57,7 +53,12 @@ For 'Callback URI' enter:
 
 http://<domain>[:<port>]/auth -> http://mydomain.com:500/auth
 
-Then continue with:
+Then continue with one of the configuration sections below:
+
+
+## Docker Setup
+
+Make sure you have Docker installed and correctly setup. ( https://docs.docker.com/engine/install/ )
 
 ```
 docker compose build && docker compose up
@@ -87,9 +88,6 @@ docker compose build && docker compose up
 Currently it is easy to run the app from the command line, so that is the recommended approach for development:
 
 ```
-cp config.py.sample config.py
-vim config.py
-<edit config -- see above for details on what value to put>
 python3 -mvenv .virtualenv
 source .virtualenv/bin/activate
 pip install -r requirements.txt
