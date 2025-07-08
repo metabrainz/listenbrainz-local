@@ -26,8 +26,8 @@ def index():
 @index_bp.route("/welcome")
 @login_forbidden
 def welcome():
-    print(current_app.config["AUTHORIZED_USERS"])
-    print(current_app.config["ADMIN_USERS"])
+    current_app.logger.warning(current_app.config["AUTHORIZED_USERS"])
+    current_app.logger.warning(current_app.config["ADMIN_USERS"])
     return render_template('login.html', no_navbar=True)
 
 
