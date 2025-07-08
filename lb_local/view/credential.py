@@ -14,9 +14,15 @@ credential_bp = Blueprint("credential_bp", __name__)
 
 def load_credentials(user_id):
 
-    print("user id: %d" % user_id)
+    msg = ""
     credentials = Credential.select().where(Credential.owner == user_id)
-    print(credentials)
+    if not credentials:
+        credentials = Credential.select().where(Credential.shared == True)
+        if credentials:
+            msg = """You are using a shared credential from another user. You can listen to music, but
+                     not save any playlists. To be able to save playlist, enter your own credential."""
+        else:
+            msg = "There are no shared credentials available. Please add your own credential."
 
     config = {}
     service_count = 0
@@ -34,6 +40,7 @@ def load_credentials(user_id):
             "port": int(url.port),
             "username": credential.user_name,
             "password": credential.password,
+            "shared": credential.shared,
             "salt": salt,
             "token": token
         }
@@ -49,7 +56,7 @@ def load_credentials(user_id):
     except RuntimeError:
         pass
         
-    return { "SUBSONIC_SERVERS" : config}
+    return { "SUBSONIC_SERVERS" : config}, msg
 
 
 @credential_bp.route("/", methods=["GET"])

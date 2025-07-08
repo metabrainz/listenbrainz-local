@@ -3,6 +3,12 @@ content -%}
 
 <h2>ListenBrainz Local Home</h2>
 
+{% if credentials_msg %}
+    <div class="alert alert-warning" role="alert">
+        {{ credentials_msg }}
+    </div>
+{% endif %}
+
 <p>
     ListenBrainz local brings the recommendation, playlist and discovery tools
     of ListenBrainz to your local music collection.

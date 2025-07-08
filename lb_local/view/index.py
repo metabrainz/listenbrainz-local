@@ -10,7 +10,7 @@ from troi.content_resolver.top_tags import TopTags
 from troi.content_resolver.unresolved_recording import UnresolvedRecordingTracker
 from troi.local.periodic_jams_local import PeriodicJamsLocal
 from troi.playlist import _deserialize_from_jspf, PlaylistElement
-from werkzeug.exceptions import BadRequest, ServiceUnavailable
+from werkzeug.exceptions import BadRequest, ServiceUnavailable, Forbidden
 from lb_local.view.credential import load_credentials
 
 from lb_local.login import login_forbidden
@@ -21,13 +21,12 @@ index_bp = Blueprint("index_bp", __name__)
 @index_bp.route("/")
 @login_required
 def index():
-    return render_template('index.html')
+    config, msg = load_credentials(current_user.user_id)
+    return render_template('index.html', credentials_msg=msg)
 
 @index_bp.route("/welcome")
 @login_forbidden
 def welcome():
-    current_app.logger.warning(current_app.config["AUTHORIZED_USERS"])
-    current_app.logger.warning(current_app.config["ADMIN_USERS"])
     return render_template('login.html', no_navbar=True)
 
 
@@ -36,7 +35,6 @@ def welcome():
 def lb_radio_get():
     prompt = request.args.get("prompt", "")
     title = request.args.get("title", "");
-    print(title)
     load_credentials(current_user.user_id)
     t = render_template('lb-radio.html', 
                         prompt=prompt, 
@@ -105,7 +103,15 @@ def playlist_create():
     playlist_element = PlaylistElement()
     playlist_element.playlists = [playlist]
 
-    conf = load_credentials(current_user.user_id)
+    conf, msg = load_credentials(current_user.user_id)
+    try:
+        if conf["SUBSONIC_SERVERS"][service]["shared"]:
+            print("hsared serviuce")
+            raise Forbidden
+    except KeyError:
+        print("no serviuce")
+        raise Forbidden
+        
     try:
         db = SubsonicDatabase(current_app.config["DATABASE_FILE"], Config(**conf), quiet=True)
         db.open()

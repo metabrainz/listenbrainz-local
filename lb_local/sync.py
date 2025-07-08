@@ -62,7 +62,7 @@ class SyncManager(Thread):
     def sync_service(self, service, credential, user_id):
         
         url = urlparse(service.url)
-        conf = load_credentials(user_id)
+        conf, _ = load_credentials(user_id)
 
         from lb_local.server import app
         with app.app_context():
