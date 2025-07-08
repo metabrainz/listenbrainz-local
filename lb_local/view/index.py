@@ -68,7 +68,6 @@ def lb_radio_post():
     try:
         playlist = r.generate(mode, prompt, .8)
     except RuntimeError as err:
-        print("runtime error")
         return render_template('component/playlist-table.html', errors=str(err))
 
     try:
@@ -80,8 +79,9 @@ def lb_radio_post():
     avail_services = []
     services = credential["SUBSONIC_SERVERS"]
     for service in services:
-        if not services[service]["shared"] and current_user.user_id == services[service]["owner_id"]:
-            avail_services.append(service.slug)
+        print(services[service])
+        if current_user.user_id == services[service]["owner_id"]:
+            avail_services.append(service)
 
     return render_template('component/playlist-table.html',
                            recordings=recordings,
