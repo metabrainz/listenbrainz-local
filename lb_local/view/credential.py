@@ -5,6 +5,7 @@ from urllib.parse import urlparse
 from flask import Blueprint, render_template, request, redirect, url_for, flash, session
 import peewee
 from flask_login import login_required, current_user
+from werkzeug.exceptions import Forbidden
 
 from lb_local.model.credential import Credential
 from lb_local.model.service import Service
@@ -79,7 +80,10 @@ def credential_add():
 def credential_edit(id):
     credential = Credential.get(Credential.id == id)
     services = Service.select()
-    return render_template("credential-add.html", mode="Edit", credential=credential, services=services)
+    return render_template("credential-add.html",
+                           mode="Edit",
+                           credential=credential,
+                           services=services)
 
 
 @credential_bp.route("/<id>/delete", methods=["GET"])
@@ -126,6 +130,9 @@ def credential_add_post():
     try:
         if _id >= 1:
             credential = Credential.get(id=_id)
+            if credential.owner.user_id != current_user.user_id:
+                raise Forbidden()
+
             credential.service = service_id
             credential.owner = owner
             credential.user_name = user_name

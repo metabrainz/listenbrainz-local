@@ -4,7 +4,7 @@ import peewee
 import validators
 from flask import Blueprint, render_template, request, redirect, url_for, flash, current_app
 from flask_login import login_required, current_user
-from werkzeug.exceptions import BadRequest, NotFound
+from werkzeug.exceptions import BadRequest, NotFound, Forbidden
 
 from lb_local.model.service import Service
 from lb_local.model.credential import Credential
@@ -49,6 +49,8 @@ def service_edit(slug):
     if not current_user.is_admin:
         raise NotFound
     service = Service.get(Service.slug == slug)
+    if service.owner.user_id != current_user.user_id:
+        raise Forbidden
     return render_template("service-add.html", mode="Edit", service=service, slug=slug)
 
 
@@ -59,6 +61,8 @@ def service_delete(slug):
         raise NotFound
     try:
         service = Service.get(Service.slug == slug)
+        if service.owner.user_id != current_user.user_id:
+            raise Forbidden
         service.delete_instance()
         flash("Service deleted")
     except peewee.DoesNotExist:
@@ -76,9 +80,7 @@ def service_add_post():
         raise NotFound
     mode = request.form.get("mode", "")
     old_slug = request.form.get("old_slug", "")
-    print("add save: mode '%s' '%s'" % (mode, old_slug))
     slug = request.form.get("slug", "")
-    print("new slug '%s'" % slug)
     url = request.form.get("url", "")
     if not url or not slug:
         flash("Both URL and nickname are required.")
@@ -94,10 +96,11 @@ def service_add_post():
 
     if mode == "Add":
         try:
-            service = Service.create(slug=slug, url=url)
+            service = Service.create(slug=slug, owner=current_user.user_id, url=url)
             service.save()
-        except peewee.IntegrityError:
+        except peewee.IntegrityError as err:
             flash("Service nickname is already being used, please provide a unique one.")
+            print(err)
             return render_template("service-add.html", slug=slug, url=url)
     else:
         try:
