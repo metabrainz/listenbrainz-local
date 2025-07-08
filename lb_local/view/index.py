@@ -23,16 +23,11 @@ index_bp = Blueprint("index_bp", __name__)
 def index():
     return render_template('index.html')
 
-# remove me soon
-@index_bp.route("/config")
-def config():
-    print(current_app.config)
-    return "meh!", 200
-
-
 @index_bp.route("/welcome")
 @login_forbidden
 def welcome():
+    print(current_app.config["AUTHORIZED_USERS"])
+    print(current_app.config["ADMIN_USERS"])
     return render_template('login.html', no_navbar=True)
 
 
