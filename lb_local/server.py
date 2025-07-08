@@ -29,6 +29,7 @@ from troi.content_resolver.subsonic import SubsonicDatabase
 # TODO:
 # - Import and Resolve playlists
 # - WAL and FKs are not being created
+# Playlist save errors not displayed
 
 STATIC_PATH = "/static"
 STATIC_FOLDER = "static"
@@ -79,7 +80,6 @@ def create_app():
     app.config.from_mapping(env_config)
 
     db_file = app.config["DATABASE_FILE"]
-    print(db_file)
     exists = os.path.exists(db_file)
     udb = UserDatabase(db_file, False)
     if not exists:

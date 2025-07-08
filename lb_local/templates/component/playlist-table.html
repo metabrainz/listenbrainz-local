@@ -25,6 +25,8 @@
         <select name="service" id="services" class="form-control-lg">
           {% for service in services %}
             <option value="{{service}}">{{service}}</option>
+          {% else %}
+            <option value="">No service available</option>
           {% endfor %}
         </select>
         <input type="hidden" name="jspf" value="{{jspf}}"/>
@@ -104,7 +106,6 @@ function hide_hints() {
     document.getElementById("troi-hints").style.display = "none";
 }
 function update_save_buttons() {
-  console.log("update save bt");
   edit = document.getElementById("playlist-name");
   document.getElementById("playlist-save-button").disabled = !edit.value.length;
 }

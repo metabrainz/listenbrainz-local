@@ -79,7 +79,6 @@ def lb_radio_post():
     avail_services = []
     services = credential["SUBSONIC_SERVERS"]
     for service in services:
-        print(services[service])
         if current_user.user_id == services[service]["owner_id"]:
             avail_services.append(service)
 
