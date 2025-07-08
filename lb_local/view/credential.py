@@ -41,6 +41,7 @@ def load_credentials(user_id):
             "username": credential.user_name,
             "password": credential.password,
             "shared": credential.shared,
+            "owner_id": credential.owner.user_id,
             "salt": salt,
             "token": token
         }

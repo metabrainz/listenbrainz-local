@@ -51,7 +51,7 @@ def lb_radio_get():
 @login_required
 def lb_radio_post():
 
-    load_credentials(current_user.user_id)
+    credential, msg = load_credentials(current_user.user_id)
     try:
         prompt = request.form["prompt"]
     except KeyError:
@@ -76,6 +76,12 @@ def lb_radio_post():
     except (IndexError, KeyError, AttributeError):
         msgs = db.metadata_sanity_check(include_subsonic=True, return_as_array=True)
         return render_template('component/playlist-table.html', errors="\n".join(msgs))
+    
+    avail_services = []
+    services = credential["SUBSONIC_SERVERS"]
+    for service in services:
+        if not services[service]["shared"] and current_user.user_id == services[service]["owner_id"]:
+            avail_services.append(service.slug)
 
     return render_template('component/playlist-table.html',
                            recordings=recordings,
@@ -83,7 +89,7 @@ def lb_radio_post():
                            playlist_desc=playlist.playlists[0].description,
                            hints=r.patch.user_feedback(),
                            jspf=json.dumps(playlist.get_jspf()),
-                           services=session["subsonic"].keys())
+                           services=avail_services)
 
 
 class Config:
@@ -105,11 +111,10 @@ def playlist_create():
 
     conf, msg = load_credentials(current_user.user_id)
     try:
-        if conf["SUBSONIC_SERVERS"][service]["shared"]:
-            print("hsared serviuce")
+        if conf["SUBSONIC_SERVERS"][service]["shared"] and \
+           conf["SUBSONIC_SERVERS"][service]["owner_id"] != current_user.user_id:
             raise Forbidden
     except KeyError:
-        print("no serviuce")
         raise Forbidden
         
     try:
@@ -148,12 +153,10 @@ def weekly_jams_post():
     try:
         playlist = r.generate()
     except RuntimeError as err:
-        print("err 1")
         return render_template('component/playlist-table.html', errors=str(err))
     try:
         recordings = playlist.playlists[0].recordings
     except (IndexError, KeyError, AttributeError):
-        print("err 2")
         msgs = db.metadata_sanity_check(include_subsonic=True, return_as_array=True)
         return render_template('component/playlist-table.html', errors="\n".join(msgs))
     
