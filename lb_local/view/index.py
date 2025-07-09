@@ -4,13 +4,15 @@ from urllib.parse import urlparse
 
 from flask import Blueprint, render_template, request, current_app, make_response, session
 from flask_login import login_required, current_user
+from werkzeug.exceptions import BadRequest, ServiceUnavailable, Forbidden
+from libsonic.errors import CredentialError
+
 from troi.content_resolver.lb_radio import ListenBrainzRadioLocal
 from troi.content_resolver.subsonic import SubsonicDatabase, Database
 from troi.content_resolver.top_tags import TopTags
 from troi.content_resolver.unresolved_recording import UnresolvedRecordingTracker
 from troi.local.periodic_jams_local import PeriodicJamsLocal
 from troi.playlist import _deserialize_from_jspf, PlaylistElement
-from werkzeug.exceptions import BadRequest, ServiceUnavailable, Forbidden
 from lb_local.view.credential import load_credentials
 
 from lb_local.login import login_forbidden
@@ -120,7 +122,7 @@ def playlist_create():
         db = SubsonicDatabase(current_app.config["DATABASE_FILE"], Config(**conf), quiet=True)
         db.open()
         db.upload_playlist(playlist_element, service, playlist_name)
-    except RuntimeError as err:
+    except (RuntimeError, CredentialError) as err:
         return render_template('component/playlist-save-result.html', error=err)
 
     return render_template('component/playlist-save-result.html', success="Playlist saved.")

@@ -43,6 +43,11 @@ content -%}
             </p>
         </div>
     </div>
+    {% else %}
+       <p>There are no unresolved albums/recordings. These will be added when attempting to
+          resolve a local playlist (e.g. Weekly Jams) and some recordings where not available
+          in the local collection.
+       </p>
     {% endfor %}
 </div>
 
