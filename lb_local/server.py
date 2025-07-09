@@ -28,7 +28,6 @@ from troi.content_resolver.subsonic import SubsonicDatabase
 
 # TODO:
 # - Playlist save errors not displayed
-# - Using seed artist Amy Winehouse only
 # - New feature: Import and Resolve playlists
 
 STATIC_PATH = "/static"
