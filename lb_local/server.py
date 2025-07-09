@@ -27,9 +27,9 @@ from lb_local.sync import SyncManager
 from troi.content_resolver.subsonic import SubsonicDatabase
 
 # TODO:
-# - Import and Resolve playlists
-# - WAL and FKs are not being created
-# Playlist save errors not displayed
+# - Playlist save errors not displayed
+# - Using seed artist Amy Winehouse only
+# - New feature: Import and Resolve playlists
 
 STATIC_PATH = "/static"
 STATIC_FOLDER = "static"
