@@ -45,6 +45,10 @@ class SyncManager(Thread):
         self._exit = True
 
     def request_service_scan(self, service, credential, user_id):
+        conf, msg = load_credentials(user_id)
+        if msg:
+            return msg
+
         added = False
         self.lock.acquire()
         if service.slug in self.job_data and self.job_data[service.slug]["completed"]:
@@ -53,11 +57,13 @@ class SyncManager(Thread):
             added = True
             self.job_queue.put((service, credential, user_id))
             self.job_data[service.slug] = { "service": service, "credential": credential, "sync_log": "", "completed": False, "expire_at": monotonic() + LOG_EXPIRY_DURATION }
+        else:
+            msg = "There is a sync already queued, it should start soon."
         self.lock.release()
         
 #        self.clear_out_old_logs()
 
-        return added
+        return msg
     
     def sync_service(self, service, credential, user_id):
         
@@ -69,7 +75,6 @@ class SyncManager(Thread):
             db = SubsonicDatabase(current_app.config["DATABASE_FILE"], Config(**conf), quiet=False)
         try:
             db.open()
-            print(service.slug)
             db.sync(service.slug)
 
             lookup = MetadataLookup(False)

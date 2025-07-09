@@ -22,7 +22,7 @@ def load_credentials(user_id):
             msg = """You are using a shared credential from another user. You can listen to music, but
                      not save any playlists. To be able to save playlist, enter your own credential."""
         else:
-            msg = "There are no shared credentials available. Please add your own credential."
+            msg = "There are no credentials available. Please add your own credential."
 
     config = {}
     service_count = 0
