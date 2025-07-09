@@ -130,9 +130,9 @@ def service_sync_start(slug):
         raise NotFound
     service = Service.get(Service.slug == slug)
     credential = Credential.select().where(Credential.owner == current_user.user_id and Credential.service == service.id)
-    added = current_app.config["SYNC_MANAGER"].request_service_scan(service, credential, current_user.user_id)
-    if not added:
-        return render_template("component/sync-log.html", logs="There is a sync already queued, it should start soon.", update=True, slug=slug)
+    msg = current_app.config["SYNC_MANAGER"].request_service_scan(service, credential, current_user.user_id)
+    if msg:
+        return render_template("component/sync-log.html", logs=msg, update=True, slug=slug)
 
     return render_template("component/sync-log.html", logs="The sync has been enqueued, it should start soon.", update=True, slug=slug)
 
