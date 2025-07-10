@@ -22,15 +22,17 @@
                style="width: 40%"
                hx-on:input="update_save_buttons();"/>
         <label for="service">Service</label>
-        {% for service in services %}
+        {% if services %}
             <select name="service" id="services" class="form-control-lg">
-              <option value="{{service}}">{{service}}</option>
+            {% for service in services %}
+                <option value="{{service}}">{{service}}</option>
+            {% endfor %}
             </select>
         {% else %}
             <select name="service" id="services" class="form-control-lg" DISABLED>
-              <option value="">No service available</option>
+              <option value="">No services available</option>
             </select>
-        {% endfor %}
+        {% endif %}
         <input type="hidden" name="jspf" value="{{jspf}}"/>
         <button class="btn btn-lg btn-primary"
                type="submit"
