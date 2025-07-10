@@ -27,7 +27,6 @@ from lb_local.sync import SyncManager
 from troi.content_resolver.subsonic import SubsonicDatabase
 
 # TODO:
-# - Playlist save errors not displayed
 # - New feature: Import and Resolve playlists
 
 STATIC_PATH = "/static"
