@@ -81,7 +81,7 @@ The PORT configuration will be ignored in this setup and port 443 will be used.
 Then start the service with:
 
 ```
-docker compose build && docker compose up
+docker compose build && docker compose -f docker-compose-https-proxy.yml up -d
 ```
 
 ## Development setup
@@ -95,7 +95,7 @@ pip install -r requirements.txt
 ./lb_local.py
 ```
 
-The app should then be available at the URL configured in config.py.
+The app should then be available at the URL configured in .env
 
 
 # Screenshot
