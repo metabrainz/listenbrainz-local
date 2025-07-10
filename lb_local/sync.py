@@ -78,7 +78,7 @@ class SyncManager(Thread):
             db.sync(service.slug)
 
             lookup = MetadataLookup(False)
-            lookup.lookup()
+            lookup.lookup(service.slug)
 
         except Exception as err:
             while True:

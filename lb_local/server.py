@@ -30,6 +30,9 @@ from troi.content_resolver.subsonic import SubsonicDatabase
 # - New feature: Import and Resolve playlists
 # - Gonic not defined in configuration error when missing credential
 # Saving playlists from mixed services is undefined
+# Trim input in server/credential fields
+# Force users to add  port to the services URL
+# sync errors cause jobs to be stuck and not removed from queue.
 
 STATIC_PATH = "/static"
 STATIC_FOLDER = "static"
