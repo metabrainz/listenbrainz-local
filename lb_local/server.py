@@ -28,6 +28,8 @@ from troi.content_resolver.subsonic import SubsonicDatabase
 
 # TODO:
 # - New feature: Import and Resolve playlists
+# - Gonic not defined in configuration error when missing credential
+# Saving playlists from mixed services is undefined
 
 STATIC_PATH = "/static"
 STATIC_FOLDER = "static"
@@ -63,10 +65,7 @@ def create_app():
     
     # Have the docker-compose file override any settings from .env
     for k in env_keys:
-        if k in env_config:
-            app.logger.warning(".env: %s -> %s" % (k, env_config[k]))
         if k in os.environ:
-            app.logger.warning("docker: %s -> %s" % (k, os.environ[k]))
             env_config[k] = os.environ[k]
             
         if k not in env_config:

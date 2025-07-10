@@ -64,7 +64,7 @@ def lb_radio_post():
     except KeyError:
         raise BadRequest("argument 'mode' is required.")
 
-    db = SubsonicDatabase(current_app.config["DATABASE_FILE"], current_app.config, quiet=False)
+    db = SubsonicDatabase(current_app.config["DATABASE_FILE"], current_app.config, quiet=True)
     db.open()
     r = ListenBrainzRadioLocal(quiet=True)
     try:
@@ -148,9 +148,9 @@ def weekly_jams_post():
     except KeyError:
         raise BadRequest("argument 'user_name' is required.")
 
-    db = SubsonicDatabase(current_app.config["DATABASE_FILE"], current_app.config, quiet=False)
+    db = SubsonicDatabase(current_app.config["DATABASE_FILE"], current_app.config, quiet=True)
     db.open()
-    r = PeriodicJamsLocal(user_name, .8, quiet=False)
+    r = PeriodicJamsLocal(user_name, .8, quiet=True)
     try:
         playlist = r.generate()
     except RuntimeError as err:

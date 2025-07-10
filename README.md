@@ -15,7 +15,7 @@ This project is a web app that requires a subsonic hosted music collection:
 * [Gonic](https://github.com/sentriz/gonic)
 * [Navidrome](https://www.navidrome.org/)
 
-So far we've only tested with Navidrome, so we would appreciate help testing others setups.
+So far we've only tested with Navidrome and Gonic, so we would appreciate help testing other setups.
 
 ## Important Security Consideration
 
