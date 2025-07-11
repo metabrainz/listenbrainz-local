@@ -1,6 +1,6 @@
 from flask import request, redirect, url_for
 from flask_admin.contrib.peewee import ModelView
-from flask_login import current_user
+from flask_login import current_user, logout_user
 
 
 class UserModelView(ModelView):
@@ -18,6 +18,7 @@ class UserModelView(ModelView):
 
     def after_model_delete(self, model):
         # TODO: Revoke session for user
+        logout_user()
         pass
 
 
