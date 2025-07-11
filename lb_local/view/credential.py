@@ -118,8 +118,8 @@ def credential_delete(id):
 def credential_add_post():
     _id = int(request.form.get("id", "-1"))
     service_id = request.form.get("service", None)
-    user_name = request.form.get("user_name", "")
-    password = request.form.get("password", "")
+    user_name = request.form.get("user_name", "").strip()
+    password = request.form.get("password", "").strip()
     owner = current_user.user_id
     shared = request.form.get("shared", "off")
     shared = True if shared == "on" else False

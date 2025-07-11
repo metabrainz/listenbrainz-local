@@ -1,4 +1,5 @@
 from time import time
+from urllib.parse import urlparse
 
 import peewee
 import validators
@@ -51,7 +52,7 @@ def service_edit(slug):
     service = Service.get(Service.slug == slug)
     if service.owner.user_id != current_user.user_id:
         raise Forbidden
-    return render_template("service-add.html", mode="Edit", service=service, slug=slug)
+    return render_template("service-add.html", mode="Edit", url=service.url, slug=slug)
 
 
 @service_bp.route("/<slug>/delete", methods=["GET"])
@@ -79,29 +80,35 @@ def service_add_post():
     if not current_user.is_admin:
         raise NotFound
     mode = request.form.get("mode", "")
+    print(mode)
     old_slug = request.form.get("old_slug", "")
-    slug = request.form.get("slug", "")
-    url = request.form.get("url", "")
+    slug = request.form.get("slug", "").strip()
+    url = request.form.get("url", "").strip()
     if not url or not slug:
         flash("Both URL and nickname are required.")
-        return render_template("service-add.html", slug=slug, url=url)
+        return render_template("service-add.html", slug=slug, url=url, mode=mode)
 
     if not url.startswith("https://") and not url.startswith("http://"):
         flash("URL must start with http:// or https://")
-        return render_template("service-add.html", slug=slug, url=url)
+        return render_template("service-add.html", slug=slug, url=url, mode=mode)
 
     if not validators.url(url, simple_host=True):
         flash("Invalid URL")
-        return render_template("service-add.html", slug=slug, url=url)
+        return render_template("service-add.html", slug=slug, url=url, mode=mode)
+
+    parsed_url = urlparse(url)
+    if parsed_url.port is None:
+        flash("The service URL must contain a port number. Use 443 for https installations.")
+        return render_template("service-add.html", slug=slug, url=url, mode=mode)
 
     if mode == "Add":
         try:
             service = Service.create(slug=slug, owner=current_user.user_id, url=url)
             service.save()
         except peewee.IntegrityError as err:
-            flash("Service nickname is already being used, please provide a unique one.")
+            flash("Service nickname or URL is already being used, please provide unique values.")
             print(err)
-            return render_template("service-add.html", slug=slug, url=url)
+            return render_template("service-add.html", slug=slug, url=url, mode=mode)
     else:
         try:
             service = Service.get(slug=old_slug)
@@ -109,7 +116,7 @@ def service_add_post():
             service.url = url
         except peewee.DoesNotExist:
             flash("Service does not exist. Internal error.")
-            return render_template("service-add.html", slug=slug, url=url)
+            return render_template("service-add.html", slug=slug, url=url, mode=mode)
         service.save()
 
     load_credentials(current_user.user_id)

@@ -61,7 +61,7 @@ class SyncManager(Thread):
             msg = "There is a sync already queued, it should start soon."
         self.lock.release()
         
-#        self.clear_out_old_logs()
+        self.clear_out_old_logs()
 
         return msg
     
