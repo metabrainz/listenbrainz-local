@@ -84,7 +84,15 @@ def lb_radio_post():
         if current_user.user_id == services[service]["owner_id"]:
             avail_services.append(service)
 
+    sources = set() 
+    for rec in recordings:
+        try:
+            sources.add(rec.listenbrainz["file_source"])
+        except KeyError:
+            sources.add("---")
+
     return render_template('component/playlist-table.html',
+                           show_file_source=len(sources),
                            recordings=recordings,
                            playlist_name=playlist.playlists[0].name,
                            playlist_desc=playlist.playlists[0].description,
@@ -160,8 +168,13 @@ def weekly_jams_post():
     except (IndexError, KeyError, AttributeError):
         msgs = db.metadata_sanity_check(include_subsonic=True, return_as_array=True)
         return render_template('component/playlist-table.html', errors="\n".join(msgs))
-    
+
+    sources = set() 
+    for rec in recordings:
+        sources.add(rec.listenbrainz["file_source"])
+
     return render_template('component/playlist-table.html',
+                           show_file_source=len(sources),
                            recordings=recordings,
                            playlist_name=playlist.playlists[0].name,
                            playlist_desc=playlist.playlists[0].description,

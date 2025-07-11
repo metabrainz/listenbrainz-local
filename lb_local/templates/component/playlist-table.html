@@ -69,6 +69,9 @@
         <th>title</th>
         <th>release</th>
         <th>artist</th>
+        {% if show_service %}
+          <th>service</th>
+        {% endif %}
     </thead>
     <tbody>
     {% for rec in recordings %}
@@ -98,6 +101,11 @@
                     {{ artist.join_phrase }}
                 {% endfor %}
             </td>
+            {% if show_service %}
+            <td>
+                {{ rec.listenbrainz.file_source }}
+            </td>
+            {% endif %}
         </tr>
     {% endfor %}
     </tbody>
