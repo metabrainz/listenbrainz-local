@@ -11,7 +11,7 @@ messages %}
 <div class="form-body d-flex flex-row justify-content-between">
     <div id="form-stats" style="width: 70%">
         <div hx-trigger="document-loaded from:body"
-             hx-get="/service/-/sync/log"
+             hx-get="/service/{{ slug }}/sync/log"
              hx-swap="outerHTML">
         </div>
     </div>
@@ -30,7 +30,11 @@ messages %}
                 hx-class="btn btn-lg btn-primary"
                 hx-target="#form-stats"
                 hx-swap="innerHTML"
-                hx-on--before-request="this.disabled = true;">
+                hx-on--before-request="this.disabled = true;"
+                {% if not completed %}
+                    disabled
+                {% endif %}
+            >
                 Sync
             </button>
         </form>
@@ -43,7 +47,6 @@ messages %}
         htmx.trigger(document.body, 'document-loaded');
     });
     document.body.addEventListener('sync-complete', function(event) {
-        console.log('processFinished event received!', event.detail);
         const button = document.getElementById('sync-submit-button');
         if (button) 
             button.disabled = false;

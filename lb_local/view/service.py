@@ -131,7 +131,8 @@ def service_add_post():
 def service_sync(slug):
     if not current_user.is_admin:
         raise NotFound
-    return render_template("service-sync.html", page="service", slug=slug)
+    completed = current_app.config["SYNC_MANAGER"].sync_completed(slug)
+    return render_template("service-sync.html", page="service", slug=slug, completed=completed)
 
 @service_bp.route("/<slug>/sync/start", methods=["POST"])
 @login_required
@@ -149,17 +150,21 @@ def service_sync_start(slug):
 @service_bp.route("/<slug>/sync/log")
 @login_required
 def service_sync_log(slug):
-    
-    # If slug is -, then we're loading an empty HTML on page load
-    if slug == '-':
-        return render_template("component/sync-status.html", stats={ "withmbid": 15, "count": 80, "total": 180, "percent": 45, "completed": False}, update=False)
-        
     if not current_user.is_admin:
         raise NotFound
+    
+    # If slug is -, then we're loading an empty HTML on page load
+#    if slug == '-':
+#        completed = current_app.config["SYNC_MANAGER"].sync_completed(slug)
+#        print(completed)
+#        return render_template("component/sync-status.html", stats={}, completed=completed)
+        
     try:
         logs, stats, completed = current_app.config["SYNC_MANAGER"].get_sync_log(slug)
     except TypeError:
         return BadRequest("What are you smoking?")
+    
+    print(completed)
     
     headers = {} 
     if completed:

@@ -72,6 +72,17 @@ class SyncManager(Thread):
 
         return msg
     
+    def sync_completed(self, slug):
+        self.lock.acquire()
+        if slug in self.job_data:
+            print("found job!")
+            completed = self.job_data[slug]["completed"] 
+        else:
+            print("job not found!", list(self.job_data.keys()))
+            completed = True
+        self.lock.release()
+        return completed
+
     def sync_service(self, service, credential, user_id):
         
         url = urlparse(service.url)
@@ -108,7 +119,7 @@ class SyncManager(Thread):
         try:
             logs = self.job_data[service]["sync_log"]
         except KeyError:
-            return None, self.job_data[service]["stats"], True
+            return None, tuple(), True
         finally:
             self.lock.release()
         
