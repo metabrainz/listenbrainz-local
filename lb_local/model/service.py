@@ -18,6 +18,3 @@ class Service(Model):
     status = TextField(null=True)
     last_synched = IntegerField(null=True)
     scan_log = TextField(null=True)
-
-    def __repr__(self):
-        return "<Service('%s')>" % (self.name or "")

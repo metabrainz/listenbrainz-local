@@ -1,5 +1,6 @@
 import os
 from copy import copy
+import json
 import logging
 from logging.handlers import QueueHandler
 from queue import Queue, Empty
@@ -56,12 +57,16 @@ class SyncManager(Thread):
         if service.slug not in self.job_data:
             added = True
             self.job_queue.put((service, credential, user_id))
-            self.job_data[service.slug] = { "service": service, "credential": credential, "sync_log": "", "completed": False, "expire_at": monotonic() + LOG_EXPIRY_DURATION }
+            self.job_data[service.slug] = { "service": service,
+                                            "credential": credential,
+                                            "sync_log": "", "completed": False,
+                                            "expire_at": monotonic() + LOG_EXPIRY_DURATION,
+                                            "stats": tuple() }
         else:
             msg = "There is a sync already queued, it should start soon."
         self.lock.release()
         
-        self.clear_out_old_logs()
+#        self.clear_out_old_logs()
 
         return msg
     
@@ -100,7 +105,7 @@ class SyncManager(Thread):
         try:
             logs = self.job_data[service]["sync_log"]
         except KeyError:
-            return None, True
+            return None, self.job_data[service]["stats"], True
         finally:
             self.lock.release()
         
@@ -108,6 +113,15 @@ class SyncManager(Thread):
         while True:
             try:
                 rec = logging_queue.get_nowait()
+                if rec.message[0] == "{":
+                    try:
+                        stats = json.loads(rec.message)
+                    except Exception as err:
+                        print(err)
+                        continue
+                    self.job_data[service]["stats"] = stats
+                    continue
+                    
                 logs += rec.message + "\n"
                 loaded_rows = True
             except Empty:
@@ -117,20 +131,21 @@ class SyncManager(Thread):
         try:
             completed = self.job_data[service]["completed"]
         except KeyError:
-            return None
+            return None, self.job_data[service]["stats"], False
         finally:
             self.lock.release()
 
         if not loaded_rows and completed:
-            return logs, completed
+            return logs, self.job_data[service]["stats"], completed
 
         self.lock.acquire()
         self.job_data[service]["sync_log"] = logs
         self.lock.release()
         
-        return logs, completed
+        return logs, self.job_data[service]["stats"], completed
 
     def clear_out_old_logs(self):
+        # TODO: Old, needs updating
         self.lock.acquire()
         valid_jobs = []
         for job in self.job_data:

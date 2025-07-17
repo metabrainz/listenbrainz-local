@@ -8,27 +8,38 @@ messages %}
 <div class="alert alert-warning" role="alert">{{ message }}</div>
 {% endfor %} {% endif %} {% endwith %}
 
-<p><span style="font-size: 0.7rem;">Note: This screen is buggy and not very userfiendly. If someone wants to help, this is a good place to do it!</span></p>
-
-<div class="form-buttons text-end">
-    <form>
-        <button
-            type="submit"
-            class="btn btn-lg btn-primary"
-            hx-post="/service/{{ slug }}/sync/start"
-            hx-class="btn btn-lg btn-primary"
-            hx-target="#scan-log"
-            hx-swap="outerHTML"
-        >
-            Sync
-        </button>
-    </form>
-</div>
-
-<div class="form-body" style="width: 100%; height: 100%">
-    <textarea id="scan-log" readonly>Logs will appear here once the sync starts. </textarea>
+<div class="form-body d-flex flex-row justify-content-between">
+    <div id="form-stats" style="width: 70%">
+        <div hx-trigger="document-loaded from:body"
+             hx-get="/service/-/sync/log"
+             hx-swap="outerHTML">
+        </div>
+    </div>
+    <div class="form-buttons d-flex justify-content-end" style="width: 30%">
+        <form>
+            <button
+                class="btn btn-lg btn-secondary"
+            >
+                Show log
+            </button>
+            <button
+                type="submit"
+                class="btn btn-lg btn-primary"
+                hx-post="/service/{{ slug }}/sync/start"
+                hx-class="btn btn-lg btn-primary"
+                hx-target="#form-stats"
+                hx-swap="innerHTML"
+            >
+                Sync
+            </button>
+        </form>
+    </div>
 </div>
 
 {% endblock%} {% block scripts %}
-<script type="text/javascript"></script>
+<script type="text/javascript">
+    document.addEventListener("DOMContentLoaded", () => {
+        htmx.trigger(document.body, 'document-loaded');
+    });
+</script>
 {% endblock %}

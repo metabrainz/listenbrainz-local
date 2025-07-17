@@ -139,23 +139,25 @@ def service_sync_start(slug):
     credential = Credential.select().where(Credential.owner == current_user.user_id and Credential.service == service.id)
     msg = current_app.config["SYNC_MANAGER"].request_service_scan(service, credential, current_user.user_id)
     if msg:
-        return render_template("component/sync-log.html", logs=msg, update=True, slug=slug)
+        return render_template("component/sync-status.html", logs=msg, update=True, slug=slug)
 
-    return render_template("component/sync-log.html", logs="The sync has been enqueued, it should start soon.", update=True, slug=slug)
+    return render_template("component/sync-status.html", update=True, slug=slug)
 
 @service_bp.route("/<slug>/sync/log")
 @login_required
 def service_sync_log(slug):
+    
+    # If slug is -, then we're loading an empty HTML on page load
+    if slug == '-':
+        return render_template("component/sync-status.html", stats=tuple(), update=False)
+        
     if not current_user.is_admin:
         raise NotFound
     try:
-        logs, completed = current_app.config["SYNC_MANAGER"].get_sync_log(slug)
+        logs, stats, completed = current_app.config["SYNC_MANAGER"].get_sync_log(slug)
     except TypeError:
-        print("bad request")
         return BadRequest("What are you smoking?")
+    
+    print(stats)
 
-    if logs is None:
-        print("empty logs")
-        raise BadRequest("Cannot find service with slug %s" % slug)
-
-    return render_template("component/sync-log.html", logs=logs, update=(not completed), slug=slug)
+    return render_template("component/sync-status.html", stats=stats, update=(not completed), slug=slug)

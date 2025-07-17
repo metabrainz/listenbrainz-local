@@ -158,11 +158,11 @@ body {
 .form-body {
     background-color: #e5e5e5;
     border-radius: 10px;
-    padding: 1.8em;
+    padding: 1.2em;
 }
 
 .form-buttons {
-    margin-top: 1.2em;
+    margin-top: 1em;
 }
 
 #scan-log {
