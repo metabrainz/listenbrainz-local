@@ -1,4 +1,5 @@
 import os
+from time import time
 from copy import copy
 import json
 import logging
@@ -8,11 +9,12 @@ from threading import Lock, Thread
 from time import monotonic
 import traceback
 from urllib.parse import urlparse
-from lb_local.view.credential import load_credentials
 
 from flask import current_app
 from troi.content_resolver.subsonic import SubsonicDatabase
 from troi.content_resolver.metadata_lookup import MetadataLookup
+
+from lb_local.view.credential import load_credentials
 from lb_local.model.service import Service
 
 # NOTES:
@@ -86,6 +88,7 @@ class SyncManager(Thread):
             lookup.lookup(service.slug)
 
         except Exception as err:
+            print(err)
             while True:
                 try:
                     logging_queue.get_nowait()
@@ -134,6 +137,11 @@ class SyncManager(Thread):
             return None, self.job_data[service]["stats"], False
         finally:
             self.lock.release()
+            
+        if completed:
+            print("completed! ------------------------------")
+            query = Service.update({ "last_synched": time(), "status": "synced ok" }).where(Service.slug == service)
+            query.execute()
 
         if not loaded_rows and completed:
             return logs, self.job_data[service]["stats"], completed

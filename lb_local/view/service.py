@@ -1,3 +1,5 @@
+import datetime
+import timeago
 from time import time
 from urllib.parse import urlparse
 
@@ -30,7 +32,9 @@ def service_list():
     services = Service.select()
     for service in services:
         if service.last_synched:
-            service.last_synched_text = "%s seconds ago" % int(time() - service.last_synched)
+            sync_date = datetime.datetime.fromtimestamp(service.last_synched)
+            service.last_synched_text = timeago.format(sync_date, datetime.datetime.now())
+            print(timeago.format(sync_date, datetime.datetime.now()))
         else:
             service.last_synched_text = ""
     return render_template("component/service-list.html", services=services)
@@ -149,7 +153,7 @@ def service_sync_log(slug):
     
     # If slug is -, then we're loading an empty HTML on page load
     if slug == '-':
-        return render_template("component/sync-status.html", stats=tuple(), update=False)
+        return render_template("component/sync-status.html", stats={ "withmbid": 15, "count": 80, "total": 180, "percent": 45}, update=False)
         
     if not current_user.is_admin:
         raise NotFound

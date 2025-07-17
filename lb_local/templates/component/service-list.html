@@ -15,7 +15,7 @@
             <td>{{ service.owner.name }}</td>
             <td>{{ service.url }}</td>
             <td>{{ service.status or "not synced" }}</td>
-            <td>{{ service.last_scanned_text }}</td>
+            <td>{{ service.last_synched_text }}</td>
             <td>
                     <a href="/service/{{ service.slug }}/sync">Sync</a> |
                     <a href="/service/{{ service.slug }}/edit">Edit</a> |

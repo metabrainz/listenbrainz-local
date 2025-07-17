@@ -29,7 +29,7 @@ messages %}
                 hx-class="btn btn-lg btn-primary"
                 hx-target="#form-stats"
                 hx-swap="innerHTML"
-            >
+                hx-on--before-request="this.disabled = true;">
                 Sync
             </button>
         </form>
