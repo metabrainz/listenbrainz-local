@@ -5,7 +5,7 @@ from urllib.parse import urlparse
 
 import peewee
 import validators
-from flask import Blueprint, render_template, request, redirect, url_for, flash, current_app
+from flask import Blueprint, render_template, request, redirect, url_for, flash, current_app, Response
 from flask_login import login_required, current_user
 from werkzeug.exceptions import BadRequest, NotFound, Forbidden
 
@@ -34,7 +34,6 @@ def service_list():
         if service.last_synched:
             sync_date = datetime.datetime.fromtimestamp(service.last_synched)
             service.last_synched_text = timeago.format(sync_date, datetime.datetime.now())
-            print(timeago.format(sync_date, datetime.datetime.now()))
         else:
             service.last_synched_text = ""
     return render_template("component/service-list.html", services=services)
@@ -153,7 +152,7 @@ def service_sync_log(slug):
     
     # If slug is -, then we're loading an empty HTML on page load
     if slug == '-':
-        return render_template("component/sync-status.html", stats={ "withmbid": 15, "count": 80, "total": 180, "percent": 45}, update=False)
+        return render_template("component/sync-status.html", stats={ "withmbid": 15, "count": 80, "total": 180, "percent": 45, "completed": False}, update=False)
         
     if not current_user.is_admin:
         raise NotFound
@@ -162,6 +161,10 @@ def service_sync_log(slug):
     except TypeError:
         return BadRequest("What are you smoking?")
     
-    print(stats)
+    headers = {} 
+    if completed:
+        headers['HX-Trigger-After-Swap'] = 'sync-complete'
 
-    return render_template("component/sync-status.html", stats=stats, update=(not completed), slug=slug)
+    response = Response(render_template("component/sync-status.html", stats=stats, completed=completed, slug=slug),
+                        headers=headers)
+    return response

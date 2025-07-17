@@ -25,6 +25,7 @@ messages %}
             <button
                 type="submit"
                 class="btn btn-lg btn-primary"
+                id="sync-submit-button"
                 hx-post="/service/{{ slug }}/sync/start"
                 hx-class="btn btn-lg btn-primary"
                 hx-target="#form-stats"
@@ -40,6 +41,12 @@ messages %}
 <script type="text/javascript">
     document.addEventListener("DOMContentLoaded", () => {
         htmx.trigger(document.body, 'document-loaded');
+    });
+    document.body.addEventListener('sync-complete', function(event) {
+        console.log('processFinished event received!', event.detail);
+        const button = document.getElementById('sync-submit-button');
+        if (button) 
+            button.disabled = false;
     });
 </script>
 {% endblock %}
