@@ -63,7 +63,7 @@ def load_credentials(user_id):
 @credential_bp.route("/", methods=["GET"])
 @login_required
 def credential_index():
-    if not current_user.is_service_user:
+    if not current_user.is_authorized:
         raise NotFound
     services = Service.select()
     if not services:
@@ -74,7 +74,7 @@ def credential_index():
 @credential_bp.route("/list", methods=["GET"])
 @login_required
 def credential_list():
-    if not current_user.is_service_user:
+    if not current_user.is_authenticated:
         raise NotFound
     return render_template("component/credential-list.html", 
         credentials=Credential.select().where((Credential.owner == current_user.user_id) | (Credential.shared == True)))
@@ -83,7 +83,7 @@ def credential_list():
 @credential_bp.route("/add", methods=["GET"])
 @login_required
 def credential_add():
-    if not current_user.is_service_user:
+    if not current_user.is_authenticated:
         raise NotFound
     services = Service.select()
     if not services:
@@ -94,7 +94,7 @@ def credential_add():
 @credential_bp.route("/<id>/edit", methods=["GET"])
 @login_required
 def credential_edit(id):
-    if not current_user.is_service_user:
+    if not current_user.is_authenticated:
         raise NotFound
     credential = Credential.get(Credential.id == id)
     services = Service.select()
@@ -107,7 +107,7 @@ def credential_edit(id):
 @credential_bp.route("/<id>/delete", methods=["GET"])
 @login_required
 def credential_delete(id):
-    if not current_user.is_service_user:
+    if not current_user.is_authenticated:
         raise NotFound
     try:
         credential = Credential.get(Credential.id == id)
@@ -126,7 +126,7 @@ def credential_delete(id):
 @credential_bp.route("/add", methods=["POST"])
 @login_required
 def credential_add_post():
-    if not current_user.is_service_user:
+    if not current_user.is_authenticated:
         raise NotFound
     _id = int(request.form.get("id", "-1"))
     service_id = request.form.get("service", None)

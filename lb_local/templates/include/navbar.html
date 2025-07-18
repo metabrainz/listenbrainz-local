@@ -52,16 +52,14 @@
                         {{ current_user.name }}
                       </a>
                       <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
-                        {% if current_user.is_service_user or current_user.is_admin %}
-                            {% if current_user.is_service_user %}
-                                <li><a class="dropdown-item" href="/service">Services</a></lio>
-                                <li><a class="dropdown-item" href="/credential">Credentials</a></lio>
-                            {% endif %}
-                            {% if current_user.is_admin %}
-                                <li><a class="dropdown-item" href="/admin">Admin</a></lio>
-                            {% endif %}
-                            <li><hr class="dropdown-divider"></li>
+                        {% if current_user.is_service_user %}
+                            <li><a class="dropdown-item" href="/service">Services</a></lio>
                         {% endif %}
+                        <li><a class="dropdown-item" href="/credential">Credentials</a></lio>
+                        {% if current_user.is_admin %}
+                            <li><a class="dropdown-item" href="/admin">Admin</a></lio>
+                        {% endif %}
+                        <li><hr class="dropdown-divider"></li>
                         <li><a class="dropdown-item" href="/logout">Logout</a></li>
                       </ul>
                     </li>
