@@ -30,8 +30,9 @@ def service_index():
 def service_list():
     if not current_user.is_service_user:
         raise NotFound
-    services = Service.select().where(Service.owner == current_user.user_id)
+    services = Service.select().where(Service.owner == current_user)
     for service in services:
+        print(service.owner, current_user.user_id)
         if service.last_synched:
             sync_date = datetime.datetime.fromtimestamp(service.last_synched)
             service.last_synched_text = timeago.format(sync_date, datetime.datetime.now())
