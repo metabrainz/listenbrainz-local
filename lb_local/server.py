@@ -31,15 +31,13 @@ from troi.content_resolver.subsonic import SubsonicDatabase
 # - Gonic not defined in configuration error when missing credential
 # Saving playlists from mixed services is undefined
 # Add column showing which service tracks are from
-# Trim input in server/credential fields
-# Force users to add  port to the services URL
 # sync errors cause jobs to be stuck and not removed from queue.
 
 STATIC_PATH = "/static"
 STATIC_FOLDER = "static"
 TEMPLATE_FOLDER = "templates"
 
-env_keys = ["DATABASE_FILE", "SECRET_KEY", "DOMAIN", "PORT", "AUTHORIZED_USERS",
+env_keys = ["DATABASE_FILE", "SECRET_KEY", "DOMAIN", "PORT", "AUTHORIZED_USERS", "SERVICE_USERS",
             "MUSICBRAINZ_CLIENT_ID", "MUSICBRAINZ_CLIENT_SECRET"]
 
 sync_manager = SyncManager()
@@ -78,6 +76,7 @@ def create_app():
             
     env_config["AUTHORIZED_USERS"] = [ x.strip() for x in env_config["AUTHORIZED_USERS"].split(",") ]
     env_config["ADMIN_USERS"] = [ x.strip() for x in env_config["ADMIN_USERS"].split(",") ]
+    env_config["SERVICE_USERS"] = [ x.strip() for x in env_config["SERVICE_USERS"].split(",") ]
     app.config.from_mapping(env_config)
 
     db_file = app.config["DATABASE_FILE"]

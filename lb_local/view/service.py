@@ -19,7 +19,7 @@ service_bp = Blueprint("service_bp", __name__)
 @service_bp.route("/", methods=["GET"])
 @login_required
 def service_index():
-    if not current_user.is_admin:
+    if not current_user.is_service_user:
         raise NotFound
     return render_template("service.html", page="service")
 
@@ -27,7 +27,7 @@ def service_index():
 @service_bp.route("/list", methods=["GET"])
 @login_required
 def service_list():
-    if not current_user.is_admin:
+    if not current_user.is_service_user:
         raise NotFound
     services = Service.select()
     for service in services:
@@ -42,7 +42,7 @@ def service_list():
 @service_bp.route("/add", methods=["GET"])
 @login_required
 def service_add():
-    if not current_user.is_admin:
+    if not current_user.is_service_user:
         raise NotFound
     return render_template("service-add.html", mode="Add")
 
@@ -50,7 +50,7 @@ def service_add():
 @service_bp.route("/<slug>/edit", methods=["GET"])
 @login_required
 def service_edit(slug):
-    if not current_user.is_admin:
+    if not current_user.is_service_user:
         raise NotFound
     service = Service.get(Service.slug == slug)
     if service.owner.user_id != current_user.user_id:
@@ -61,7 +61,7 @@ def service_edit(slug):
 @service_bp.route("/<slug>/delete", methods=["GET"])
 @login_required
 def service_delete(slug):
-    if not current_user.is_admin:
+    if not current_user.is_service_user:
         raise NotFound
     try:
         service = Service.get(Service.slug == slug)
@@ -80,7 +80,7 @@ def service_delete(slug):
 @service_bp.route("/add", methods=["POST"])
 @login_required
 def service_add_post():
-    if not current_user.is_admin:
+    if not current_user.is_service_user:
         raise NotFound
     mode = request.form.get("mode", "")
     print(mode)
@@ -129,7 +129,7 @@ def service_add_post():
 @service_bp.route("/<slug>/sync", methods=["GET"])
 @login_required
 def service_sync(slug):
-    if not current_user.is_admin:
+    if not current_user.is_service_user:
         raise NotFound
     completed = current_app.config["SYNC_MANAGER"].sync_completed(slug)
     return render_template("service-sync.html", page="service", slug=slug, completed=completed)
@@ -137,7 +137,7 @@ def service_sync(slug):
 @service_bp.route("/<slug>/sync/start", methods=["POST"])
 @login_required
 def service_sync_start(slug):
-    if not current_user.is_admin:
+    if not current_user.is_service_user:
         raise NotFound
     service = Service.get(Service.slug == slug)
     credential = Credential.select().where(Credential.owner == current_user.user_id and Credential.service == service.id)
@@ -150,7 +150,7 @@ def service_sync_start(slug):
 @service_bp.route("/<slug>/sync/log")
 @login_required
 def service_sync_log(slug):
-    if not current_user.is_admin:
+    if not current_user.is_service_user:
         raise NotFound
     
     # If slug is -, then we're loading an empty HTML on page load

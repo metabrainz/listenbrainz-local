@@ -63,6 +63,8 @@ def load_credentials(user_id):
 @credential_bp.route("/", methods=["GET"])
 @login_required
 def credential_index():
+    if not current_user.is_service_user:
+        raise NotFound
     services = Service.select()
     if not services:
         flash("You need to add a service before adding a credential")
@@ -72,6 +74,8 @@ def credential_index():
 @credential_bp.route("/list", methods=["GET"])
 @login_required
 def credential_list():
+    if not current_user.is_service_user:
+        raise NotFound
     return render_template("component/credential-list.html", 
         credentials=Credential.select().where((Credential.owner == current_user.user_id) | (Credential.shared == True)))
 
@@ -79,6 +83,8 @@ def credential_list():
 @credential_bp.route("/add", methods=["GET"])
 @login_required
 def credential_add():
+    if not current_user.is_service_user:
+        raise NotFound
     services = Service.select()
     if not services:
         flash("You need to add a service before adding a credential")
@@ -88,6 +94,8 @@ def credential_add():
 @credential_bp.route("/<id>/edit", methods=["GET"])
 @login_required
 def credential_edit(id):
+    if not current_user.is_service_user:
+        raise NotFound
     credential = Credential.get(Credential.id == id)
     services = Service.select()
     return render_template("credential-add.html",
@@ -99,6 +107,8 @@ def credential_edit(id):
 @credential_bp.route("/<id>/delete", methods=["GET"])
 @login_required
 def credential_delete(id):
+    if not current_user.is_service_user:
+        raise NotFound
     try:
         credential = Credential.get(Credential.id == id)
         credential.delete_instance()
@@ -116,6 +126,8 @@ def credential_delete(id):
 @credential_bp.route("/add", methods=["POST"])
 @login_required
 def credential_add_post():
+    if not current_user.is_service_user:
+        raise NotFound
     _id = int(request.form.get("id", "-1"))
     service_id = request.form.get("service", None)
     user_name = request.form.get("user_name", "").strip()

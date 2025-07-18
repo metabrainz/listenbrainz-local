@@ -18,6 +18,7 @@ class User(Model, UserMixin):
         with app.app_context():
             self.authorized_users = current_app.config["AUTHORIZED_USERS"]
             self.admin_users = current_app.config["ADMIN_USERS"]
+            self.service_users = current_app.config["SERVICE_USERS"]
 
     class Meta:
         database = user_db
@@ -51,6 +52,10 @@ class User(Model, UserMixin):
     @property
     def is_admin(self):
         return self.name in self.admin_users
+
+    @property
+    def is_service_user(self):
+        return self.name in self.service_users
 
     def __repr__(self):
         return "<User('%s' '%s')>" % (self.user_id, self.name or "")
