@@ -77,7 +77,7 @@ def credential_list():
     if not current_user.is_authenticated:
         raise NotFound
     return render_template("component/credential-list.html", 
-        credentials=Credential.select().where((Credential.owner == current_user.user_id) | (Credential.shared == True)))
+        credentials=Credential.select().where(Credential.owner == current_user.user_id))
 
 
 @credential_bp.route("/add", methods=["GET"])
