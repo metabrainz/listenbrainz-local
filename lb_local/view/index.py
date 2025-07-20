@@ -91,12 +91,16 @@ def lb_radio_post():
         except KeyError:
             sources.add("---")
 
+    hints = r.patch.user_feedback()
+    if not recordings:
+        hints.append("No recorings were available for playback. Have you sync'ed your service?") 
+
     return render_template('component/playlist-table.html',
                            show_file_source=len(sources),
                            recordings=recordings,
                            playlist_name=playlist.playlists[0].name,
                            playlist_desc=playlist.playlists[0].description,
-                           hints=r.patch.user_feedback(),
+                           hints=hints,
                            jspf=json.dumps(playlist.get_jspf()),
                            services=avail_services)
 
@@ -171,14 +175,21 @@ def weekly_jams_post():
 
     sources = set() 
     for rec in recordings:
-        sources.add(rec.listenbrainz["file_source"])
+        try:
+            sources.add(rec.listenbrainz["file_source"])
+        except KeyError:
+            sources.add("---")
+
+    hints = r.patch.user_feedback()
+    if not recordings:
+        hints.append("No recorings were available for playback. Have you sync'ed your service?") 
 
     return render_template('component/playlist-table.html',
                            show_file_source=len(sources),
                            recordings=recordings,
                            playlist_name=playlist.playlists[0].name,
                            playlist_desc=playlist.playlists[0].description,
-                           hints=r.patch.user_feedback(),
+                           hints=hints,
                            services=session["subsonic"].keys(),
                            jspf=json.dumps(playlist.get_jspf()))
 
