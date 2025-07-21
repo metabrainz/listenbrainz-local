@@ -10,7 +10,7 @@ messages %}
 
 <div class="form-body">
     <div class="form-buttons">
-        <form>
+        <form id="sync-form">
             <button
                 type="submit"
                 class="btn btn-lg btn-primary"
@@ -19,7 +19,7 @@ messages %}
                 hx-class="btn btn-lg btn-primary"
                 hx-target="#form-stats"
                 hx-swap="innerHTML"
-                hx-on--before-request="this.disabled = true;"
+                hx-on--before-request="document.getElementById('sync-form').querySelectorAll('button[type=\'submit\']').forEach(btn => btn.disabled = true);"
                 {% if not completed %}
                     disabled
                 {% endif %}
@@ -29,12 +29,12 @@ messages %}
             <button
                 type="submit"
                 class="btn btn-lg btn-primary"
-                id="sync-submit-button"
+                id="mo-sync-submit-button"
                 hx-post="/service/{{ slug }}/sync/start/metadata-only"
                 hx-class="btn btn-lg btn-primary"
                 hx-target="#form-stats"
                 hx-swap="innerHTML"
-                hx-on--before-request="this.disabled = true;"
+                hx-on--before-request="document.getElementById('sync-form').querySelectorAll('button[type=\'submit\']').forEach(btn => btn.disabled = true);"
                 {% if not completed %}
                     disabled
                 {% endif %}
@@ -64,7 +64,10 @@ messages %}
         htmx.trigger(document.body, 'document-loaded');
     });
     document.body.addEventListener('sync-complete', function(event) {
-        const button = document.getElementById('sync-submit-button');
+        button = document.getElementById('sync-submit-button');
+        if (button) 
+            button.disabled = false;
+        button = document.getElementById('mo-sync-submit-button');
         if (button) 
             button.disabled = false;
     });
