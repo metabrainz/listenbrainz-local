@@ -47,7 +47,7 @@ class SyncManager(Thread):
     def exit(self):
         self._exit = True
 
-    def request_service_scan(self, service, credential, user_id):
+    def request_service_scan(self, service, credential, user_id, metadata_only=False):
         conf, msg = load_credentials(user_id)
         if msg:
             return msg
@@ -63,7 +63,8 @@ class SyncManager(Thread):
                                             "credential": credential,
                                             "sync_log": "", "completed": False,
                                             "expire_at": monotonic() + LOG_EXPIRY_DURATION,
-                                            "stats": tuple() }
+                                            "stats": tuple(),
+                                            "type": "metadata" if metadata_only else "full" }
         else:
             msg = "There is a sync already queued, it should start soon."
         self.lock.release()
@@ -75,10 +76,8 @@ class SyncManager(Thread):
     def sync_completed(self, slug):
         self.lock.acquire()
         if slug in self.job_data:
-            print("found job!")
             completed = self.job_data[slug]["completed"] 
         else:
-            print("job not found!", list(self.job_data.keys()))
             completed = True
         self.lock.release()
         return completed
@@ -88,12 +87,18 @@ class SyncManager(Thread):
         url = urlparse(service.url)
         conf, _ = load_credentials(user_id)
 
+        self.lock.acquire()
+        type = self.job_data[service.slug]["type"]
+        self.lock.release()
+
         from lb_local.server import app
         with app.app_context():
             db = SubsonicDatabase(current_app.config["DATABASE_FILE"], Config(**conf), quiet=False)
         try:
             db.open()
-            db.sync(service.slug)
+            
+            if type == "full":
+                db.sync(service.slug)
 
             lookup = MetadataLookup(False)
             lookup.lookup(service.slug)
@@ -127,7 +132,7 @@ class SyncManager(Thread):
         while True:
             try:
                 rec = logging_queue.get_nowait()
-                if rec.message[0] == "{":
+                if rec.message[0] == "[":
                     try:
                         stats = json.loads(rec.message)
                     except Exception as err:
@@ -150,7 +155,6 @@ class SyncManager(Thread):
             self.lock.release()
             
         if completed:
-            print("completed! ------------------------------")
             query = Service.update({ "last_synched": time(), "status": "synced ok" }).where(Service.slug == service)
             query.execute()
 

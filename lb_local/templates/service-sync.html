@@ -8,22 +8,9 @@ messages %}
 <div class="alert alert-warning" role="alert">{{ message }}</div>
 {% endfor %} {% endif %} {% endwith %}
 
-<div class="form-body d-flex flex-row justify-content-between">
-    <div id="form-stats" style="width: 70%">
-        <div hx-trigger="document-loaded from:body"
-             hx-get="/service/{{ slug }}/sync/log"
-             hx-swap="outerHTML">
-        </div>
-    </div>
-    <div class="form-buttons d-flex justify-content-end" style="width: 30%">
+<div class="form-body">
+    <div class="form-buttons">
         <form>
-            <a 
-                href="/service/{{ slug }}/sync/full-log"
-                class="btn btn-lg btn-secondary"
-                target="_blank"
-            >
-                Show log
-            </a>
             <button
                 type="submit"
                 class="btn btn-lg btn-primary"
@@ -39,7 +26,35 @@ messages %}
             >
                 Sync
             </button>
+            <button
+                type="submit"
+                class="btn btn-lg btn-primary"
+                id="sync-submit-button"
+                hx-post="/service/{{ slug }}/sync/start/metadata-only"
+                hx-class="btn btn-lg btn-primary"
+                hx-target="#form-stats"
+                hx-swap="innerHTML"
+                hx-on--before-request="this.disabled = true;"
+                {% if not completed %}
+                    disabled
+                {% endif %}
+            >
+                Sync Metadata only
+            </button>
+            <a 
+                href="/service/{{ slug }}/sync/full-log"
+                class="btn btn-lg btn-secondary"
+                target="_blank"
+            >
+                Show log
+            </a>
         </form>
+    </div>
+    <div id="form-stats">
+        <div hx-trigger="document-loaded from:body"
+             hx-get="/service/{{ slug }}/sync/log"
+             hx-swap="outerHTML">
+        </div>
     </div>
 </div>
 

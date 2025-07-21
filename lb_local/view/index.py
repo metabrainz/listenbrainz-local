@@ -182,7 +182,7 @@ def weekly_jams_post():
 
     hints = r.patch.user_feedback()
     if not recordings:
-        hints.append("No recorings were available for playback. Have you sync'ed your service?") 
+        hints.append("No recordings were available for playback. Have you sync'ed your service?") 
 
     return render_template('component/playlist-table.html',
                            show_file_source=len(sources),
@@ -203,6 +203,14 @@ def tags():
     ts = tt.get_top_tags(250)
     return render_template("top-tags.html", tags=ts, page="top-tags")
 
+@index_bp.route("/tag/<tag>", methods=["GET"])
+@login_required
+def tag(tag):
+    db = Database(current_app.config["DATABASE_FILE"], quiet=True)
+    db.open()
+    tt = TopTags()
+    ts = tt.get_top_tags(250)
+    return render_template("top-tags.html", tags=ts, page="top-tags")
 
 @index_bp.route("/unresolved", methods=["GET"])
 @login_required

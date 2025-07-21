@@ -141,16 +141,19 @@ def service_sync(slug):
     return render_template("service-sync.html", page="service", slug=slug, completed=completed)
 
 @service_bp.route("/<slug>/sync/start", methods=["POST"])
+@service_bp.route("/<slug>/sync/start/metadata-only", methods=["POST"])
 @login_required
 def service_sync_start(slug):
     if not current_user.is_service_user:
         raise NotFound
+    
+    metadata_only = request.path.endswith("metadata-only")
 
     service = Service.get(Service.slug == slug)
     if current_user.user_id != service.owner.user_id:
         raise NotFound
     credential = Credential.select().where(Credential.owner == current_user.user_id and Credential.service == service.id)
-    msg = current_app.config["SYNC_MANAGER"].request_service_scan(service, credential, current_user.user_id)
+    msg = current_app.config["SYNC_MANAGER"].request_service_scan(service, credential, current_user.user_id, metadata_only)
     if msg:
         return render_template("component/sync-status.html", logs=msg, update=True, slug=slug)
 
