@@ -175,7 +175,7 @@ def service_sync_log(slug):
     
     print(logs)
     print(stats)
-    print(complete)
+    print(completed)
     
     headers = {} 
     if completed:
