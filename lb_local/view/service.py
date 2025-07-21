@@ -20,7 +20,7 @@ service_bp = Blueprint("service_bp", __name__)
 @service_bp.route("/", methods=["GET"])
 @login_required
 def service_index():
-    if not current_user.is_service_user:
+    if not current_user.is_service_user and not current_user.is_admin:
         raise NotFound
     return render_template("service.html", page="service")
 
@@ -28,7 +28,7 @@ def service_index():
 @service_bp.route("/list", methods=["GET"])
 @login_required
 def service_list():
-    if not current_user.is_service_user:
+    if not current_user.is_service_user and not current_user.is_admin:
         raise NotFound
     services = Service.select().where(Service.owner == current_user)
     for service in services:
@@ -44,7 +44,7 @@ def service_list():
 @service_bp.route("/add", methods=["GET"])
 @login_required
 def service_add():
-    if not current_user.is_service_user:
+    if not current_user.is_service_user and not current_user.is_admin:
         raise NotFound
     return render_template("service-add.html", mode="Add")
 
@@ -52,7 +52,7 @@ def service_add():
 @service_bp.route("/<slug>/edit", methods=["GET"])
 @login_required
 def service_edit(slug):
-    if not current_user.is_service_user:
+    if not current_user.is_service_user and not current_user.is_admin:
         raise NotFound
     service = Service.get(Service.slug == slug)
     if service.owner.user_id != current_user.user_id:
@@ -63,7 +63,7 @@ def service_edit(slug):
 @service_bp.route("/<slug>/delete", methods=["GET"])
 @login_required
 def service_delete(slug):
-    if not current_user.is_service_user:
+    if not current_user.is_service_user and not current_user.is_admin:
         raise NotFound
     try:
         service = Service.get(Service.slug == slug)
@@ -82,7 +82,7 @@ def service_delete(slug):
 @service_bp.route("/add", methods=["POST"])
 @login_required
 def service_add_post():
-    if not current_user.is_service_user:
+    if not current_user.is_service_user and not current_user.is_admin:
         raise NotFound
     mode = request.form.get("mode", "")
     old_slug = request.form.get("old_slug", "")
@@ -130,7 +130,7 @@ def service_add_post():
 @service_bp.route("/<slug>/sync", methods=["GET"])
 @login_required
 def service_sync(slug):
-    if not current_user.is_service_user:
+    if not current_user.is_service_user and not current_user.is_admin:
         raise NotFound
 
     service = Service.get(Service.slug == slug)
@@ -144,7 +144,7 @@ def service_sync(slug):
 @service_bp.route("/<slug>/sync/start/metadata-only", methods=["POST"])
 @login_required
 def service_sync_start(slug):
-    if not current_user.is_service_user:
+    if not current_user.is_service_user and not current_user.is_admin:
         raise NotFound
     
     metadata_only = request.path.endswith("metadata-only")
@@ -162,7 +162,7 @@ def service_sync_start(slug):
 @service_bp.route("/<slug>/sync/log")
 @login_required
 def service_sync_log(slug):
-    if not current_user.is_service_user:
+    if not current_user.is_service_user and not current_user.is_admin:
         raise NotFound
     
     service = Service.get(Service.slug == slug)
@@ -184,7 +184,7 @@ def service_sync_log(slug):
 @service_bp.route("/<slug>/sync/full-log")
 @login_required
 def service_sync_full_log(slug):
-    if not current_user.is_service_user:
+    if not current_user.is_service_user and not current_user.is_admin:
         raise NotFound
 
     service = Service.get(Service.slug == slug)

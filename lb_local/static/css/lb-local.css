@@ -165,6 +165,10 @@ body {
     margin-bottom: 1.2em;
 }
 
+.form-buttons-bottom {
+    margin-top: 1.2em;
+}
+
 #scan-log {
     height: 100%;
     width: 100%;
