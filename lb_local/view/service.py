@@ -173,6 +173,10 @@ def service_sync_log(slug):
     except TypeError:
         raise BadRequest("What are you smoking?")
     
+    print(logs)
+    print(stats)
+    print(complete)
+    
     headers = {} 
     if completed:
         headers['HX-Trigger-After-Swap'] = 'sync-complete'

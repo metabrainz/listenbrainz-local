@@ -136,6 +136,7 @@ class SyncManager(Thread):
                     try:
                         stats = json.loads(rec.message)
                     except Exception as err:
+                        print(rec.message)
                         print(err)
                         continue
                     self.job_data[service]["stats"] = stats
