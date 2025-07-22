@@ -171,7 +171,8 @@ def service_sync_log(slug):
     try:
         logs, stats, completed = current_app.config["SYNC_MANAGER"].get_sync_log(slug)
     except TypeError:
-        raise BadRequest("What are you smoking?")
+        print("No job found")
+        return render_template("component/sync-status.html", stats=stats, completed=False, slug=slug),
     
     print(logs)
     print(stats)
