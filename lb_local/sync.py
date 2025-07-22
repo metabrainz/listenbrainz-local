@@ -183,6 +183,7 @@ class SyncManager(Thread):
         
     def run(self):
 
+        print("sync thread started")
         while not self._exit:
             try:
                 service, credential, user_id = self.job_queue.get()
@@ -192,4 +193,7 @@ class SyncManager(Thread):
 
             from lb_local.server import app
             with app.app_context():
+                print("start sync job")
                 self.sync_service(service, credential, user_id)
+                print("finish sync job")
+        print("sync thread exited")
