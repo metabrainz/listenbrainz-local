@@ -61,7 +61,8 @@ class SyncManager(Thread):
             self.job_queue.put((service, credential, user_id))
             self.job_data[service.slug] = { "service": service,
                                             "credential": credential,
-                                            "sync_log": "", "completed": False,
+                                            "sync_log": "", 
+                                            "completed": False,
                                             "expire_at": monotonic() + LOG_EXPIRY_DURATION,
                                             "stats": tuple(),
                                             "type": "metadata" if metadata_only else "full" }
@@ -104,13 +105,14 @@ class SyncManager(Thread):
             lookup.lookup(service.slug)
 
         except Exception as err:
-            print(err)
             while True:
                 try:
                     logging_queue.get_nowait()
                 except Empty:
                     break
             traceback_str = traceback.format_exc()
+            print("sync failed")
+            print(traceback_str)
             self.lock.acquire()
             self.job_data[service.slug]["sync_log"] += "An error occurred when syncing the collection:\n" + str(traceback_str) + "\n"
             self.lock.release()
