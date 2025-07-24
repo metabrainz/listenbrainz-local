@@ -13,8 +13,8 @@ from troi.content_resolver.top_tags import TopTags
 from troi.content_resolver.unresolved_recording import UnresolvedRecordingTracker
 from troi.local.periodic_jams_local import PeriodicJamsLocal
 from troi.playlist import _deserialize_from_jspf, PlaylistElement
+from lb_local.database import user_db
 from lb_local.view.credential import load_credentials
-
 from lb_local.login import login_forbidden
 
 index_bp = Blueprint("index_bp", __name__)
@@ -201,6 +201,8 @@ def tags():
     db.open()
     tt = TopTags()
     ts = tt.get_top_tags(250)
+    for tag in ts:
+        tag["count"] = f"{tag['count']:,}"
     return render_template("top-tags.html", tags=ts, page="top-tags")
 
 @index_bp.route("/tag/<tag>", methods=["GET"])
@@ -208,9 +210,33 @@ def tags():
 def tag(tag):
     db = Database(current_app.config["DATABASE_FILE"], quiet=True)
     db.open()
-    tt = TopTags()
-    ts = tt.get_top_tags(250)
-    return render_template("top-tags.html", tags=ts, page="top-tags")
+    
+    MINIMUM_TAG_COUNT = 5  # TODO: move this
+
+    cursor = user_db.execute_sql("""SELECT DISTINCT recording_id
+                                         , count AS tag_count
+                                         , artist_name
+                                         , release_name
+                                         , recording_name
+                                         , artist_mbid
+                                         , release_mbid
+                                         , recording_mbid
+                                      FROM recording_tag
+                                      JOIN recording
+                                        ON recording.id = recording_tag.recording_id
+                                      JOIN tag
+                                        ON tag.id = recording_tag.tag_id
+                                     WHERE tag.name = ?
+                                       AND count >= ?
+                                  ORDER BY count DESC""", (tag, MINIMUM_TAG_COUNT))
+    col_names = [desc[0] for desc in cursor.description]
+    rows = []
+    for row in cursor.fetchall():
+        tmp = dict(zip(col_names, row))
+        tmp["tag_count"] = f"{int(tmp['tag_count']):,}"
+        rows.append(tmp)
+        
+    return render_template("tag.html", recordings=rows, tag=tag)
 
 @index_bp.route("/unresolved", methods=["GET"])
 @login_required

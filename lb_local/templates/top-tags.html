@@ -11,7 +11,11 @@ Below are the top {{ tags | length }} tags that MusicBrainz users have applied t
 <div class="flex-wrap-container" style="margin-top: 3em">
   {% for tag in tags %}
     <div class="tag-div">
-        <a href="/lb-radio?prompt={{ "tag:(" + tag.tag + ")" | safe }}">{{ tag.tag }}</a><br/>{{ tag.count }};
+        <a href="/tag/{{ tag.tag | safe }}">{{ tag.tag }}</a>
+        <br/>
+        {{ tag.count }} tags
+        <br/>
+        <a href="/lb-radio?prompt={{ "tag:(" + tag.tag + ")" | safe }}"><i class="fa-solid fa-radio"></i></a>
     </div>
   {% endfor %}
 </div>
