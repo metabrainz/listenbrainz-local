@@ -3,6 +3,7 @@ import logging
 import os
 import sys
 from datetime import datetime
+import multiprocessing
 import signal
 
 import peewee
@@ -40,8 +41,9 @@ TEMPLATE_FOLDER = "templates"
 env_keys = ["DATABASE_FILE", "SECRET_KEY", "DOMAIN", "PORT", "AUTHORIZED_USERS", "SERVICE_USERS",
             "MUSICBRAINZ_CLIENT_ID", "MUSICBRAINZ_CLIENT_SECRET"]
 
-sync_manager = SyncManager()
-sync_manager.daemon = True
+submit_queue = multiprocessing.Queue()
+stats_queue = multiprocessing.Queue()
+sync_manager = SyncManager(submit_queue, stats_queue)
 sync_manager.start()
 
 class Config:
@@ -108,8 +110,8 @@ def create_app():
 
     login_manager.init_app(app)
 
-    app.config["SYNC_MANAGER"] = sync_manager
-
+    app.config["STATS_QUEUE"] = stats_queue
+    app.config["SUBMIT_QUEUE"] = submit_queue
         
     return app, oauth
 
