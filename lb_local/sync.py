@@ -1,3 +1,4 @@
+from collections import namedtuple
 import os
 from time import time
 from copy import copy
@@ -30,29 +31,54 @@ logger.setLevel(APP_LOG_LEVEL_NUM)
 class Config:
     def __init__(self, **entries):
         self.__dict__.update(entries)
+        
+SubmitMessage = namedtuple("SubmitMessage", ["service",
+                                             "credential",
+                                             "user_id",
+                                             "expire_at",
+                                             "type"])
+StatusMessage = namedtuple("StatusMessage", ["complete",
+                                             "error_msg",
+                                             "stats",
+                                             "logs"])
 
-class SyncManagerClient:
+class SyncClient:
     def __init__(self, submit_queue, stats_queue):
         self.submit_queue = submit_queue
         self.stats_queue = stats_queue
+        self.latest_status = None
+        
 
-    def request_service_scan(submit_queue, service, credential, user_id, metadata_only=False):
+        # TODO: Update the entry on disk  for both functions below
+        if complete:
+            query = Service.update({ "last_synched": time(), "status": "synced ok" }).where(Service.slug == service)
+            query.execute()
+
+    def request_sync(self, message: SubmitMessage):
         """ This function is called from the initiating process!"""
         
         # Make sure we can load a credential
-        _, msg = load_credentials(user_id)
-        if msg:
-            return msg
+        _, err_msg = load_credentials(user_id)
+        if err_msg:
+            return err_msg
 
-        job_data = { "service": service,
-                     "credential": credential,
-                     "sync_log": "", 
-                     "completed": False,
-                     "expire_at": monotonic() + LOG_EXPIRY_DURATION,
-                     "stats": tuple(),
-                     "type": "metadata" if metadata_only else "full" }
-        submit_queue.put((service, credential, user_id, job_data))
+        if message.expire_at is None:
+            message.expire_at = monotonic() + LOG_EXPIRY_DURATION
+
+        self.submit_queue.put(message)
         return ""
+    
+    def sync_status(self):
+        
+        # Fetch the latest stats. Keep only the last one
+        while True:
+            try:
+                self.latest_status = self.stats_queue.get_nowait()
+            except Empty:
+                break
+            
+        return self.latest_status
+
 
 class SyncManager(multiprocessing.Process):
 
@@ -67,11 +93,6 @@ class SyncManager(multiprocessing.Process):
     def exit(self):
         self.worker.exit()
 
-    def get_sync_status(self, service):
-        """ Fetch the current status """
-        pass
-
-    
     def run(self):
 
         print("manager process started")
@@ -91,6 +112,7 @@ class SyncWorker(Thread):
     def __init__(self):
         self.job_queue = Queue()
         self.job_data = {}
+        self.current_slug = None
         self._exit = False
         
     def exit(self):
@@ -99,23 +121,21 @@ class SyncWorker(Thread):
     def add_job(self, job):
         self.job_queue.put(job)
 
-    def sync_completed(self, slug):
-        self.lock.acquire()
-        if slug in self.job_data:
-            completed = self.job_data[slug]["completed"] 
-        else:
-            completed = True
-        self.lock.release()
-
-        return completed
-
-    def sync_service(self, service, credential, user_id, job_data):
+    def sync_service(self, submit_msg):
         
-        url = urlparse(service.url)
-        conf, _ = load_credentials(user_id)
+        slug = submit_msg.service.slug
+        url = urlparse(submit_msg.service.url)
+        conf, _ = load_credentials(submit_msg.user_id)
 
         self.lock.acquire()
-        type = self.job_data[service.slug]["type"]
+        self.job_data[slug] = { "stats": None,
+                                "logs": None,
+                                "type": submit_msg.type,
+                                "user_id": submit_msg.user_id,
+                                "expire_at": submit_msg.expire_time,
+                                "complete": False
+                              }        
+        self.current_slug = slug
         self.lock.release()
 
         from lb_local.server import app
@@ -124,11 +144,11 @@ class SyncWorker(Thread):
         try:
             db.open()
             
-            if type == "full":
-                db.sync(service.slug)
+            if submit_msg.type == "full":
+                db.sync(slug)
 
             lookup = MetadataLookup(False)
-            lookup.lookup(service.slug)
+            lookup.lookup(slug)
 
         except Exception as err:
             while True:
@@ -140,21 +160,22 @@ class SyncWorker(Thread):
             print("sync failed")
             print(traceback_str)
             self.lock.acquire()
-            self.job_data[service.slug]["sync_log"] += "An error occurred when syncing the collection:\n" + str(traceback_str) + "\n"
+            self.job_data[slug]["error"] = "An error occurred when syncing the collection:\n" + str(traceback_str) + "\n"
             self.lock.release()
 
         self.lock.acquire()
-        self.job_data[service.slug]["completed"] = True
+        self.job_data[slug]["complete"] = True
+        self.current_slug = None
         self.lock.release()
         
     def process_log_messages(self):
-        """ Read log messages, mangle and then return to push into stats queue"""
-        try:
-            self.lock.acquire()
-            logs = self.job_data[service]["sync_log"]
-            self.lock.release()
-        except KeyError:
-            return None, tuple(), True
+        """ Read log messages, process them as needed, then return them """
+        self.lock.acquire()
+        slug = self.current_slug
+        self.lock.release()
+        
+        if slug is None:
+            return
         
         loaded_rows = False
         while True:
@@ -168,7 +189,7 @@ class SyncWorker(Thread):
                         print(err)
                         continue
                     self.lock.acquire()
-                    self.job_data[service]["stats"] = stats
+                    self.job_data[slug]["stats"] = stats
                     self.lock.release()
                     continue
                     
@@ -179,7 +200,7 @@ class SyncWorker(Thread):
             
         try:
             self.lock.acquire()
-            completed = self.job_data[service]["completed"]
+            complete = self.job_data[service]["complete"]
             self.lock.release()
         except KeyError:
             self.lock.acquire()
@@ -187,49 +208,31 @@ class SyncWorker(Thread):
             self.lock.release()
             return None, stats, False
             
-        if completed:
-            query = Service.update({ "last_synched": time(), "status": "synced ok" }).where(Service.slug == service)
-            query.execute()
 
-        if not loaded_rows and completed:
-            return logs, self.job_data[service]["stats"], completed
+        if not loaded_rows and complete:
+            return logs, self.job_data[service]["stats"], complete
 
         self.job_data[service]["sync_log"] = logs
         
         self.lock.acquire()
         stats = self.job_data[service]["stats"]
         self.lock.release()
-        return logs, stats, completed
+        return logs, stats, error, complete
 
-    def clear_out_old_logs(self):
-        # TODO: Old, needs updating
-        
     def run(self):
 
         print("sync thread started")
         while not self._exit:
             try:
-                service, credential, user_id, job_data = self.job_queue.get()
+                submit_mesg = self.job_queue.get()
             except Empty:
                 sleep(.1)
                 continue
 
-        added = False  
-
-        self.lock.acquire()
-        if service.slug in self.job_data and self.job_data[service.slug]["completed"]:
-            if service.slug not in self.job_data:
-                added = True
-                self.job_queue.put(job)
-        self.lock.release()
-        
-        else:
-            msg = "There is a sync already queued, it should start soon."
-        return added
             from lb_local.server import app
             with app.app_context():
                 print("start sync job")
-                self.sync_service(service, credential, user_id, job_data)
+                self.sync_service(submit_msg)
                 print("finish sync job")
 
         print("sync thread exited")
