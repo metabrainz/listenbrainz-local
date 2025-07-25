@@ -43,7 +43,8 @@ env_keys = ["DATABASE_FILE", "SECRET_KEY", "DOMAIN", "PORT", "AUTHORIZED_USERS",
 
 submit_queue = multiprocessing.Queue()
 stats_queue = multiprocessing.Queue()
-sync_manager = SyncManager(submit_queue, stats_queue)
+stop_event = multiprocessing.Event()
+sync_manager = SyncManager(submit_queue, stats_queue, stop_event)
 sync_manager.start()
 
 class Config:
@@ -51,10 +52,12 @@ class Config:
         self.__dict__.update(entries)
 
 def signal_handler(signum, frame):
-    global sync_manager
+    print("signal handler called")
     if sync_manager is not None:
-        sync_manager.exit()
-    sync_manager = None
+        stop_event.set()
+        print("waiting to join proc")
+        sync_manager.join()
+#        sync_manager = None
     raise KeyboardInterrupt
     
 signal.signal(signal.SIGTERM, signal_handler)
@@ -112,6 +115,7 @@ def create_app():
 
     app.config["STATS_QUEUE"] = stats_queue
     app.config["SUBMIT_QUEUE"] = submit_queue
+    app.config["STOP_EVENT"] = stop_event
         
     return app, oauth
 

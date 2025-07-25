@@ -12,6 +12,7 @@ from werkzeug.exceptions import BadRequest, NotFound, Forbidden
 from lb_local.model.service import Service
 from lb_local.model.credential import Credential
 from lb_local.view.credential import load_credentials
+from lb_local.sync import SyncClient, SubmitMessage
 
 service_bp = Blueprint("service_bp", __name__)
 
@@ -137,8 +138,12 @@ def service_sync(slug):
     if current_user.user_id != service.owner.user_id:
         raise NotFound
         
-    completed = current_app.config["SYNC_MANAGER"].sync_completed(slug)
-    return render_template("service-sync.html", page="service", slug=slug, completed=completed)
+    client = SyncClient(current_app.config["SUBMIT_QUEUE"], current_app.config["STATS_QUEUE"])
+    current_status = client.sync_status()
+    return render_template("service-sync.html",
+                           page="service",
+                           slug=slug,
+                           completed=(current_status and current.status.complete) or False)
 
 @service_bp.route("/<slug>/sync/start", methods=["POST"])
 @service_bp.route("/<slug>/sync/start/metadata-only", methods=["POST"])
@@ -153,7 +158,10 @@ def service_sync_start(slug):
     if current_user.user_id != service.owner.user_id:
         raise NotFound
     credential = Credential.select().where(Credential.owner == current_user.user_id and Credential.service == service.id)
-    msg = current_app.config["SYNC_MANAGER"].request_service_scan(service, credential, current_user.user_id, metadata_only)
+    
+    submit_msg = SubmitMessage(service=service, credential=credential, user_id=current_user.user_id, type="full")
+    client = SyncClient(current_app.config["SUBMIT_QUEUE"], current_app.config["STATS_QUEUE"])
+    msg = client.request_sync(submit_msg)
     if msg:
         return render_template("component/sync-status.html", logs=msg, update=True, slug=slug)
 
@@ -168,21 +176,21 @@ def service_sync_log(slug):
     service = Service.get(Service.slug == slug)
     if current_user.user_id != service.owner.user_id:
         raise NotFound
-    try:
-        logs, stats, completed = current_app.config["SYNC_MANAGER"].get_sync_log(slug)
-    except TypeError:
-        print("No job found")
-        return render_template("component/sync-status.html", stats=stats, completed=False, slug=slug),
+
+    client = SyncClient(current_app.config["SUBMIT_QUEUE"], current_app.config["STATS_QUEUE"])
+    current_status = client.sync_status()
     
-    print(logs)
-    print(stats)
-    print(completed)
+    print(current_status.logs)
+    print(current_status.stats)
+    print(current_status.completed)
     
     headers = {} 
-    if completed:
+    if current_status.completed:
         headers['HX-Trigger-After-Swap'] = 'sync-complete'
 
-    response = Response(render_template("component/sync-status.html", stats=stats, completed=completed, slug=slug),
+    response = Response(render_template("component/sync-status.html",
+                                        stats=current_status.stats, 
+                                        completed=current_status.completed, slug=slug),
                         headers=headers)
     return response
 
@@ -196,14 +204,12 @@ def service_sync_full_log(slug):
     if current_user.user_id != service.owner.user_id:
         raise NotFound
 
-    try:
-        logs, _, _ = current_app.config["SYNC_MANAGER"].get_sync_log(slug)
-    except TypeError:
-        raise BadRequest("What are you smoking?")
+    client = SyncClient(current_app.config["SUBMIT_QUEUE"], current_app.config["STATS_QUEUE"])
+    current_status = client.sync_status()
     
-    if logs is None:
-        logs = "No log file available."
+    if current_status.logs is None:
+        current_status.logs = "No log file available."
     
-    response = make_response(logs, 200)
+    response = make_response(current_status.logs, 200)
     response.mimetype = "text/plain"
     return response

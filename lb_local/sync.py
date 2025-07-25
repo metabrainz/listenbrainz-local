@@ -50,9 +50,9 @@ class SyncClient:
         
 
         # TODO: Update the entry on disk  for both functions below
-        if complete:
-            query = Service.update({ "last_synched": time(), "status": "synced ok" }).where(Service.slug == service)
-            query.execute()
+#        if complete:
+#            query = Service.update({ "last_synched": time(), "status": "synced ok" }).where(Service.slug == service)
+ #           query.execute()
 
     def request_sync(self, message: SubmitMessage):
         """ This function is called from the initiating process!"""
@@ -82,35 +82,37 @@ class SyncClient:
 
 class SyncManager(multiprocessing.Process):
 
-    def __init__(self, submit_queue, stats_queue):
+    def __init__(self, submit_queue, stats_queue, stop_event):
         multiprocessing.Process.__init__(self)
         self.submit_queue = submit_queue
         self.stats_queue = stats_queue
+        self.stop_event = stop_event
         
         self.worker = SyncWorker()
         self.worker.start()
 
-    def exit(self):
-        self.worker.exit()
-
     def run(self):
 
         print("manager process started")
-        while not self._exit:
+        while not self.stop_event.is_set():
             self.worker.process_log_messages()
             try:
                 job = self.submit_queue.get()
                 self.worker.add_job(job)
             except Empty:
-                sleep(.1)
+                print("sleep")
+                sleep(1)
                 continue
 
+        self.worker.exit()
         print("manager process exited")
 
 class SyncWorker(Thread):
     
     def __init__(self):
+        Thread.__init__(self)
         self.job_queue = Queue()
+        self.lock = Lock()
         self.job_data = {}
         self.current_slug = None
         self._exit = False
@@ -206,18 +208,17 @@ class SyncWorker(Thread):
             self.lock.acquire()
             stats = self.job_data[service]["stats"]
             self.lock.release()
-            return None, stats, False
-            
+            return StatusMessage(complete=False, stats=self.job_data[service]["stats"])
 
         if not loaded_rows and complete:
-            return logs, self.job_data[service]["stats"], complete
+            return StatusMessage(complete=True, stats=self.job_data[service]["stats"], logs=logs)
 
         self.job_data[service]["sync_log"] = logs
         
         self.lock.acquire()
         stats = self.job_data[service]["stats"]
         self.lock.release()
-        return logs, stats, error, complete
+        return StatusMessage(complete=complete, stats=self.job_data[service]["stats"], logs=logs)
 
     def run(self):
 
