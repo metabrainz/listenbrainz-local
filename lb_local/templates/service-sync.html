@@ -64,6 +64,7 @@ messages %}
         htmx.trigger(document.body, 'document-loaded');
     });
     document.body.addEventListener('sync-complete', function(event) {
+        console.log("sync complete");
         button = document.getElementById('sync-submit-button');
         if (button) 
             button.disabled = false;

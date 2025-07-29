@@ -1,9 +1,10 @@
 import datetime
 import timeago
-from time import time
+from time import time, monotonic
 from urllib.parse import urlparse
 
 import peewee
+from playhouse.shortcuts import model_to_dict
 import validators
 from flask import Blueprint, render_template, request, redirect, url_for, flash, current_app, Response, make_response
 from flask_login import login_required, current_user
@@ -16,6 +17,7 @@ from lb_local.sync import SyncClient, SubmitMessage
 
 service_bp = Blueprint("service_bp", __name__)
 
+LOG_EXPIRY_DURATION = 60 * 60  # in s
 
 
 @service_bp.route("/", methods=["GET"])
@@ -33,7 +35,6 @@ def service_list():
         raise NotFound
     services = Service.select().where(Service.owner == current_user)
     for service in services:
-        print(service.owner, current_user.user_id)
         if service.last_synched:
             sync_date = datetime.datetime.fromtimestamp(service.last_synched)
             service.last_synched_text = timeago.format(sync_date, datetime.datetime.now())
@@ -143,7 +144,7 @@ def service_sync(slug):
     return render_template("service-sync.html",
                            page="service",
                            slug=slug,
-                           completed=(current_status and current.status.complete) or False)
+                           completed=(current_status and current.status.complete) or True)
 
 @service_bp.route("/<slug>/sync/start", methods=["POST"])
 @service_bp.route("/<slug>/sync/start/metadata-only", methods=["POST"])
@@ -157,9 +158,10 @@ def service_sync_start(slug):
     service = Service.get(Service.slug == slug)
     if current_user.user_id != service.owner.user_id:
         raise NotFound
-    credential = Credential.select().where(Credential.owner == current_user.user_id and Credential.service == service.id)
+    credential = Credential.get(Credential.owner == current_user.user_id and Credential.service == service.id)
     
-    submit_msg = SubmitMessage(service=service, credential=credential, user_id=current_user.user_id, type="full")
+    expire_at = monotonic() + LOG_EXPIRY_DURATION
+    submit_msg = SubmitMessage(service=model_to_dict(service), credential=model_to_dict(credential), user_id=current_user.user_id, type="full", expire_at=expire_at)
     client = SyncClient(current_app.config["SUBMIT_QUEUE"], current_app.config["STATS_QUEUE"])
     msg = client.request_sync(submit_msg)
     if msg:
@@ -179,6 +181,13 @@ def service_sync_log(slug):
 
     client = SyncClient(current_app.config["SUBMIT_QUEUE"], current_app.config["STATS_QUEUE"])
     current_status = client.sync_status()
+    
+    if current_status is None:
+        print(" no stats")
+        return render_template("component/sync-status.html",
+                               stats=[],
+                               completed=True,
+                               slug=slug)
     
     print(current_status.logs)
     print(current_status.stats)

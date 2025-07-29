@@ -7,21 +7,22 @@ import logging
 from logging.handlers import QueueHandler
 import multiprocessing
 from queue import Queue, Empty
-from time import monotonic
-from threading import Thread, Lock
+from time import monotonic, sleep
+from threading import Thread, get_ident
 import traceback
 from urllib.parse import urlparse
 
-from flask import current_app
 from troi.content_resolver.subsonic import SubsonicDatabase
 from troi.content_resolver.metadata_lookup import MetadataLookup
 
 from lb_local.view.credential import load_credentials
 from lb_local.model.service import Service
 
-LOG_EXPIRY_DURATION = 60 * 60  # in s
 APP_LOG_LEVEL_NUM = 19
 
+def log(msg):
+    with open("/tmp/log", "a+") as l:
+        l.write("pid %d tid %d: %s\n" % (os.getpid(), get_ident(), msg))
 
 logging_queue = Queue()
 logger = logging.getLogger("troi_subsonic_scan")
@@ -58,14 +59,13 @@ class SyncClient:
         """ This function is called from the initiating process!"""
         
         # Make sure we can load a credential
-        _, err_msg = load_credentials(user_id)
+        _, err_msg = load_credentials(message.user_id)
         if err_msg:
             return err_msg
 
-        if message.expire_at is None:
-            message.expire_at = monotonic() + LOG_EXPIRY_DURATION
-
+        print("submit to queue %d" % os.getpid())
         self.submit_queue.put(message)
+        print("submitted to queue")
         return ""
     
     def sync_status(self):
@@ -82,54 +82,77 @@ class SyncClient:
 
 class SyncManager(multiprocessing.Process):
 
-    def __init__(self, submit_queue, stats_queue, stop_event):
+    def __init__(self, submit_queue, stats_queue, stop_event, db_file):
         multiprocessing.Process.__init__(self)
         self.submit_queue = submit_queue
         self.stats_queue = stats_queue
         self.stop_event = stop_event
-        
-        self.worker = SyncWorker()
-        self.worker.start()
+        self.db_file = db_file
+        self.worker = None
+
+        print("sync manager init %d, %d" % (os.getpid(), get_ident()))
+        log("sync manager init %d, %d" % (os.getpid(), get_ident()))
 
     def run(self):
 
-        print("manager process started")
-        while not self.stop_event.is_set():
-            self.worker.process_log_messages()
-            try:
-                job = self.submit_queue.get()
-                self.worker.add_job(job)
-            except Empty:
-                print("sleep")
-                sleep(1)
-                continue
+        self.worker = SyncWorker(self.db_file)
+        self.worker.start()
 
-        self.worker.exit()
-        print("manager process exited")
+        print("sync manager run %d, %d" % (os.getpid(), get_ident()))
+        log("sync manager run %d, %d" % (os.getpid(), get_ident()))
+
+        try:
+            log("manager process started")
+            while not self.stop_event.is_set():
+                self.worker.process_log_messages()
+                try:
+                    job = self.submit_queue.get_nowait()
+                    #log(str(job))
+                    log("queue put(): job queue id: %d, pid: %d" % (id(self.worker.job_queue), os.getpid()))
+                    self.worker.job_queue.put(job)
+                    log("added job %d" % self.worker.job_queue.qsize())
+                except Empty:
+                    log("manager sleep")
+                    # TODO: Reduce a bit later
+                    sleep(1)
+                    continue
+
+            log("manager loop exited")
+            self.worker.exit()
+            self.worker.join()
+            log("manager process exited")
+        except Exception:
+            traceback_str = traceback.format_exc()
+            log("manager fail")
+            log(traceback_str)
+
+        print("sync manager run exit %d, %d" % (os.getpid(), get_ident()))
+        log("sync manager run exit %d, %d" % (os.getpid(), get_ident()))
+            
 
 class SyncWorker(Thread):
     
-    def __init__(self):
+    def __init__(self, db_file):
         Thread.__init__(self)
         self.job_queue = Queue()
-        self.lock = Lock()
         self.job_data = {}
         self.current_slug = None
         self._exit = False
+        self.db_file = db_file
+        print("sync worker init %d, %d" % (os.getpid(), get_ident()))
+        log("sync worker init %d, %d" % (os.getpid(), get_ident()))
         
     def exit(self):
         self._exit = True
         
-    def add_job(self, job):
-        self.job_queue.put(job)
-
     def sync_service(self, submit_msg):
-        
-        slug = submit_msg.service.slug
-        url = urlparse(submit_msg.service.url)
+        print("sync service %d, %d" % (os.getpid(), get_ident()))
+        log("sync service %d, %d" % (os.getpid(), get_ident()))
+
+        slug = submit_msg.service["slug"]
+        url = urlparse(submit_msg.service["url"])
         conf, _ = load_credentials(submit_msg.user_id)
 
-        self.lock.acquire()
         self.job_data[slug] = { "stats": None,
                                 "logs": None,
                                 "type": submit_msg.type,
@@ -138,18 +161,17 @@ class SyncWorker(Thread):
                                 "complete": False
                               }        
         self.current_slug = slug
-        self.lock.release()
 
-        from lb_local.server import app
-        with app.app_context():
-            db = SubsonicDatabase(current_app.config["DATABASE_FILE"], Config(**conf), quiet=False)
+        db = SubsonicDatabase(self.db_file, Config(**conf), quiet=False)
         try:
             db.open()
             
-            if submit_msg.type == "full":
+            if submit_msg["type"] == "full":
+                log("call sync!")
                 db.sync(slug)
 
             lookup = MetadataLookup(False)
+            log("call lookup!")
             lookup.lookup(slug)
 
         except Exception as err:
@@ -159,22 +181,20 @@ class SyncWorker(Thread):
                 except Empty:
                     break
             traceback_str = traceback.format_exc()
-            print("sync failed")
-            print(traceback_str)
-            self.lock.acquire()
+            log("sync failed")
+            log(traceback_str)
             self.job_data[slug]["error"] = "An error occurred when syncing the collection:\n" + str(traceback_str) + "\n"
-            self.lock.release()
+            
+        log("sync complete")
 
-        self.lock.acquire()
         self.job_data[slug]["complete"] = True
         self.current_slug = None
-        self.lock.release()
         
     def process_log_messages(self):
         """ Read log messages, process them as needed, then return them """
-        self.lock.acquire()
+        
+        
         slug = self.current_slug
-        self.lock.release()
         
         if slug is None:
             return
@@ -187,12 +207,10 @@ class SyncWorker(Thread):
                     try:
                         stats = json.loads(rec.message)
                     except Exception as err:
-                        print(rec.message)
-                        print(err)
+                        log(rec.message)
+                        log(err)
                         continue
-                    self.lock.acquire()
                     self.job_data[slug]["stats"] = stats
-                    self.lock.release()
                     continue
                     
                 logs += rec.message + "\n"
@@ -201,13 +219,9 @@ class SyncWorker(Thread):
                 break
             
         try:
-            self.lock.acquire()
             complete = self.job_data[service]["complete"]
-            self.lock.release()
         except KeyError:
-            self.lock.acquire()
             stats = self.job_data[service]["stats"]
-            self.lock.release()
             return StatusMessage(complete=False, stats=self.job_data[service]["stats"])
 
         if not loaded_rows and complete:
@@ -215,25 +229,32 @@ class SyncWorker(Thread):
 
         self.job_data[service]["sync_log"] = logs
         
-        self.lock.acquire()
         stats = self.job_data[service]["stats"]
-        self.lock.release()
+
         return StatusMessage(complete=complete, stats=self.job_data[service]["stats"], logs=logs)
 
     def run(self):
 
-        print("sync thread started")
-        while not self._exit:
-            try:
-                submit_mesg = self.job_queue.get()
-            except Empty:
-                sleep(.1)
-                continue
+        print("sync worker run %d, %d" % (os.getpid(), get_ident()))
+        log("sync worker run %d, %d" % (os.getpid(), get_ident()))
+        try:
+            while not self._exit:
+                try:
+                    log("get_nowait() queue id %d pid: %d size: %d" % (id(self.job_queue), os.getpid(), self.job_queue.qsize()))
+                    submit_msg = self.job_queue.get_nowait()
+                    log("got message!")
+                except Empty:
+                    log("worker sleep")
+                    # TODO: Speed this up
+                    sleep(1)
+                    continue
 
-            from lb_local.server import app
-            with app.app_context():
-                print("start sync job")
+                log("start sync job")
                 self.sync_service(submit_msg)
-                print("finish sync job")
-
-        print("sync thread exited")
+                log("finish sync job")
+        except Exception:
+            traceback_str = traceback.format_exc()
+            log("manager fail")
+            log(traceback_str)
+        print("sync worker run exit %d, %d" % (os.getpid(), get_ident()))
+        log("sync worker run exit %d, %d" % (os.getpid(), get_ident()))

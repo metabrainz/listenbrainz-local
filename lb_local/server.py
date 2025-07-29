@@ -1,9 +1,10 @@
-import atexit
 import logging
 import os
 import sys
+from time import sleep
 from datetime import datetime
 import multiprocessing
+from threading import get_ident
 import signal
 
 import peewee
@@ -34,6 +35,7 @@ from troi.content_resolver.subsonic import SubsonicDatabase
 # Add column showing which service tracks are from
 # sync errors cause jobs to be stuck and not removed from queue.
 
+print("server starting pid %d" % os.getpid())
 STATIC_PATH = "/static"
 STATIC_FOLDER = "static"
 TEMPLATE_FOLDER = "templates"
@@ -44,27 +46,28 @@ env_keys = ["DATABASE_FILE", "SECRET_KEY", "DOMAIN", "PORT", "AUTHORIZED_USERS",
 submit_queue = multiprocessing.Queue()
 stats_queue = multiprocessing.Queue()
 stop_event = multiprocessing.Event()
-sync_manager = SyncManager(submit_queue, stats_queue, stop_event)
-sync_manager.start()
+sync_manager = None
 
 class Config:
     def __init__(self, **entries):
         self.__dict__.update(entries)
 
+
 def signal_handler(signum, frame):
-    print("signal handler called")
     if sync_manager is not None:
         stop_event.set()
-        print("waiting to join proc")
         sync_manager.join()
-#        sync_manager = None
+        os._exit(0)
     raise KeyboardInterrupt
-    
+
 signal.signal(signal.SIGTERM, signal_handler)
 signal.signal(signal.SIGINT, signal_handler)
 
 def create_app():
-
+    
+    global sync_manager
+    
+    print("create_app() %d, %d" % (os.getpid(), get_ident()))
     app = Flask(__name__, static_url_path=STATIC_PATH, static_folder=STATIC_FOLDER, template_folder=TEMPLATE_FOLDER)
 
     # Load the .env file config    
@@ -112,6 +115,11 @@ def create_app():
     admin.add_view(ServiceCredentialModelView(Credential, "Credential"))
 
     login_manager.init_app(app)
+
+    if not app.debug or os.environ.get('WERKZEUG_RUN_MAIN'):
+        print("sync manager started from create_app")
+        sync_manager = SyncManager(submit_queue, stats_queue, stop_event, db_file)
+        sync_manager.start()
 
     app.config["STATS_QUEUE"] = stats_queue
     app.config["SUBMIT_QUEUE"] = submit_queue
