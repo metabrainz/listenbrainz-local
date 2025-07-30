@@ -47,6 +47,7 @@ submit_queue = multiprocessing.Queue()
 stats_queue = multiprocessing.Queue()
 stop_event = multiprocessing.Event()
 sync_manager = None
+manager_owner_tid = None
 
 class Config:
     def __init__(self, **entries):
@@ -54,7 +55,8 @@ class Config:
 
 
 def signal_handler(signum, frame):
-    if sync_manager is not None:
+    if sync_manager is not None and get_ident() == manager_owner_tid:
+        print("join() %d, %d" % (os.getpid(), get_ident()))
         stop_event.set()
         sync_manager.join()
         os._exit(0)
@@ -66,6 +68,7 @@ signal.signal(signal.SIGINT, signal_handler)
 def create_app():
     
     global sync_manager
+    global manager_owner_pid
     
     print("create_app() %d, %d" % (os.getpid(), get_ident()))
     app = Flask(__name__, static_url_path=STATIC_PATH, static_folder=STATIC_FOLDER, template_folder=TEMPLATE_FOLDER)
@@ -118,6 +121,7 @@ def create_app():
 
     if not app.debug or os.environ.get('WERKZEUG_RUN_MAIN'):
         print("sync manager started from create_app")
+        manager_owner_tid = get_ident()
         sync_manager = SyncManager(submit_queue, stats_queue, stop_event, db_file)
         sync_manager.start()
 

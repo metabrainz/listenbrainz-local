@@ -20,7 +20,7 @@ messages %}
                 hx-target="#form-stats"
                 hx-swap="innerHTML"
                 hx-on--before-request="document.getElementById('sync-form').querySelectorAll('button[type=\'submit\']').forEach(btn => btn.disabled = true);"
-                {% if not completed %}
+                {% if not complete %}
                     disabled
                 {% endif %}
             >
@@ -35,7 +35,7 @@ messages %}
                 hx-target="#form-stats"
                 hx-swap="innerHTML"
                 hx-on--before-request="document.getElementById('sync-form').querySelectorAll('button[type=\'submit\']').forEach(btn => btn.disabled = true);"
-                {% if not completed %}
+                {% if not complete %}
                     disabled
                 {% endif %}
             >

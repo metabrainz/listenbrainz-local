@@ -1,5 +1,5 @@
 <table class="w-100"
-    {% if not completed %}
+    {% if not complete %}
         hx-trigger="every 2s"
         hx-get="/service/{{ slug }}/sync/log" 
         hx-swap="innerHTML"

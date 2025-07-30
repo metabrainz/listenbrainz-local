@@ -12,17 +12,19 @@ from lb_local.model.service import Service
 
 credential_bp = Blueprint("credential_bp", __name__)
 
-def load_credentials(user_id):
+def load_credentials(user_id, credentials=None):
 
     msg = ""
-    credentials = Credential.select().where(Credential.owner == user_id)
-    if not credentials:
-        credentials = Credential.select().where(Credential.shared == True)
-        if credentials:
-            msg = """You are using a shared credential from another user. You can listen to music, but
-                     not save any playlists. To be able to save playlist, enter your own credential."""
-        else:
-            msg = "There are no credentials available. Please add your own credential."
+    
+    if credentials is None:
+        credentials = Credential.select().where(Credential.owner == user_id)
+        if not credentials:
+            credentials = Credential.select().where(Credential.shared == True)
+            if credentials:
+                msg = """You are using a shared credential from another user. You can listen to music, but
+                         not save any playlists. To be able to save playlist, enter your own credential."""
+            else:
+                msg = "There are no credentials available. Please add your own credential."
 
     config = {}
     service_count = 0

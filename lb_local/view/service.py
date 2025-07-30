@@ -144,7 +144,7 @@ def service_sync(slug):
     return render_template("service-sync.html",
                            page="service",
                            slug=slug,
-                           completed=(current_status and current.status.complete) or True)
+                           complete=(current_status and current.status.complete) or True)
 
 @service_bp.route("/<slug>/sync/start", methods=["POST"])
 @service_bp.route("/<slug>/sync/start/metadata-only", methods=["POST"])
@@ -153,7 +153,10 @@ def service_sync_start(slug):
     if not current_user.is_service_user and not current_user.is_admin:
         raise NotFound
     
-    metadata_only = request.path.endswith("metadata-only")
+    if request.path.endswith("metadata-only"):
+        type = "metadata_only"
+    else:
+        type = "full"
 
     service = Service.get(Service.slug == slug)
     if current_user.user_id != service.owner.user_id:
@@ -161,7 +164,11 @@ def service_sync_start(slug):
     credential = Credential.get(Credential.owner == current_user.user_id and Credential.service == service.id)
     
     expire_at = monotonic() + LOG_EXPIRY_DURATION
-    submit_msg = SubmitMessage(service=model_to_dict(service), credential=model_to_dict(credential), user_id=current_user.user_id, type="full", expire_at=expire_at)
+    submit_msg = SubmitMessage(service=model_to_dict(service),
+                               credential=model_to_dict(credential),
+                               user_id=current_user.user_id,
+                               type=type,
+                               expire_at=expire_at)
     client = SyncClient(current_app.config["SUBMIT_QUEUE"], current_app.config["STATS_QUEUE"])
     msg = client.request_sync(submit_msg)
     if msg:
@@ -183,23 +190,17 @@ def service_sync_log(slug):
     current_status = client.sync_status()
     
     if current_status is None:
-        print(" no stats")
-        return render_template("component/sync-status.html",
-                               stats=[],
-                               completed=True,
-                               slug=slug)
-    
-    print(current_status.logs)
-    print(current_status.stats)
-    print(current_status.completed)
-    
+        return "", 204
+
     headers = {} 
-    if current_status.completed:
+    if current_status.complete:
+        print("Complete!")
         headers['HX-Trigger-After-Swap'] = 'sync-complete'
 
     response = Response(render_template("component/sync-status.html",
                                         stats=current_status.stats, 
-                                        completed=current_status.completed, slug=slug),
+                                        complete=current_status.complete,
+                                        slug=slug),
                         headers=headers)
     return response
 
