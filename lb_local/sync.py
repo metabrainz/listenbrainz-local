@@ -6,7 +6,7 @@ import json
 import logging
 from logging.handlers import QueueHandler
 import multiprocessing
-from queue import Queue, Empty
+from queue import Queue, Empty, Full
 from time import monotonic, sleep
 from threading import Thread, get_ident, Lock
 import traceback
@@ -46,8 +46,9 @@ StatusMessage = namedtuple("StatusMessage", ["complete",
                                              "logs"])
 
 class SyncClient:
-    def __init__(self, submit_queue, stats_queue):
+    def __init__(self, submit_queue, stats_req_queue, stats_queue):
         self.submit_queue = submit_queue
+        self.stats_req_queue = stats_req_queue
         self.stats_queue = stats_queue
         
 
@@ -67,27 +68,24 @@ class SyncClient:
         self.submit_queue.put(message)
         return ""
     
-    def sync_status(self):
-        
-        # Fetch the latest stats. Keep only the last one
-        status = None
-        while True:
-            try:
-                status = self.stats_queue.get_nowait()
-                if status.complete or status.error_msg:
-                    print("Got complete!")
-                    break
-            except Empty:
-                break
-            
-        return status
+    def sync_status(self, slug):
+        self.stats_req_queue.put(slug)
+        try:
+            print("fetch stats from queue %d %d" % (self.stats_queue.qsize(), id(self.stats_queue)))
+            s = self.stats_queue.get(True, 3.0)
+            print("got stats from queue", s)
+            return s
+        except Empty:
+            print("sync status get timed out")
+            return None
 
 
 class SyncManager(multiprocessing.Process):
 
-    def __init__(self, submit_queue, stats_queue, stop_event, db_file):
+    def __init__(self, submit_queue, stats_req_queue, stats_queue, stop_event, db_file):
         multiprocessing.Process.__init__(self)
         self.submit_queue = submit_queue
+        self.stats_req_queue = stats_req_queue
         self.stats_queue = stats_queue
         self.stop_event = stop_event
         self.db_file = db_file
@@ -98,17 +96,35 @@ class SyncManager(multiprocessing.Process):
         self.worker = SyncWorker(self.db_file)
         self.worker.start()
 
+        log("manager starting")
         try:
             while not self.stop_event.is_set():
-                stats = self.worker.process_log_messages()
-                if stats is not None:
-                    self.stats_queue.put(stats)
+                self.worker.process_log_messages()
                 try:
                     job = self.submit_queue.get_nowait()
                     self.worker.job_queue.put(job)
                 except Empty:
-                    sleep(1)
-                    continue
+                    pass
+
+                try:
+                    slug = self.stats_req_queue.get_nowait()
+                    log("got request for %s" % slug)
+                    while True:
+                        try:
+                            s = self.worker.current_status(slug)
+                            log("got stats from worker " + str(s))
+                            self.stats_queue.put(s)
+#                            self.stats_queue.put(self.worker.current_status(slug))
+                            log("put stats into queue %d %d" % (self.stats_queue.qsize(), id(self.stats_queue)))
+                            break
+                        except Full:
+                            log("queue full")
+                            sleep(1)
+                            continue
+                except Empty:
+                    pass
+
+                sleep(1)
 
             self.worker.exit()
             self.worker.join()
@@ -158,7 +174,8 @@ class SyncWorker(Thread):
                                 "type": submit_msg.type,
                                 "user_id": submit_msg.user_id,
                                 "expire_at": submit_msg.expire_at,
-                                "complete": False
+                                "complete": False,
+                                "error_msg": ""
                               }        
         self.lock.release()
         self.current_slug = slug
@@ -216,6 +233,7 @@ class SyncWorker(Thread):
                         log(err)
                         continue
 
+                    log("received stats " + str(stats))
                     self.lock.acquire()
                     self.job_data[slug]["stats"] = stats
                     self.lock.release()
@@ -229,25 +247,27 @@ class SyncWorker(Thread):
                 break
             
         self.lock.acquire()
-        self.job_data[slug]["sync_log"] = logs
-        stats = self.job_data[slug]["stats"]
+        self.job_data[slug]["logs"] = logs
+        self.lock.release()
+        
+    def current_status(self, slug):
+
+        self.lock.acquire()
         try:
-            complete = self.job_data[slug]["complete"]
+            job = self.job_data[slug]
         except KeyError:
-            return StatusMessage(complete=False, stats=stats, logs=logs, error_msg=error_msg)
+            return None
         finally:
             self.lock.release()
 
-        if complete:
-            print("sync worker: got complete")
-
-        if not loaded_rows and complete:
-            return StatusMessage(complete=True, stats=stats, logs=logs, error_msg=error_msg)
-
-        return StatusMessage(complete=complete, stats=stats, logs=logs, error_msg=error_msg)
+        return StatusMessage(complete=job["complete"],
+                             stats=job["stats"],
+                             logs=job["logs"],
+                             error_msg=job["error_msg"])
 
     def run(self):
 
+        log("worker starting")
         try:
             while not self._exit:
                 try:

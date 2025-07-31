@@ -44,6 +44,7 @@ env_keys = ["DATABASE_FILE", "SECRET_KEY", "DOMAIN", "PORT", "AUTHORIZED_USERS",
             "MUSICBRAINZ_CLIENT_ID", "MUSICBRAINZ_CLIENT_SECRET"]
 
 submit_queue = multiprocessing.Queue()
+stats_req_queue = multiprocessing.Queue()
 stats_queue = multiprocessing.Queue()
 stop_event = multiprocessing.Event()
 sync_manager = None
@@ -122,10 +123,11 @@ def create_app():
     if not app.debug or os.environ.get('WERKZEUG_RUN_MAIN'):
         print("sync manager started from create_app")
         manager_owner_tid = get_ident()
-        sync_manager = SyncManager(submit_queue, stats_queue, stop_event, db_file)
+        sync_manager = SyncManager(submit_queue, stats_req_queue, stats_queue, stop_event, db_file)
         sync_manager.start()
 
     app.config["STATS_QUEUE"] = stats_queue
+    app.config["STATS_REQ_QUEUE"] = stats_req_queue
     app.config["SUBMIT_QUEUE"] = submit_queue
     app.config["STOP_EVENT"] = stop_event
         

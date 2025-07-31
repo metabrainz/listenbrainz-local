@@ -139,12 +139,14 @@ def service_sync(slug):
     if current_user.user_id != service.owner.user_id:
         raise NotFound
         
-    client = SyncClient(current_app.config["SUBMIT_QUEUE"], current_app.config["STATS_QUEUE"])
-    current_status = client.sync_status()
+    client = SyncClient(current_app.config["SUBMIT_QUEUE"],
+                        current_app.config["STATS_REQ_QUEUE"],
+                        current_app.config["STATS_QUEUE"])
+    current_status = client.sync_status(slug)
     return render_template("service-sync.html",
                            page="service",
                            slug=slug,
-                           complete=(current_status and current.status.complete) or True)
+                           complete=(current_status and current_status.complete) or True)
 
 @service_bp.route("/<slug>/sync/start", methods=["POST"])
 @service_bp.route("/<slug>/sync/start/metadata-only", methods=["POST"])
@@ -169,7 +171,10 @@ def service_sync_start(slug):
                                user_id=current_user.user_id,
                                type=type,
                                expire_at=expire_at)
-    client = SyncClient(current_app.config["SUBMIT_QUEUE"], current_app.config["STATS_QUEUE"])
+
+    client = SyncClient(current_app.config["SUBMIT_QUEUE"],
+                        current_app.config["STATS_REQ_QUEUE"],
+                        current_app.config["STATS_QUEUE"])
     msg = client.request_sync(submit_msg)
     if msg:
         return render_template("component/sync-status.html", logs=msg, update=True, slug=slug)
@@ -186,15 +191,16 @@ def service_sync_log(slug):
     if current_user.user_id != service.owner.user_id:
         raise NotFound
 
-    client = SyncClient(current_app.config["SUBMIT_QUEUE"], current_app.config["STATS_QUEUE"])
-    current_status = client.sync_status()
-    
+    client = SyncClient(current_app.config["SUBMIT_QUEUE"],
+                        current_app.config["STATS_REQ_QUEUE"],
+                        current_app.config["STATS_QUEUE"])
+    current_status = client.sync_status(slug)
+    print("got status: ", current_status)
     if current_status is None:
         return "", 204
-
+    
     headers = {} 
     if current_status.complete:
-        print("Complete!")
         headers['HX-Trigger-After-Swap'] = 'sync-complete'
 
     response = Response(render_template("component/sync-status.html",
@@ -214,12 +220,15 @@ def service_sync_full_log(slug):
     if current_user.user_id != service.owner.user_id:
         raise NotFound
 
-    client = SyncClient(current_app.config["SUBMIT_QUEUE"], current_app.config["STATS_QUEUE"])
-    current_status = client.sync_status()
-    
+    client = SyncClient(current_app.config["SUBMIT_QUEUE"],
+                        current_app.config["STATS_REQ_QUEUE"],
+                        current_app.config["STATS_QUEUE"])
+    current_status = client.sync_status(slug)
     if current_status.logs is None:
-        current_status.logs = "No log file available."
+        logs = "No log file available."
+    else:
+        logs = current_status.logs
     
-    response = make_response(current_status.logs, 200)
+    response = make_response(logs, 200)
     response.mimetype = "text/plain"
     return response
