@@ -108,17 +108,12 @@ class SyncManager(multiprocessing.Process):
 
                 try:
                     slug = self.stats_req_queue.get_nowait()
-                    log("got request for %s" % slug)
                     while True:
                         try:
                             s = self.worker.current_status(slug)
-                            log("got stats from worker " + str(s))
-                            self.stats_queue.put(s)
-#                            self.stats_queue.put(self.worker.current_status(slug))
-                            log("put stats into queue %d %d" % (self.stats_queue.qsize(), id(self.stats_queue)))
+                            self.stats_queue.put(self.worker.current_status(slug))
                             break
                         except Full:
-                            log("queue full")
                             sleep(1)
                             continue
                 except Empty:
@@ -202,10 +197,10 @@ class SyncWorker(Thread):
             self.job_data[slug]["error"] = "An error occurred when syncing the collection:\n" + str(traceback_str) + "\n"
             self.lock.release()
             
+        self.worker.process_log_messages()
         self.lock.acquire()
         self.job_data[slug]["complete"] = True
         self.lock.release()
-        log("JOB COMPLETE")
         self.current_slug = None
         
     def process_log_messages(self):

@@ -33,7 +33,10 @@ def service_index():
 def service_list():
     if not current_user.is_service_user and not current_user.is_admin:
         raise NotFound
-    services = Service.select().where(Service.owner == current_user)
+    if current_user.is_admin:
+        services = Service.select()
+    else:
+        services = Service.select().where(Service.owner == current_user)
     for service in services:
         if service.last_synched:
             sync_date = datetime.datetime.fromtimestamp(service.last_synched)
@@ -57,7 +60,7 @@ def service_edit(slug):
     if not current_user.is_service_user and not current_user.is_admin:
         raise NotFound
     service = Service.get(Service.slug == slug)
-    if service.owner.user_id != current_user.user_id:
+    if not current_user.is_admin and service.owner.user_id != current_user.user_id:
         raise Forbidden
     return render_template("service-add.html", mode="Edit", url=service.url, slug=slug)
 
@@ -69,7 +72,7 @@ def service_delete(slug):
         raise NotFound
     try:
         service = Service.get(Service.slug == slug)
-        if service.owner.user_id != current_user.user_id:
+        if not current_user.is_admin and service.owner.user_id != current_user.user_id:
             raise Forbidden
         service.delete_instance()
         flash("Service deleted")
@@ -136,7 +139,7 @@ def service_sync(slug):
         raise NotFound
 
     service = Service.get(Service.slug == slug)
-    if current_user.user_id != service.owner.user_id:
+    if not current_user.is_admin and current_user.user_id != service.owner.user_id:
         raise NotFound
         
     client = SyncClient(current_app.config["SUBMIT_QUEUE"],
@@ -161,7 +164,7 @@ def service_sync_start(slug):
         type = "full"
 
     service = Service.get(Service.slug == slug)
-    if current_user.user_id != service.owner.user_id:
+    if not current_user.is_admin and current_user.user_id != service.owner.user_id:
         raise NotFound
     credential = Credential.get(Credential.owner == current_user.user_id and Credential.service == service.id)
     
@@ -188,7 +191,7 @@ def service_sync_log(slug):
         raise NotFound
     
     service = Service.get(Service.slug == slug)
-    if current_user.user_id != service.owner.user_id:
+    if not current_user.is_admin and current_user.user_id != service.owner.user_id:
         raise NotFound
 
     client = SyncClient(current_app.config["SUBMIT_QUEUE"],
@@ -217,7 +220,7 @@ def service_sync_full_log(slug):
         raise NotFound
 
     service = Service.get(Service.slug == slug)
-    if current_user.user_id != service.owner.user_id:
+    if not current_user.is_admin and current_user.user_id != service.owner.user_id:
         raise NotFound
 
     client = SyncClient(current_app.config["SUBMIT_QUEUE"],

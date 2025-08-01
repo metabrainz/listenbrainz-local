@@ -51,6 +51,7 @@ class User(Model, UserMixin):
 
     @property
     def is_admin(self):
+        print(self.name in self.admin_users)
         return self.name in self.admin_users
 
     @property
