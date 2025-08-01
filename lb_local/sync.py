@@ -20,6 +20,10 @@ from troi.content_resolver.metadata_lookup import MetadataLookup
 from lb_local.view.credential import load_credentials
 from lb_local.model.service import Service
 
+# TODO:
+# - Progress bar 100%
+# - Button states when reloading an active scan
+
 APP_LOG_LEVEL_NUM = 19
 
 def log(msg):
@@ -96,7 +100,6 @@ class SyncManager(multiprocessing.Process):
         self.worker = SyncWorker(self.db_file)
         self.worker.start()
 
-        log("manager starting")
         try:
             while not self.stop_event.is_set():
                 self.worker.process_log_messages()
@@ -197,7 +200,7 @@ class SyncWorker(Thread):
             self.job_data[slug]["error"] = "An error occurred when syncing the collection:\n" + str(traceback_str) + "\n"
             self.lock.release()
             
-        self.worker.process_log_messages()
+        self.process_log_messages()
         self.lock.acquire()
         self.job_data[slug]["complete"] = True
         self.lock.release()
@@ -228,7 +231,6 @@ class SyncWorker(Thread):
                         log(err)
                         continue
 
-                    log("received stats " + str(stats))
                     self.lock.acquire()
                     self.job_data[slug]["stats"] = stats
                     self.lock.release()
@@ -262,7 +264,6 @@ class SyncWorker(Thread):
 
     def run(self):
 
-        log("worker starting")
         try:
             while not self._exit:
                 try:
@@ -275,5 +276,4 @@ class SyncWorker(Thread):
                 self.sync_service(submit_msg)
         except Exception:
             traceback_str = traceback.format_exc()
-            log("worker fail")
             log(traceback_str)

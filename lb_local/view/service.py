@@ -166,7 +166,16 @@ def service_sync_start(slug):
     service = Service.get(Service.slug == slug)
     if not current_user.is_admin and current_user.user_id != service.owner.user_id:
         raise NotFound
-    credential = Credential.get(Credential.owner == current_user.user_id and Credential.service == service.id)
+
+    try: 
+        if current_user.is_admin: 
+            credential = Credential.get(Credential.owner == Credential.service.owner and Credential.service == service.id)
+        else:
+            credential = Credential.select().join(Service).where(
+                Credential.owner == Service.owner, Credential.service == service.id).get()
+    except peewee.DoesNotExist:
+        flash("There is no credential available for this service. Please add one.")
+        return redirect(url_for("service_bp.service_list"))
     
     expire_at = monotonic() + LOG_EXPIRY_DURATION
     submit_msg = SubmitMessage(service=model_to_dict(service),
