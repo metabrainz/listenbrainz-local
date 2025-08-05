@@ -17,7 +17,6 @@ def load_credentials(user_id, credentials=None):
     msg = ""
     
     if credentials is None:
-        print("credential is not provided")
         credentials = Credential.select().where((Credential.owner == user_id) | (Credential.shared == True))
         if not credentials:
             msg = "There are no credentials available. Please add your own credential."
@@ -44,7 +43,6 @@ def load_credentials(user_id, credentials=None):
             "token": token
         }
         service_count += 1
-        print(config)
 
     # This function could be called outside the app context, then don't update the session
     try:
