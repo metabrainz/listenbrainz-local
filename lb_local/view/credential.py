@@ -17,18 +17,15 @@ def load_credentials(user_id, credentials=None):
     msg = ""
     
     if credentials is None:
-        credentials = Credential.select().where(Credential.owner == user_id)
+        print("credential is not provided")
+        credentials = Credential.select().where((Credential.owner == user_id) | (Credential.shared == True))
         if not credentials:
-            credentials = Credential.select().where(Credential.shared == True)
-            if credentials:
-                msg = """You are using a shared credential from another user. You can listen to music, but
-                         not save any playlists. To be able to save playlist, enter your own credential."""
-            else:
-                msg = "There are no credentials available. Please add your own credential."
+            msg = "There are no credentials available. Please add your own credential."
 
     config = {}
     service_count = 0
     for credential in credentials:
+        print(credential)
         url = urlparse(credential.service.url)
         salt = str(uuid.uuid4())
         h = hashlib.new('md5')
@@ -48,6 +45,7 @@ def load_credentials(user_id, credentials=None):
             "token": token
         }
         service_count += 1
+        print(config)
 
     # This function could be called outside the app context, then don't update the session
     try:
