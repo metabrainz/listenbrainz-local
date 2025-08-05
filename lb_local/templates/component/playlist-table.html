@@ -2,6 +2,15 @@
     <div id="errors" style="margin-top: 1.5em" class="alert alert-warning" role="alert">
         {{ errors }}
     </div>
+    <div>
+        <p><em>No playlist was generated.</em></p>
+        <p>Some reasons could include:</p>
+        <ul>
+            <li>Your prompt was too specific and no recordings matched.</li>
+            <li>There is not enough metadata available about the music covered in the query.</li>
+            <li>The metadata for your collection has not been sync'ed.</li>
+        </ul>
+    </div>
 {% else %}
 {% include 'include/player.html' %}
 <div id="playback-errors" style="margin-top: 1.5em; display: none" class="alert alert-warning" role="alert">

@@ -25,7 +25,6 @@ def load_credentials(user_id, credentials=None):
     config = {}
     service_count = 0
     for credential in credentials:
-        print(credential)
         url = urlparse(credential.service.url)
         salt = str(uuid.uuid4())
         h = hashlib.new('md5')

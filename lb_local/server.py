@@ -35,7 +35,6 @@ from troi.content_resolver.subsonic import SubsonicDatabase
 # Add column showing which service tracks are from
 # sync errors cause jobs to be stuck and not removed from queue.
 
-print("server starting pid %d" % os.getpid())
 STATIC_PATH = "/static"
 STATIC_FOLDER = "static"
 TEMPLATE_FOLDER = "templates"
@@ -57,7 +56,6 @@ class Config:
 
 def signal_handler(signum, frame):
     if sync_manager is not None and get_ident() == manager_owner_tid:
-        print("join() %d, %d" % (os.getpid(), get_ident()))
         stop_event.set()
         sync_manager.join()
         os._exit(0)
@@ -71,7 +69,6 @@ def create_app():
     global sync_manager
     global manager_owner_pid
     
-    print("create_app() %d, %d" % (os.getpid(), get_ident()))
     app = Flask(__name__, static_url_path=STATIC_PATH, static_folder=STATIC_FOLDER, template_folder=TEMPLATE_FOLDER)
 
     # Load the .env file config    
@@ -121,7 +118,6 @@ def create_app():
     login_manager.init_app(app)
 
     if not app.debug or os.environ.get('WERKZEUG_RUN_MAIN'):
-        print("sync manager started from create_app")
         manager_owner_tid = get_ident()
         sync_manager = SyncManager(submit_queue, stats_req_queue, stats_queue, stop_event, db_file)
         sync_manager.start()

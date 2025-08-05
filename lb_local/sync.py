@@ -75,12 +75,9 @@ class SyncClient:
     def sync_status(self, slug):
         self.stats_req_queue.put(slug)
         try:
-            print("fetch stats from queue %d %d" % (self.stats_queue.qsize(), id(self.stats_queue)))
             s = self.stats_queue.get(True, 3.0)
-            print("got stats from queue", s)
             return s
         except Empty:
-            print("sync status get timed out")
             return None
 
 

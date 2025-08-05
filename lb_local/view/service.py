@@ -207,7 +207,6 @@ def service_sync_log(slug):
                         current_app.config["STATS_REQ_QUEUE"],
                         current_app.config["STATS_QUEUE"])
     current_status = client.sync_status(slug)
-    print("got status: ", current_status)
     if current_status is None:
         return "", 204
     

@@ -1,7 +1,7 @@
 {%- extends 'include/base.html' -%} {%- block title -%}services{% endblock %}
 {%- block content -%}
 
-<h2>Sync service</h2>
+<h2>Sync service <em>{{slug}}</em></h2>
 
 {% with messages = get_flashed_messages() %} {% if messages %} {% for message in
 messages %}
