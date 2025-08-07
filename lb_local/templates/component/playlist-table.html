@@ -16,6 +16,12 @@
 <div id="playback-errors" style="margin-top: 1.5em; display: none" class="alert alert-warning" role="alert">
 </div>
 <div id="save-playlist-div">
+    {% if num_services > 1 %}
+        <div class="alert alert-danger" role="alert" style="border-radius: 10px;">
+            The current playlist contains recordings from more than one service. Only
+            recordings from the selected service will be saved to the playlist.
+        </div>
+    {% endif %}
     <form hx-post="/playlist/create"
           hx-target="#save-result"
           hx-swap="outerHTML"
@@ -78,7 +84,7 @@
         <th>title</th>
         <th>release</th>
         <th>artist</th>
-        {% if show_service %}
+        {% if num_services > 1 %}
           <th>service</th>
         {% endif %}
     </thead>
@@ -110,7 +116,7 @@
                     {{ artist.join_phrase }}
                 {% endfor %}
             </td>
-            {% if 1 or show_service %}
+            {% if num_services > 1 %}
             <td>
                 {{ rec.listenbrainz.file_source }}
             </td>

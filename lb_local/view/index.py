@@ -84,19 +84,19 @@ def lb_radio_post():
         if current_user.user_id == services[service]["owner_id"]:
             avail_services.append(service)
 
-    sources = set() 
+    services = set() 
     for rec in recordings:
         try:
-            sources.add(rec.listenbrainz["file_source"])
+            services.add(rec.listenbrainz["file_source"])
         except KeyError:
-            sources.add("---")
-
+            services.add("???")
+            
     hints = r.patch.user_feedback()
     if not recordings:
         hints.append("No recorings were available for playback. Have you sync'ed your service?") 
 
     return render_template('component/playlist-table.html',
-                           show_file_source=len(sources),
+                           num_services=len(services),
                            recordings=recordings,
                            playlist_name=playlist.playlists[0].name,
                            playlist_desc=playlist.playlists[0].description,
@@ -119,6 +119,13 @@ def playlist_create():
     playlist_name = jdata["playlist-name"]
 
     playlist = _deserialize_from_jspf(json.loads(playlist_jspf))
+#    filtered = [ ]
+#    for rec in playlist.recordings:
+#        print(rec.listenbrainz)
+#        if rec.listenbrainz["file_source"] == service:
+#            filtered.append(rec)
+#    playlist.recording = filtered
+
     playlist_element = PlaylistElement()
     playlist_element.playlists = [playlist]
 
@@ -173,19 +180,20 @@ def weekly_jams_post():
         msgs = db.metadata_sanity_check(include_subsonic=True, return_as_array=True)
         return render_template('component/playlist-table.html', errors="\n".join(msgs))
 
-    sources = set() 
+    services = set() 
     for rec in recordings:
         try:
-            sources.add(rec.listenbrainz["file_source"])
+            services.add(rec.listenbrainz["file_source"])
         except KeyError:
-            sources.add("---")
+            services.add("???")
+            
 
     hints = r.patch.user_feedback()
     if not recordings:
         hints.append("No recordings were available for playback. Have you sync'ed your service?") 
 
     return render_template('component/playlist-table.html',
-                           show_file_source=len(sources),
+                           num_services=len(services),
                            recordings=recordings,
                            playlist_name=playlist.playlists[0].name,
                            playlist_desc=playlist.playlists[0].description,

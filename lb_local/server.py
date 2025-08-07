@@ -30,10 +30,11 @@ from troi.content_resolver.subsonic import SubsonicDatabase
 
 # TODO:
 # - New feature: Import and Resolve playlists
-# - Gonic not defined in configuration error when missing credential
 # Saving playlists from mixed services is undefined
-# Add column showing which service tracks are from
 # sync errors cause jobs to be stuck and not removed from queue.
+# Fix mobile views
+# Fix Auth
+# Support funkwhale
 
 STATIC_PATH = "/static"
 STATIC_FOLDER = "static"
