@@ -8,6 +8,10 @@ messages %}
 <div class="alert alert-warning" role="alert">{{ message }}</div>
 {% endfor %} {% endif %} {% endwith %}
 
+<div>
+    To use a service you need to add a service and a credential:
+</div>
+
 <div
     class="form-body"
     id="service-list"
@@ -20,6 +24,22 @@ messages %}
     <a href="/" class="btn btn-lg btn-secondary">Cancel</a>
     <a href="/service/add" class="btn btn-lg btn-primary">Add</a>
 </div>
+
+<h3>Credentials</h3>
+
+<div
+    class="form-body"
+    id="credential-list"
+    hx-get="/credential/list"
+    hx-trigger="load"
+    style="margin-top: 2em"
+></div>
+
+<div class="form-buttons-bottom text-end">
+    <a href="/" class="btn btn-lg btn-secondary">Cancel</a>
+    <a href="/credential/add" class="btn btn-lg btn-primary">Add</a>
+</div>
+
 
 {% endblock%} {% block scripts %}
 <script type="text/javascript"></script>

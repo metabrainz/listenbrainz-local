@@ -57,24 +57,18 @@ def load_credentials(user_id, credentials=None):
     return { "SUBSONIC_SERVERS" : config}, msg
 
 
-@credential_bp.route("/", methods=["GET"])
-@login_required
-def credential_index():
-    if not current_user.is_authorized:
-        raise NotFound
-    services = Service.select()
-    if not services:
-        flash("You need to add a service before adding a credential")
-    return render_template("credential.html", page="credential", services=services)
-
-
 @credential_bp.route("/list", methods=["GET"])
 @login_required
 def credential_list():
-    if not current_user.is_authenticated:
+    if not current_user.is_service_user and not current_user.is_admin:
         raise NotFound
+
+    if current_user.is_admin:
+        credentials = Credential.select()
+    else:
+        credentials = Credential.select().where(Credential.owner == current_user.user_id)
     return render_template("component/credential-list.html", 
-        credentials=Credential.select().where(Credential.owner == current_user.user_id))
+                           credentials=credentials)
 
 
 @credential_bp.route("/add", methods=["GET"])
@@ -82,7 +76,10 @@ def credential_list():
 def credential_add():
     if not current_user.is_authenticated:
         raise NotFound
-    services = Service.select()
+    if current_user.is_admin:
+        services = Service.select()
+    else:
+        services = Service.select().where(Service.owner == current_user)
     if not services:
         flash("You need to add a service before adding a credential")
     return render_template("credential-add.html", mode="Add", services=services)
@@ -94,7 +91,12 @@ def credential_edit(id):
     if not current_user.is_authenticated:
         raise NotFound
     credential = Credential.get(Credential.id == id)
-    services = Service.select()
+    if current_user != credential.owner:
+        raise NotFound
+    if current_user.is_admin:
+        services = Service.select()
+    else:
+        services = Service.select().where(Service.owner == current_user)
     return render_template("credential-add.html",
                            mode="Edit",
                            credential=credential,
@@ -108,6 +110,8 @@ def credential_delete(id):
         raise NotFound
     try:
         credential = Credential.get(Credential.id == id)
+        if current_user != credential.owner:
+            raise NotFound
         credential.delete_instance()
         flash("Credential deleted")
     except peewee.DoesNotExist:
@@ -125,6 +129,7 @@ def credential_delete(id):
 def credential_add_post():
     if not current_user.is_authenticated:
         raise NotFound
+
     _id = int(request.form.get("id", "-1"))
     service_id = request.form.get("service", None)
     user_name = request.form.get("user_name", "").strip()
@@ -171,4 +176,5 @@ def credential_add_post():
 
     load_credentials(current_user.user_id)
 
-    return redirect(url_for("credential_bp.credential_index"))
+    from lb_local.view.service import service_bp
+    return redirect(url_for("service_bp.service_index"))
