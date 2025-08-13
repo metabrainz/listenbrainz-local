@@ -19,15 +19,20 @@ jobs:
       with:
         python-version: "3.10"
 
-    - name: Install dependencies
+    - name: Install system dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y build-essential python3-dev
+        
+    - name: Install Python dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install -r requirements.txt
+        pip install -r requirements-ci.txt
         pip install -r requirements-test.txt
 
     - name: Run comprehensive test suite
       run: |
-        python run_tests.py --cov=lb_local --cov-report=html --cov-report=xml --cov-report=term-missing
+        python -m pytest --cov=lb_local --cov-report=xml --cov-report=html tests/
 
     - name: Run integration tests
       run: |

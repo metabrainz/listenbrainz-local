@@ -116,21 +116,6 @@ make test
 python run_tests.py
 ```
 
-### Test Categories
-- **Endpoint Tests**: All view and API endpoints
-- **Authentication Tests**: Login, permissions, and access control  
-- **Feature Tests**: LB Radio, Weekly Jams, Share functionality
-- **Integration Tests**: Service management, credential handling
-
-### Continuous Integration
-- ✅ **Automated testing** on all pull requests
-- ✅ **Multi-Python version** support (3.9, 3.10, 3.11)
-- ✅ **Code coverage** reporting with Codecov
-- ✅ **Code quality** checks (linting, formatting, security)
-- ✅ **Nightly comprehensive** test runs
-
-See [TESTING.md](TESTING.md) for detailed testing documentation.
-
 ## Contributing
 
 1. Fork the repository
@@ -143,7 +128,6 @@ See [TESTING.md](TESTING.md) for detailed testing documentation.
 8. Open a Pull Request
 
 All pull requests are automatically tested with our CI pipeline.
-
 
 # Screenshot
 

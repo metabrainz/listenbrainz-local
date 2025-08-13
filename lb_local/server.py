@@ -121,7 +121,7 @@ def create_app():
     if not app.debug or os.environ.get('WERKZEUG_RUN_MAIN'):
         manager_owner_tid = get_ident()
         sync_manager = SyncManager(submit_queue, stats_req_queue, stats_queue, stop_event, db_file)
-        sync_manager.start()
+        #sync_manager.start()
 
     app.config["STATS_QUEUE"] = stats_queue
     app.config["STATS_REQ_QUEUE"] = stats_req_queue

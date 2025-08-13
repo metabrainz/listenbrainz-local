@@ -24,17 +24,25 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install -r requirements.txt
+        pip install -r requirements-ci.txt
         pip install -r requirements-test.txt
         # Install additional tools for quality checks
         pip install black isort mypy bandit[toml] types-requests
 
     - name: Check code formatting with Black
       run: |
+<<<<<<< HEAD
+=======
+        pip install black
+>>>>>>> test-ci
         black --check --diff lb_local/ tests/ || echo "⚠️ Code formatting issues found (not blocking)"
 
     - name: Check import sorting with isort
       run: |
+<<<<<<< HEAD
+=======
+        pip install isort
+>>>>>>> test-ci
         isort --check-only --diff lb_local/ tests/ || echo "⚠️ Import sorting issues found (not blocking)"
 
     - name: Run security check with bandit
@@ -63,11 +71,15 @@ jobs:
 
     - name: Run fast test suite
       run: |
-        python run_tests.py --no-cov -x tests/test_framework_validation.py
+        python -m pytest tests/test_framework_validation.py -v --no-cov
 
     - name: Check test coverage requirements
       run: |
+<<<<<<< HEAD
         python run_tests.py --cov=lb_local --cov-report=term --cov-fail-under=70 || echo "⚠️ Coverage below 70% (advisory for now)"
+=======
+        python -m pytest --cov=lb_local --cov-report=term --cov-fail-under=70
+>>>>>>> test-ci
 
     - name: Validate documentation
       run: |
@@ -86,5 +98,5 @@ jobs:
     - name: Performance check
       run: |
         echo "⚡ Running performance checks..."
-        time python run_tests.py tests/test_framework_validation.py > /dev/null
+        time python -m pytest tests/test_framework_validation.py > /dev/null
         echo "✅ Test suite performance check completed"

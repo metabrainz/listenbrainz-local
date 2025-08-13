@@ -34,6 +34,7 @@ jobs:
     - name: Install system dependencies
       run: |
         sudo apt-get update
+<<<<<<< HEAD
         sudo apt-get install -y sqlite3 libsqlite3-dev
         # Install build dependencies for scientific packages
         sudo apt-get install -y build-essential python3-dev
@@ -49,6 +50,14 @@ jobs:
           # Fallback to main requirements
           pip install -r requirements.txt || echo "⚠️ Some main dependencies failed"
         fi
+=======
+        sudo apt-get install -y build-essential python3-dev
+        
+    - name: Install Python dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements-ci.txt
+>>>>>>> test-ci
         pip install -r requirements-test.txt
 
     - name: Lint with flake8
@@ -64,9 +73,9 @@ jobs:
         python -m pytest tests/test_framework_validation.py -v
       continue-on-error: false
 
-    - name: Run full test suite
+    - name: Run test suite with coverage
       run: |
-        python run_tests.py --cov=lb_local --cov-report=xml --cov-report=term-missing
+        python -m pytest --cov=lb_local --cov-report=xml --cov-report=html tests/
 
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v3
