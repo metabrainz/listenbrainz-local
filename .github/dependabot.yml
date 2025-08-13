@@ -1,0 +1,51 @@
+version: 2
+updates:
+  # Enable version updates for Python packages
+  - package-ecosystem: "pip"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+    open-pull-requests-limit: 10
+    reviewers:
+      - "metabrainz/listenbrainz-local-maintainers"
+    assignees:
+      - "metabrainz/listenbrainz-local-maintainers"
+    commit-message:
+      prefix: "deps"
+      prefix-development: "deps-dev"
+      include: "scope"
+    groups:
+      flask-ecosystem:
+        patterns:
+          - "flask*"
+          - "werkzeug"
+          - "jinja2"
+      testing-framework:
+        patterns:
+          - "pytest*"
+          - "coverage"
+      security-updates:
+        dependency-type: "direct"
+        update-types:
+          - "version-update:semver-patch"
+          - "version-update:semver-minor"
+
+  # Enable version updates for GitHub Actions
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "monthly"
+    commit-message:
+      prefix: "ci"
+      include: "scope"
+
+  # Enable version updates for Docker if we add Dockerfile dependencies
+  - package-ecosystem: "docker"
+    directory: "/"
+    schedule:
+      interval: "monthly"
+    commit-message:
+      prefix: "docker"
+      include: "scope"

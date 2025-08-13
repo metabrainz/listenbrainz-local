@@ -1,0 +1,10 @@
+# Testing dependencies
+pytest>=7.0.0
+pytest-flask>=1.2.0
+pytest-cov>=4.0.0
+pytest-mock>=3.10.0
+
+# Development dependencies  
+flake8>=6.0.0
+black>=22.0.0
+isort>=5.12.0

@@ -1,0 +1,90 @@
+name: PR Quality Check
+
+on:
+  pull_request:
+    branches: [ main, develop ]
+    types: [opened, synchronize, reopened, ready_for_review]
+
+jobs:
+  quality-check:
+    if: github.event.pull_request.draft == false
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0  # Full history for better analysis
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: "3.10"
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+        pip install -r requirements-test.txt
+
+    - name: Check code formatting with Black
+      run: |
+        black --check --diff lb_local/ tests/
+
+    - name: Check import sorting with isort
+      run: |
+        isort --check-only --diff lb_local/ tests/
+
+    - name: Run security check with bandit
+      run: |
+        pip install bandit[toml]
+        bandit -r lb_local/ -f json -o bandit-report.json || true
+
+    - name: Run type checking with mypy
+      run: |
+        pip install mypy types-requests
+        mypy lb_local/ --ignore-missing-imports --no-strict-optional || true
+
+    - name: Check for common issues
+      run: |
+        echo "🔍 Checking for common issues..."
+        
+        # Check for TODO/FIXME comments
+        echo "📝 TODO/FIXME comments found:"
+        grep -r "TODO\|FIXME" lb_local/ tests/ || echo "None found"
+        
+        # Check for print statements (should use logging)
+        echo "🖨️  Print statements found (consider using logging):"
+        grep -r "print(" lb_local/ || echo "None found"
+        
+        # Check for hardcoded secrets/passwords
+        echo "🔐 Checking for potential hardcoded secrets:"
+        grep -ri "password\|secret\|key" lb_local/ --include="*.py" | grep -v "# noqa" || echo "None found"
+
+    - name: Run fast test suite
+      run: |
+        python run_tests.py --no-cov -x tests/test_framework_validation.py
+
+    - name: Check test coverage requirements
+      run: |
+        python run_tests.py --cov=lb_local --cov-report=term --cov-fail-under=70
+
+    - name: Validate documentation
+      run: |
+        echo "📚 Checking documentation completeness..."
+        
+        # Check if new endpoints have documentation
+        if git diff --name-only origin/main...HEAD | grep -q "lb_local/view/"; then
+          echo "✅ View files changed - ensure endpoints are documented in TESTING.md"
+        fi
+        
+        # Check for README updates if significant changes
+        if [[ $(git diff --stat origin/main...HEAD | tail -n1 | grep -o '[0-9]\+' | head -n1) -gt 50 ]]; then
+          echo "📝 Large changeset detected - consider updating README.md"
+        fi
+
+    - name: Performance check
+      run: |
+        echo "⚡ Running performance checks..."
+        time python run_tests.py tests/test_framework_validation.py > /dev/null
+        echo "✅ Test suite performance check completed"

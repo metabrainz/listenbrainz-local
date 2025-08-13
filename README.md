@@ -1,5 +1,9 @@
 # listenbrainz-local
 
+[![CI Tests](https://github.com/metabrainz/listenbrainz-local/actions/workflows/ci.yml/badge.svg)](https://github.com/metabrainz/listenbrainz-local/actions/workflows/ci.yml)
+[![codecov](https://codecov.io/gh/metabrainz/listenbrainz-local/branch/main/graph/badge.svg)](https://codecov.io/gh/metabrainz/listenbrainz-local)
+[![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
+
 ListenBrainz local brings recommendation features to your local Subsonic hosted music collection. Many subsonic projects
 lack recommendations or good playlisting tools and this project aims to create another layer on top of these projects to show
 what can actually be done when you have lots of good music metadata. 
@@ -96,6 +100,49 @@ pip install -r requirements.txt
 ```
 
 The app should then be available at the URL configured in .env
+
+## Testing
+
+ListenBrainz Local has a comprehensive test suite covering all endpoints and functionality.
+
+### Quick Start
+```bash
+# Install test dependencies
+pip install -r requirements-test.txt
+
+# Run all tests
+make test
+# or
+python run_tests.py
+```
+
+### Test Categories
+- **Endpoint Tests**: All view and API endpoints
+- **Authentication Tests**: Login, permissions, and access control  
+- **Feature Tests**: LB Radio, Weekly Jams, Share functionality
+- **Integration Tests**: Service management, credential handling
+
+### Continuous Integration
+- ✅ **Automated testing** on all pull requests
+- ✅ **Multi-Python version** support (3.9, 3.10, 3.11)
+- ✅ **Code coverage** reporting with Codecov
+- ✅ **Code quality** checks (linting, formatting, security)
+- ✅ **Nightly comprehensive** test runs
+
+See [TESTING.md](TESTING.md) for detailed testing documentation.
+
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Make your changes
+4. Add tests for new functionality
+5. Run the test suite (`make test`)
+6. Commit your changes (`git commit -am 'Add amazing feature'`)
+7. Push to the branch (`git push origin feature/amazing-feature`)
+8. Open a Pull Request
+
+All pull requests are automatically tested with our CI pipeline.
 
 
 # Screenshot
