@@ -1,7 +1,7 @@
 {%- extends 'include/base.html' -%} {%- block title -%}home{% endblock %} {%-
 block content -%}
 
-<h2 style="margin-bottom: 0.5em">
+<h2 class="lb-radio-title">
     {% if title %}
         LB Radio for {{ title }}
     {% else %}
@@ -9,7 +9,7 @@ block content -%}
     {% endif %}
 </h2>
 
-<form id="lb-radio-form" hx-post="/lb-radio" hx-target="#lb-local-playlist" hx-swap="innerHTML">
+<form id="lb-radio-form" class="lb-radio-form" hx-post="/lb-radio" hx-target="#lb-local-playlist" hx-swap="innerHTML">
     <fieldset>
         <div class="col-auto">
             <label for="prompt" class="form-label">
@@ -19,7 +19,7 @@ block content -%}
                 >)
             </label>
         </div>
-        <div class="row align-items-center">
+        <div class="row align-items-center lb-radio-controls">
             <div class="col-7">
                 <input
                     id="prompt"
@@ -28,6 +28,7 @@ block content -%}
                     name="prompt"
                     value="{{ prompt }}"
                     hx-on:input="update_buttons();"
+                    placeholder="Enter your prompt here..."
                 />
             </div>
             <div class="col">
@@ -68,7 +69,7 @@ block content -%}
             >
         </p>
     </fieldset>
-    <div style="text-align: center; width: 100%">
+    <div class="spinner-container" style="text-align: center; width: 100%; display: flex; justify-content: center; align-items: center; min-height: 40px;">
         <img
             id="spinner"
             class="htmx-indicator"

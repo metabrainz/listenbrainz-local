@@ -2,7 +2,7 @@
 {%- block title -%}home{% endblock %}
 {%- block content -%}
 
-<h2>Weekly Jams</h2>
+<h2 class="weekly-jams-title">Weekly Jams</h2>
 
 <p>
     Generate a playlist from a ListenBrainz user's weekly recommendations. You can generate a playlist as
@@ -10,26 +10,31 @@
 </p>
 
 <form id="weekly-jams-form"
+      class="weekly-jams-form"
       hx-post="/weekly-jams"
       hx-target="#lb-local-playlist"
       hx-swap="innerHTML">
-  <fieldset>
-    <label for="prompt">ListenBrainz user</label>
-    <input type="text"
-           name="user_name"
-           id="prompt"
-           class="form-control-lg"
-           placeholder="user name"
-           style="width: 40%"
-           hx-on:input="update_buttons();"/>
-    <button class="btn btn-lg btn-primary disabled"
-           type="submit"
-           id="submit-button"
-           hx-indicator="#spinner"
-           hx-on:click="clear_page();">
-        Generate</button>
+  <fieldset class="weekly-jams-fieldset">
+    <div class="weekly-jams-input">
+        <label for="prompt">ListenBrainz user</label>
+        <input type="text"
+               name="user_name"
+               id="prompt"
+               class="form-control-lg"
+               placeholder="user name"
+               style="width: 40%"
+               hx-on:input="update_buttons();"/>
+    </div>
+    <div class="weekly-jams-button">
+        <button class="btn btn-lg btn-primary disabled"
+               type="submit"
+               id="submit-button"
+               hx-indicator="#spinner"
+               hx-on:click="clear_page();">
+            Generate</button>
+    </div>
   </fieldset>
-  <div style="text-align: center; width: 100%">
+  <div class="spinner-container">
     <img id="spinner"
          class="htmx-indicator"
          src="{{ url_for('static', filename='img/spinner.svg') }}">

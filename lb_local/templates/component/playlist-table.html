@@ -15,6 +15,7 @@
 {% include 'include/player.html' %}
 <div id="playback-errors" style="margin-top: 1.5em; display: none" class="alert alert-warning" role="alert">
 </div>
+
 <div id="save-playlist-div">
     {% if num_services > 1 %}
         <div class="alert alert-danger" role="alert" style="border-radius: 10px;">
@@ -26,7 +27,7 @@
           hx-target="#save-result"
           hx-swap="outerHTML"
           hx-ext="json-enc">
-      <fieldset class="d-flex flex-row justify-content-evenly align-items-center">
+      <fieldset class="d-flex flex-row justify-content-evenly align-items-center save-playlist-fieldset">
         <label for="playlist_name">Save playlist</label>
         <input type="text"
                name="playlist-name"
@@ -78,7 +79,8 @@
         </ul>
     </div>
 {% endif %}
-<table class="table" id="playlist-table">
+<div class="table-responsive">
+    <table class="table" id="playlist-table">
     <thead>
         <th>cover</th>
         <th>title</th>
@@ -125,6 +127,7 @@
     {% endfor %}
     </tbody>
 </table>
+</div>
 <script type="text/javascript">
 function hide_playlist() {
     document.getElementById("save-playlist-div").style.display = "none";

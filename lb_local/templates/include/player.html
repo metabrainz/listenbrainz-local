@@ -1,41 +1,43 @@
 <div style="display: flex; justify-content: center">
     <div class="flex-wrap-container player">
-        <button
-            class="btn btn-secondary player-button"
-            id="prev-button"
-            onclick="enter_event(EVENT_PREV);"
-        >
-            <i class="fa-solid fa-backward"></i>
-        </button>
-        <button
-            class="btn btn-secondary player-button"
-            id="stop-button"
-            onclick="enter_event(EVENT_STOP);"
-        >
-            <i class="fa-solid fa-stop"></i>
-        </button>
-        <button
-            class="btn btn-secondary player-button"
-            id="play-button"
-            onclick="enter_event(EVENT_PLAY);"
-        >
-            <i class="fa-solid fa-play" id="play-pause-icon"></i>
-        </button>
-        <button
-            class="btn btn-secondary player-button"
-            id="next-button"
-            onclick="enter_event(EVENT_NEXT);"
-        >
-            <i class="fa-solid fa-forward"></i>
-        </button>
-        <button
-            class="btn btn-secondary player-button"
-            type="submit"
-            id="save-playlist"
-            onclick="show_playlist()"
-        >
-            <i class="fa-solid fa-download"></i>
-        </button>
+        <div class="player-buttons-row">
+            <button
+                class="btn btn-secondary player-button"
+                id="prev-button"
+                onclick="enter_event(EVENT_PREV);"
+            >
+                <i class="fa-solid fa-backward"></i>
+            </button>
+            <button
+                class="btn btn-secondary player-button"
+                id="stop-button"
+                onclick="enter_event(EVENT_STOP);"
+            >
+                <i class="fa-solid fa-stop"></i>
+            </button>
+            <button
+                class="btn btn-secondary player-button"
+                id="play-button"
+                onclick="enter_event(EVENT_PLAY);"
+            >
+                <i class="fa-solid fa-play" id="play-pause-icon"></i>
+            </button>
+            <button
+                class="btn btn-secondary player-button"
+                id="next-button"
+                onclick="enter_event(EVENT_NEXT);"
+            >
+                <i class="fa-solid fa-forward"></i>
+            </button>
+            <button
+                class="btn btn-secondary player-button"
+                type="submit"
+                id="save-playlist"
+                onclick="show_playlist()"
+            >
+                <i class="fa-solid fa-download"></i>
+            </button>
+        </div>
         <div class="progress" hx-on:click="seek(event);" id="progress-bar-div">
             <div
                 id="progress-bar"
