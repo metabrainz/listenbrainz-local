@@ -31,18 +31,10 @@ jobs:
 
     - name: Check code formatting with Black
       run: |
-<<<<<<< HEAD
-=======
-        pip install black
->>>>>>> test-ci
         black --check --diff lb_local/ tests/ || echo "⚠️ Code formatting issues found (not blocking)"
 
     - name: Check import sorting with isort
       run: |
-<<<<<<< HEAD
-=======
-        pip install isort
->>>>>>> test-ci
         isort --check-only --diff lb_local/ tests/ || echo "⚠️ Import sorting issues found (not blocking)"
 
     - name: Run security check with bandit
@@ -75,11 +67,7 @@ jobs:
 
     - name: Check test coverage requirements
       run: |
-<<<<<<< HEAD
         python run_tests.py --cov=lb_local --cov-report=term --cov-fail-under=70 || echo "⚠️ Coverage below 70% (advisory for now)"
-=======
-        python -m pytest --cov=lb_local --cov-report=term --cov-fail-under=70
->>>>>>> test-ci
 
     - name: Validate documentation
       run: |
