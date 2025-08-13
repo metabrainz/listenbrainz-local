@@ -59,12 +59,19 @@ def authenticated_client(client):
         }
     )
     
-    # Mock the is_authenticated property to return True
-    test_user.is_authenticated = True
+    # Use Flask-Login's test client approach to simulate login
+    with client.session_transaction() as sess:
+        sess['_user_id'] = test_user.login_id
+        sess['_fresh'] = True
+        # Set required session data that views expect
+        sess['subsonic'] = {
+            'url': 'http://test-subsonic.com',
+            'username': 'testuser',
+            'password': 'testpass'
+        }
+        sess['cors_url'] = 'http://test-cors.com'
     
-    # Use Flask-Login's testing utilities to simulate login
-    with patch('flask_login.current_user', test_user):
-        yield client
+    yield client
 
 @pytest.fixture
 def admin_client(client):
@@ -78,12 +85,19 @@ def admin_client(client):
         }
     )
     
-    # Mock the is_authenticated property to return True
-    admin_user.is_authenticated = True
+    # Use Flask-Login's test client approach to simulate admin login
+    with client.session_transaction() as sess:
+        sess['_user_id'] = admin_user.login_id
+        sess['_fresh'] = True
+        # Set required session data that views expect
+        sess['subsonic'] = {
+            'url': 'http://test-subsonic.com',
+            'username': 'adminuser',
+            'password': 'testpass'
+        }
+        sess['cors_url'] = 'http://test-cors.com'
     
-    # Use Flask-Login's testing utilities to simulate admin login
-    with patch('flask_login.current_user', admin_user):
-        yield client
+    yield client
 
 @pytest.fixture
 def mock_radio_service():
