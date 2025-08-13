@@ -68,7 +68,6 @@ signal.signal(signal.SIGINT, signal_handler)
 def create_app():
     
     global sync_manager
-    global manager_owner_pid
     
     app = Flask(__name__, static_url_path=STATIC_PATH, static_folder=STATIC_FOLDER, template_folder=TEMPLATE_FOLDER)
 
