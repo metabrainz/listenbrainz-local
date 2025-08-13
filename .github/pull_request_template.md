@@ -39,31 +39,6 @@ Brief description of the changes made.
 - [ ] Tested with different user roles (if applicable)
 - [ ] Tested with different Subsonic servers (if applicable)
 
-### Test Commands Run
-```bash
-# List the specific test commands you ran
-make test
-make test-coverage  
-# etc.
-```
-
-## Screenshots (if applicable)
-
-<!-- Add screenshots showing the changes, especially for UI modifications -->
-
-## Database Changes
-
-- [ ] No database changes
-- [ ] Database migrations included
-- [ ] Database schema documented
-
-## Breaking Changes
-
-- [ ] No breaking changes
-- [ ] Breaking changes documented below
-
-<!-- If there are breaking changes, explain what breaks and how to migrate -->
-
 ## Deployment Notes
 
 - [ ] No special deployment requirements
