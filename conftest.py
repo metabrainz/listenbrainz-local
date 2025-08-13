@@ -102,6 +102,14 @@ def authenticated_client(client):
 @pytest.fixture
 def admin_client(client):
     """Create a client with admin user"""
+    # Get the app from the client and manually set admin config
+    app = client.application
+    
+    # Override the app config to ensure adminuser is in ADMIN_USERS
+    app.config['ADMIN_USERS'] = ['adminuser']
+    app.config['AUTHORIZED_USERS'] = ['testuser', 'adminuser']
+    app.config['SERVICE_USERS'] = ['testuser', 'adminuser']
+    
     # Get or create admin user
     admin_user, created = User.get_or_create(
         name="adminuser",

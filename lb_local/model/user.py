@@ -14,25 +14,21 @@ class User(Model, UserMixin):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs) 
-        # Try to get config from current app context first, fall back to importing app
+        # Try to get config from current app context first
         try:
             from flask import has_app_context
-            if has_app_context():
-                self.authorized_users = current_app.config["AUTHORIZED_USERS"]
-                self.admin_users = current_app.config["ADMIN_USERS"] 
-                self.service_users = current_app.config["SERVICE_USERS"]
-            else:
-                # Fall back to importing app and creating context
-                from lb_local.server import app
-                with app.app_context():
-                    self.authorized_users = current_app.config["AUTHORIZED_USERS"]
-                    self.admin_users = current_app.config["ADMIN_USERS"]
-                    self.service_users = current_app.config["SERVICE_USERS"]
+            if has_app_context() and current_app:
+                self.authorized_users = current_app.config.get("AUTHORIZED_USERS", [])
+                self.admin_users = current_app.config.get("ADMIN_USERS", []) 
+                self.service_users = current_app.config.get("SERVICE_USERS", [])
+                return
         except Exception:
-            # Fallback to empty lists if config unavailable
-            self.authorized_users = []
-            self.admin_users = []
-            self.service_users = []
+            pass
+            
+        # Fallback to empty lists if config unavailable
+        self.authorized_users = []
+        self.admin_users = []
+        self.service_users = []
 
     class Meta:
         database = user_db

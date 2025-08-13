@@ -110,7 +110,24 @@ def create_app():
                    client_kwargs={"scope": "profile"},
                    authorize_params={"access_type": "offline"},
                    fetch_token=fetch_token)
-    admin = Admin(app, name='ListenBrainz Local Admin')
+    
+    # Configure Flask-Admin with authentication
+    from flask_admin import Admin, AdminIndexView
+    from flask_login import current_user
+    from werkzeug.exceptions import Forbidden
+    
+    class AuthenticatedAdminIndexView(AdminIndexView):
+        def is_accessible(self):
+            return current_user.is_authenticated and current_user.is_admin
+            
+        def inaccessible_callback(self, name, **kwargs):
+            from flask import redirect, url_for, request
+            if not current_user.is_authenticated:
+                return redirect(url_for("index_bp.index", next=request.url))
+            else:
+                raise Forbidden()
+    
+    admin = Admin(app, name='ListenBrainz Local Admin', index_view=AuthenticatedAdminIndexView(), template_mode='bootstrap3')
     admin.add_view(UserModelView(User, "User"))
     admin.add_view(ServiceCredentialModelView(Service, "Service"))
     admin.add_view(ServiceCredentialModelView(Credential, "Credential"))
