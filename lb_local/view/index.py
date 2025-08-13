@@ -238,7 +238,6 @@ def tag(tag):
                                          , artist_name
                                          , release_name
                                          , recording_name
-                                         , artist_mbid
                                          , release_mbid
                                          , recording_mbid
                                       FROM recording_tag
