@@ -64,7 +64,10 @@
     </div>
 </div>
 <div>
-    <h2>{{ playlist_name }}</h2>
+    <h2 style="display: inline-block; margin-right: 10px;">{{ playlist_name }}</h2>
+    <a href="#" onclick="sharePlaylist()" title="Share this playlist" class="share-button">
+        <i class="fa-solid fa-share-nodes"></i>
+    </a>
     <div>{{ playlist_desc }}</div>
 </div>
 {% if hints %}
@@ -139,6 +142,50 @@ function update_save_buttons() {
   edit = document.getElementById("playlist-name");
   document.getElementById("playlist-save-button").disabled = !edit.value.length ||
                                                   document.getElementById("services").disabled;
+}
+function sharePlaylist() {
+    const prompt = "{{ prompt | urlencode }}";
+    const mode = "{{ mode }}";
+    const baseUrl = window.location.origin + "/lb-radio";
+    const shareUrl = `${baseUrl}?prompt=${prompt}&mode=${mode}`;
+    
+    // Copy to clipboard
+    if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(shareUrl).then(() => {
+            showShareMessage("Share link copied to clipboard!");
+        }).catch(() => {
+            showShareUrl(shareUrl);
+        });
+    } else {
+        // Fallback for older browsers or non-HTTPS
+        showShareUrl(shareUrl);
+    }
+}
+
+function showShareMessage(message) {
+    // Create temporary message element
+    const messageDiv = document.createElement('div');
+    messageDiv.className = 'alert alert-success share-message';
+    messageDiv.style.position = 'fixed';
+    messageDiv.style.top = '20px';
+    messageDiv.style.right = '20px';
+    messageDiv.style.zIndex = '9999';
+    messageDiv.style.minWidth = '200px';
+    messageDiv.textContent = message;
+    
+    document.body.appendChild(messageDiv);
+    
+    // Remove after 3 seconds
+    setTimeout(() => {
+        if (messageDiv.parentNode) {
+            messageDiv.parentNode.removeChild(messageDiv);
+        }
+    }, 3000);
+}
+
+function showShareUrl(url) {
+    // Show the URL in a prompt as fallback
+    prompt("Copy this share link:", url);
 }
 </script>
 {% endif %}

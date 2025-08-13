@@ -625,3 +625,37 @@ body {
         min-width: 35px;
     }
 }
+
+/* Share button styles */
+.share-button {
+    color: #6c757d;
+    text-decoration: none;
+    font-size: 1.2em;
+    vertical-align: middle;
+    margin-left: 10px;
+    transition: color 0.2s ease;
+}
+
+.share-button:hover {
+    color: #007bff;
+    text-decoration: none;
+}
+
+.share-button:active {
+    color: #0056b3;
+}
+
+.share-message {
+    animation: slideInRight 0.3s ease-out;
+}
+
+@keyframes slideInRight {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}

@@ -102,7 +102,9 @@ def lb_radio_post():
                            playlist_desc=playlist.playlists[0].description,
                            hints=hints,
                            jspf=json.dumps(playlist.get_jspf()),
-                           services=avail_services)
+                           services=avail_services,
+                           prompt=prompt,
+                           mode=mode)
 
 
 class Config:
