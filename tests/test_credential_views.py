@@ -1,6 +1,7 @@
 import pytest
 from unittest.mock import Mock, patch
 from lb_local.model.credential import Credential
+from lb_local.model.service import Service
 
 
 class TestCredentialViews:
@@ -57,29 +58,34 @@ class TestCredentialViews:
 
     def test_credential_with_existing_credential(self, authenticated_client, app):
         """Test credential endpoints with an existing credential."""
-        with app.app_context():
-            # Create a test credential
-            credential = Credential.create(
-                service='spotify',
-                user_name='test_user',
-                client_id='test_client_id',
-                client_secret='test_client_secret',
-                redirect_uri='http://localhost:5000/callback',
-                owner_id=1
-            )
-            
-            # Test edit page
-            response = authenticated_client.get(f'/credential/{credential.id}/edit')
-            assert response.status_code == 200
-            
-            # Test delete page
-            response = authenticated_client.get(f'/credential/{credential.id}/delete')
-            assert response.status_code == 200
-            
-            # Clean up
-            credential.delete_instance()
+        # Get or create a test service 
+        service, created = Service.get_or_create(
+            url='http://test-credential.com',
+            defaults={
+                'name': 'Test Credential Service',
+                'slug': 'test-credential-service',
+                'owner_id': 1
+            }
+        )
 
-
+        # Create a test credential
+        credential = Credential.create(
+            service=service,
+            user_name='test_user',
+            password='test_password',
+            shared=False,
+            owner_id=1
+        )
+        
+        # Test edit page
+        response = authenticated_client.get(f'/credential/{credential.id}/edit')
+        assert response.status_code == 200
+        
+        # Test delete page (should redirect after successful deletion)
+        response = authenticated_client.get(f'/credential/{credential.id}/delete')
+        assert response.status_code == 302  # Successful deletion redirects
+        
+        # No need to clean up - already deleted
 class TestCredentialAPI:
     """Test cases for credential-related functionality."""
 
@@ -87,10 +93,27 @@ class TestCredentialAPI:
     def test_load_credentials_mock(self, mock_load_credentials, authenticated_client):
         """Test that credential loading works properly."""
         mock_load_credentials.return_value = ({}, None)
-        
-        # This will trigger credential loading in most endpoints
-        response = authenticated_client.get('/credential/list')
-        assert response.status_code == 200
+
+        # Create a service and credential to delete (which will trigger load_credentials)
+        service, created = Service.get_or_create(
+            url='http://test-load-cred.com',
+            defaults={
+                'name': 'Load Test Service',
+                'slug': 'load-test-service', 
+                'owner_id': 1
+            }
+        )
+        credential = Credential.create(
+            service=service,
+            user_name='load_test_user',
+            password='test_password',
+            shared=False,
+            owner_id=1
+        )
+
+        # Delete the credential - this will trigger load_credentials
+        response = authenticated_client.get(f'/credential/{credential.id}/delete')
+        assert response.status_code == 302
         mock_load_credentials.assert_called()
 
     def test_credential_add_post_with_auth(self, authenticated_client):

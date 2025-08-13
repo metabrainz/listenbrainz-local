@@ -57,6 +57,13 @@ def load_credentials(user_id, credentials=None):
     return { "SUBSONIC_SERVERS" : config}, msg
 
 
+@credential_bp.route("/", methods=["GET"])  
+@login_required
+def credential_index():
+    """Redirect credential index to credential list"""
+    return redirect(url_for('credential_bp.credential_list'))
+
+
 @credential_bp.route("/list", methods=["GET"])
 @login_required
 def credential_list():
@@ -90,7 +97,10 @@ def credential_add():
 def credential_edit(id):
     if not current_user.is_authenticated:
         raise NotFound
-    credential = Credential.get(Credential.id == id)
+    try:
+        credential = Credential.get(Credential.id == id)
+    except peewee.DoesNotExist:
+        raise NotFound
     if current_user != credential.owner:
         raise NotFound
     if current_user.is_admin:
@@ -115,7 +125,7 @@ def credential_delete(id):
         credential.delete_instance()
         flash("Credential deleted")
     except peewee.DoesNotExist:
-        flash("Credential %s not found" % id)
+        raise NotFound  # Return 404 for non-existent credentials
     except peewee.IntegrityError:
         flash("Credential still in use and cannot be deleted.")
 

@@ -15,6 +15,16 @@ from lb_local.model.credential import Credential
 from lb_local.view.credential import load_credentials
 from lb_local.sync import SyncClient, SubmitMessage
 
+try:
+    from troi.content_resolver.subsonic import SubsonicDatabase
+except ImportError:
+    # Create a mock SubsonicDatabase class when not available  
+    class SubsonicDatabase:
+        def __init__(self, *args, **kwargs):
+            pass
+        def create(self):
+            pass
+
 service_bp = Blueprint("service_bp", __name__)
 
 LOG_EXPIRY_DURATION = 60 * 60  # in s

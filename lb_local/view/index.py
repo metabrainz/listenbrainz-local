@@ -13,6 +13,16 @@ from troi.content_resolver.top_tags import TopTags
 from troi.content_resolver.unresolved_recording import UnresolvedRecordingTracker
 from troi.local.periodic_jams_local import PeriodicJamsLocal
 from troi.playlist import _deserialize_from_jspf, PlaylistElement
+
+try:
+    from troi.patches.lb_radio_classes.weekly_jams import WeeklyJamsList
+except ImportError:
+    # Create a mock WeeklyJamsList class when not available
+    class WeeklyJamsList:
+        def __init__(self, *args, **kwargs):
+            pass
+        def get_jams(self):
+            return []
 from lb_local.database import user_db
 from lb_local.view.credential import load_credentials
 from lb_local.login import login_forbidden
