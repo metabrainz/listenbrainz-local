@@ -5,7 +5,7 @@ from urllib.parse import urlparse
 from flask import Blueprint, render_template, request, redirect, url_for, flash, session
 import peewee
 from flask_login import login_required, current_user
-from werkzeug.exceptions import Forbidden
+from werkzeug.exceptions import Forbidden, NotFound
 
 from lb_local.model.credential import Credential
 from lb_local.model.service import Service
