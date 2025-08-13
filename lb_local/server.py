@@ -143,6 +143,11 @@ def create_app():
     app.config["STATS_REQ_QUEUE"] = stats_req_queue
     app.config["SUBMIT_QUEUE"] = submit_queue
     app.config["STOP_EVENT"] = stop_event
+    
+    # Add basic error handler for 500 errors
+    @app.errorhandler(500)
+    def handle_500_error(error):
+        return "Internal Server Error", 500
         
     return app, oauth
 

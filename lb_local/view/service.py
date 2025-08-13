@@ -69,7 +69,10 @@ def service_add():
 def service_edit(slug):
     if not current_user.is_service_user and not current_user.is_admin:
         raise NotFound
-    service = Service.get(Service.slug == slug)
+    try:
+        service = Service.get(Service.slug == slug)
+    except Service.DoesNotExist:
+        raise NotFound
     if not current_user.is_admin and service.owner.user_id != current_user.user_id:
         raise Forbidden
     return render_template("service-add.html", mode="Edit", url=service.url, slug=slug)
@@ -87,7 +90,7 @@ def service_delete(slug):
         service.delete_instance()
         flash("Service deleted")
     except peewee.DoesNotExist:
-        flash("Service %s not found" % slug)
+        raise NotFound
     except peewee.IntegrityError:
         flash("Service still in use and cannot be deleted.")
 
@@ -148,7 +151,10 @@ def service_sync(slug):
     if not current_user.is_service_user and not current_user.is_admin:
         raise NotFound
 
-    service = Service.get(Service.slug == slug)
+    try:
+        service = Service.get(Service.slug == slug)
+    except Service.DoesNotExist:
+        raise NotFound
     if not current_user.is_admin and current_user.user_id != service.owner.user_id:
         raise NotFound
         
@@ -245,7 +251,7 @@ def service_sync_full_log(slug):
                         current_app.config["STATS_REQ_QUEUE"],
                         current_app.config["STATS_QUEUE"])
     current_status = client.sync_status(slug)
-    if current_status.logs is None:
+    if current_status is None or current_status.logs is None:
         logs = "No log file available."
     else:
         logs = current_status.logs

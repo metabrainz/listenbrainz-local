@@ -116,31 +116,27 @@ class TestServiceViews:
     @patch('lb_local.view.service.SubsonicDatabase')
     def test_service_with_existing_service(self, mock_db, authenticated_client, app):
         """Test service endpoints with an existing service."""
-        with app.app_context():
-            # Create a test service
-            service = Service.create(
-                name='Test Service',
-                slug='test-service',
-                url='http://test.com',
-                username='test',
-                password='test',
-                owner_id=1
-            )
-            
-            # Test edit page
-            response = authenticated_client.get(f'/service/{service.slug}/edit')
-            assert response.status_code == 200
-            
-            # Test delete page
-            response = authenticated_client.get(f'/service/{service.slug}/delete')
-            assert response.status_code == 200
-            
-            # Test sync page
-            response = authenticated_client.get(f'/service/{service.slug}/sync')
-            assert response.status_code == 200
-            
-            # Clean up
-            service.delete_instance()
+        # Create a test service
+        service = Service.create(
+            name='Test Service',
+            slug='test-service-1',
+            url='http://test1.com',
+            username='test',
+            password='test',
+            owner_id=1
+        )
+        
+        # Test edit page
+        response = authenticated_client.get(f'/service/{service.slug}/edit')
+        assert response.status_code == 200
+        
+        # Test sync page
+        response = authenticated_client.get(f'/service/{service.slug}/sync')
+        assert response.status_code == 200
+        
+        # Test delete page (should redirect after deletion)
+        response = authenticated_client.get(f'/service/{service.slug}/delete')
+        assert response.status_code == 302
 
 
 class TestServiceAPI:
@@ -148,24 +144,26 @@ class TestServiceAPI:
 
     def test_sync_endpoints_exist(self, authenticated_client, app):
         """Test that sync-related endpoints exist and handle requests properly."""
-        with app.app_context():
-            # Create a test service
-            service = Service.create(
-                name='Test Service',
-                slug='test-service',
-                url='http://test.com',
-                username='test',
-                password='test',
-                owner_id=1
-            )
-            
-            # Test sync log endpoint
-            response = authenticated_client.get(f'/service/{service.slug}/sync/log')
-            assert response.status_code == 200
-            
-            # Test full sync log endpoint
-            response = authenticated_client.get(f'/service/{service.slug}/sync/full-log')
-            assert response.status_code == 200
-            
-            # Clean up
-            service.delete_instance()
+        import time
+        timestamp = int(time.time())
+        # Create a test service
+        service = Service.create(
+            name=f'Test Service API Endpoints {timestamp}',
+            slug=f'api-endpoints-test-{timestamp}',
+            url=f'http://very-unique-api-test-{timestamp}.example.org',
+            username='testapi',
+            password='testapi',
+            owner_id=1
+        )
+        
+        # Test sync log endpoint
+        response = authenticated_client.get(f'/service/{service.slug}/sync/log')
+        assert response.status_code == 204  # No content when no logs exist
+        
+        # Test full sync log endpoint
+        response = authenticated_client.get(f'/service/{service.slug}/sync/full-log')
+        assert response.status_code == 200  # Returns message when no logs exist
+        assert b"No log file available" in response.data
+        
+        # Clean up
+        service.delete_instance()

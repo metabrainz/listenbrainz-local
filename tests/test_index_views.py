@@ -73,27 +73,28 @@ class TestIndexViews:
         response = client.post('/weekly-jams', data={'user': 'test'})
         assert response.status_code == 302
 
-    @patch('lb_local.view.index.WeeklyJamsList')
+    @patch('lb_local.view.index.PeriodicJamsLocal')
     @patch('lb_local.view.index.SubsonicDatabase')
-    def test_weekly_jams_post_valid(self, mock_db, mock_weekly_jams, authenticated_client, mock_credentials):
+    def test_weekly_jams_post_valid(self, mock_db, mock_periodic_jams, authenticated_client, mock_credentials):
         """Test valid Weekly Jams POST request."""
-        # Mock weekly jams response
-        mock_weekly_instance = Mock()
+        # Mock periodic jams response
+        mock_periodic_instance = Mock()
         mock_playlist = Mock()
         mock_playlist.playlists = [Mock()]
         mock_playlist.playlists[0].recordings = []
         mock_playlist.playlists[0].name = "Weekly Jams"
         mock_playlist.playlists[0].description = "Weekly playlist"
         mock_playlist.get_jspf.return_value = {"playlist": {"track": []}}
-        mock_weekly_instance.generate.return_value = mock_playlist
-        mock_weekly_instance.patch.user_feedback.return_value = []
-        mock_weekly_jams.return_value = mock_weekly_instance
+        mock_periodic_instance.generate.return_value = mock_playlist
+        mock_periodic_instance.patch.user_feedback.return_value = ["Test hint"]
+        mock_periodic_jams.return_value = mock_periodic_instance
         
         # Mock database
         mock_db_instance = Mock()
+        mock_db_instance.metadata_sanity_check.return_value = ["No issues found"]
         mock_db.return_value = mock_db_instance
         
-        response = authenticated_client.post('/weekly-jams', data={'user': 'test'})
+        response = authenticated_client.post('/weekly-jams', data={'user_name': 'test'})
         assert response.status_code == 200
 
     def test_playlist_create_requires_authentication(self, client):
