@@ -57,7 +57,7 @@ jobs:
         coverage report >> test-report.md
 
     - name: Upload comprehensive results
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: nightly-test-results
         path: |
@@ -106,7 +106,7 @@ jobs:
         bandit -r lb_local/ -f json -o bandit-report.json || true
 
     - name: Upload security reports
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: security-reports
         path: |
