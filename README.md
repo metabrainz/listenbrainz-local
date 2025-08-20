@@ -38,7 +38,7 @@ Clearly we will fix this as soon as we are able.
 We recommend the Docker setup for users who wish run this service; if you want to do development
 a python virtual environment setup is better.
 
-Clone this repo and then in the listenbrainz-local and copy the file _env to .env and then
+Clone this repo and then in the listenbrainz-local and copy the file _env-sample to .env and then
 ensure that it contains the following completed configuration lines:
 
 ```
@@ -56,7 +56,11 @@ Note: Put values in "" if the values contain spaces.
 When adding a MusicBrainz application, create the application here: https://musicbrainz.org/account/applications .
 For 'Callback URI' enter:
 
+```
 http://<domain>[:<port>]/auth -> http://mydomain.com:500/auth
+```
+
+For a local setup use http://localhost:5000/auth
 
 Then continue with one of the configuration sections below:
 
