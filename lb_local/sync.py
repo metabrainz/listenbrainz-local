@@ -1,14 +1,12 @@
 from collections import namedtuple
 import os
-from time import time
-from copy import copy
 import json
 import logging
 from logging.handlers import QueueHandler
 import multiprocessing
 from queue import Queue, Empty, Full
-from time import monotonic, sleep
-from threading import Thread, get_ident, Lock
+from time import sleep
+from threading import Thread, Lock
 import traceback
 from urllib.parse import urlparse
 import uuid
@@ -25,10 +23,6 @@ from lb_local.model.service import Service
 # - Button states when reloading an active scan
 
 APP_LOG_LEVEL_NUM = 19
-
-def log(msg):
-    with open("/tmp/log", "a+") as l:
-        l.write("pid %d tid %d: %s\n" % (os.getpid(), get_ident(), msg))
 
 logging_queue = Queue()
 logger = logging.getLogger("troi_subsonic_scan")
@@ -125,7 +119,7 @@ class SyncManager(multiprocessing.Process):
             self.worker.join()
         except Exception:
             traceback_str = traceback.format_exc()
-            log(traceback_str)
+            logging.error(traceback_str)
 
 
 class SyncWorker(Thread):
@@ -192,7 +186,7 @@ class SyncWorker(Thread):
                 except Empty:
                     break
             traceback_str = traceback.format_exc()
-            log(traceback_str)
+            logging.error(traceback_str)
             self.lock.acquire()
             self.job_data[slug]["error"] = "An error occurred when syncing the collection:\n" + str(traceback_str) + "\n"
             self.lock.release()
@@ -224,8 +218,8 @@ class SyncWorker(Thread):
                         stats = json.loads(rec.message[5:])
                     except Exception as err:
                         error_msg = err
-                        log(rec.message)
-                        log(err)
+                        logging.error(rec.message)
+                        logging.error(err)
                         continue
 
                     self.lock.acquire()
@@ -273,4 +267,4 @@ class SyncWorker(Thread):
                 self.sync_service(submit_msg)
         except Exception:
             traceback_str = traceback.format_exc()
-            log(traceback_str)
+            logging.error(traceback_str)
