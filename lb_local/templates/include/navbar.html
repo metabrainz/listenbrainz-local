@@ -52,7 +52,7 @@
                         {{ current_user.name }}
                       </a>
                       <ul class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
-                        {% if current_user.is_service_user %}
+                        {% if current_user.is_service_user or current_user.is_admin %}
                             <li><a class="dropdown-item" href="/service">Services</a></lio>
                         {% endif %}
                         {% if current_user.is_admin %}
